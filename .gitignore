@@ -21,9 +21,12 @@ bin/
 /dist/
 /nbdist/
 /.nb-gradle/
-
+OthelloTwo.iml
+out
+.idea
 ### VS Code ###
 .vscode/
 
 ### Mac OS ###
 .DS_Store
+/.idea/uiDesigner.xml
