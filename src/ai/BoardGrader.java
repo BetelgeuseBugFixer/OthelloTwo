@@ -1,4 +1,8 @@
 package ai;
 
-public class BoardGrader {
+import othello.Othello;
+
+public interface BoardGrader {
+
+    public int gradeBoard(Othello board);
 }

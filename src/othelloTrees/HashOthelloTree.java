@@ -1,5 +1,6 @@
 package othelloTrees;
 
+import ai.BoardGrader;
 import othello.Othello;
 import szte.mi.Move;
 
@@ -11,6 +12,12 @@ public class HashOthelloTree implements OthelloTree {
     public HashOthelloTree(){
 
     }
+
+    @Override
+    public void setRoot(OthelloNode node) {
+
+    }
+
     @Override
     public OthelloNode getRoot() {
         return null;
@@ -21,24 +28,41 @@ public class HashOthelloTree implements OthelloTree {
 
     }
 
-    public static class HashOthelloNode implements OthelloNode {
+    public static class HashOthelloNode extends OthelloNode {
 
         public HashMap<String,Othello> nextMoves;
-        final private Othello board;
 
-        public HashOthelloNode(Othello board){
-            this.board=board;
+        public HashOthelloNode(Othello board, boolean parentNodePassed){
+            super(board,parentNodePassed);
             this.nextMoves=new HashMap<>();
         }
 
         @Override
-        public void sortMoves() {
+        public OthelloNode getNextNode(Move move) {
+            return null;
+        }
 
+
+        @Override
+        public boolean getIsTerminalNode() {
+            return false;
+        }
+
+
+        @Override
+        public int getScore(BoardGrader grader) {
+            return 0;
         }
 
         @Override
-        public Othello getBoard() {
-            return this.board;
+        public Move[] getNextMoves() {
+
+            return null;
+        }
+
+        @Override
+        public OthelloNode[] getNextNodes() {
+            return new OthelloNode[0];
         }
 
         @Override
