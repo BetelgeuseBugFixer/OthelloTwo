@@ -1,6 +1,7 @@
 import ai.AaronFish;
 import oldOthello.OldOthello;
 import othello.Othello;
+import progressbar.Progressbar;
 import progressbar.Timer;
 import szte.mi.Move;
 
@@ -123,8 +124,8 @@ public class Test {
         boolean gameIsRunning = true;
         Move prevMove = null;
         int roundsPassed = 0;
-        Timer test = new Timer();
-        test.startTimer();
+        //Timer test = new Timer();
+        //test.startTimer();
         while (gameIsRunning) {
             prevMove = aiOne.nextMove(prevMove, 8, 8);
             if (prevMove == null) {
@@ -136,9 +137,11 @@ public class Test {
             if (roundsPassed == 2 || game.boardIsFull()) {
                 gameIsRunning = false;
             }
-            System.out.println("player one: " + moveToString(prevMove));
+            /*System.out.println("player one: " + moveToString(prevMove));
             System.out.println(game);
             System.out.println();
+
+             */
 
             prevMove = aiTwo.nextMove(prevMove, 8, 8);
             if (prevMove == null) {
@@ -150,16 +153,19 @@ public class Test {
             if (roundsPassed == 2 || game.boardIsFull()) {
                 gameIsRunning = false;
             }
-            System.out.println("player two: " + moveToString(prevMove));
+            /*System.out.println("player two: " + moveToString(prevMove));
             System.out.println(game);
             System.out.println();
+            */
         }
-        test.stopTimer();
-
+        //test.stopTimer();
+/*
         System.out.println(game.blackPlayerDiscs + game.whitePLayerDiscs);
         System.out.println("black discs: " + Long.bitCount(game.blackPlayerDiscs));
         System.out.println("white discs: " + Long.bitCount(game.whitePLayerDiscs));
         System.out.println("game took " + test.getCurrentTimeInMilliSeconds() + "ms");
+
+             */
     }
 
     public static void randomOthelloGame(Random random, boolean printResult) {
@@ -204,19 +210,13 @@ public class Test {
     }
 
     public static void main(String[] args) {
-        int[] game = new int[3];
-        game[1] = 2;
-        int[] newGame=new int[game.length];
-        for (int i = 0; i < game.length; i++) {
-            newGame[i]=game[i];
-        }
-        newGame[0]=5;
 
-        System.out.println("game:");
-        for (int i : game) {
-            System.out.print(i+",");
+        int n=100_000;
+        Progressbar test=new Progressbar("simulate games",n);
+        for (int i = 0; i < n; i++) {
+            //randomOthelloGame(new Random(42),false);
+            test.countUp();
         }
-        System.out.println();
     }
 
     public static String moveToString(Move move) {

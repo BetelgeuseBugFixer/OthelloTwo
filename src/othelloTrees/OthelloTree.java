@@ -39,7 +39,7 @@ public interface OthelloTree {
 
         public abstract boolean getIsTerminalNode(boolean playerOne);
 
-        public abstract int getScore(BoardGrader grader);
+        public abstract int getScore(BoardGrader grader, boolean playerOne);
 
         public abstract OthelloNode[] getNextNodes(boolean playerOne);
     }

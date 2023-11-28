@@ -75,7 +75,7 @@ public class AaronFish implements szte.mi.Player {
 
     public int maxValue(OthelloTree.OthelloNode node, int depth, int alpha, int beta) {
         if (node.getIsTerminalNode(true) || depth == 0) {
-            return node.getScore(this.boardGrader);
+            return node.getScore(this.boardGrader,true);
         }
 
         int bestScore = Integer.MIN_VALUE;
@@ -99,7 +99,7 @@ public class AaronFish implements szte.mi.Player {
 
     public int minValue(OthelloTree.OthelloNode node, int depth, int alpha, int beta) {
         if (node.getIsTerminalNode(false) || depth == 0) {
-            return node.getScore(this.boardGrader);
+            return node.getScore(this.boardGrader,false);
         }
 
         int bestScore = Integer.MAX_VALUE;

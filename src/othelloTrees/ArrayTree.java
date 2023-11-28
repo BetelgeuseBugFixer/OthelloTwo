@@ -69,9 +69,9 @@ public class ArrayTree implements OthelloTree {
         }
 
         @Override
-        public int getScore(BoardGrader grader) {
+        public int getScore(BoardGrader grader,boolean playerOne) {
             if (!this.isGraded) {
-                this.score = grader.gradeBoard(this.getBoard());
+                this.score = grader.gradeBoard(this,playerOne);
                 this.isGraded=true;
             }
             return this.score;

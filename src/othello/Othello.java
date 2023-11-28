@@ -86,6 +86,8 @@ public class Othello {
     }
 
     public ArrayTree.ArrayNode[] getPossibleMovesAsNodes(boolean playerOne) {
+        //TODO Alternative version here:
+        // https://stackoverflow.com/questions/5944230/optimization-of-moves-calculation-in-othello-bitboard
         //according to
         //https://jxiv.jst.go.jp/index.php/jxiv/preprint/view/480
         //33 is the maximum number of moves in reachable positions
