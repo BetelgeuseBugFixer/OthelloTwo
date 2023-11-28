@@ -1,8 +1,8 @@
 package ai;
 
 import othello.Othello;
+import othelloTrees.ArrayTree;
 import szte.mi.Move;
-import othelloTrees.HashOthelloTree;
 import othelloTrees.OthelloTree.OthelloNode;
 import othelloTrees.OthelloTree;
 
@@ -21,7 +21,7 @@ public class AaronFish implements szte.mi.Player {
     public void init(int order, long t, Random rnd) {
         this.boardGrader = new SimplestGrader();
         this.board = new Othello();
-        this.boardTree = new HashOthelloTree();
+        this.boardTree = new ArrayTree();
         if (order == 0) {
             this.playerOne = true;
             currentMove = -1;
@@ -34,7 +34,7 @@ public class AaronFish implements szte.mi.Player {
     public Move nextMove(Move prevMove, long tOpponent, long t) {
         this.currentMove += 2;
         if (prevMove != null) {
-            this.boardTree.move(prevMove);
+            this.boardTree.move(Othello.getIntFromMove(prevMove),!this.playerOne);
         }
         int goalDepth = getGoalDepth(t);
         return calculateNextMove(goalDepth);
@@ -44,38 +44,45 @@ public class AaronFish implements szte.mi.Player {
         int alpha = Integer.MIN_VALUE;
         int beta = Integer.MAX_VALUE;
 
-        Move bestMove = null;
+        int bestMove = -1;
         if (playerOne) {
-            for (Move move : this.boardTree.getRoot().getNextMoves()) {
-                OthelloNode nextNode = this.boardTree.getRoot().getNextNode(move);
-                int score = minValue(nextNode, depth - 1, alpha, beta);
+            for (OthelloNode node : this.boardTree.getRoot().getNextNodes(true)) {
+                if (node==null){
+                    break;
+                }
+                int score = minValue(node, depth - 1, alpha, beta);
                 if (score > alpha) {
                     alpha = score;
-                    bestMove = move;
+                    bestMove = node.getPreviousMove();
                 }
             }
         } else {
-            for (Move move : this.boardTree.getRoot().getNextMoves()) {
-                OthelloNode nextNode = this.boardTree.getRoot().getNextNode(move);
-                int score = maxValue(nextNode, depth - 1, alpha, beta);
+            for (OthelloNode node : this.boardTree.getRoot().getNextNodes(false)) {
+                if (node==null){
+                    break;
+                }
+                int score = maxValue(node, depth - 1, alpha, beta);
                 if (score < beta) {
                     beta = score;
-                    bestMove = move;
+                    bestMove = node.getPreviousMove();
                 }
             }
 
         }
-
-        return bestMove;
+        this.boardTree.move(bestMove,this.playerOne);
+        return Othello.getMoveFromInt(bestMove);
     }
 
     public int maxValue(OthelloTree.OthelloNode node, int depth, int alpha, int beta) {
-        if (node.getIsTerminalNode() || depth == 0) {
+        if (node.getIsTerminalNode(true) || depth == 0) {
             return node.getScore(this.boardGrader);
         }
 
         int bestScore = Integer.MIN_VALUE;
-        for (OthelloNode nextNode : node.getNextNodes()) {
+        for (OthelloNode nextNode : node.getNextNodes(true)) {
+            if (nextNode==null){
+                break;
+            }
             int score = minValue(nextNode, depth - 1, alpha, beta);
             if (score > bestScore) {
                 bestScore = score;
@@ -91,12 +98,15 @@ public class AaronFish implements szte.mi.Player {
     }
 
     public int minValue(OthelloTree.OthelloNode node, int depth, int alpha, int beta) {
-        if (node.getIsTerminalNode() || depth == 0) {
+        if (node.getIsTerminalNode(false) || depth == 0) {
             return node.getScore(this.boardGrader);
         }
 
         int bestScore = Integer.MAX_VALUE;
-        for (OthelloNode nextNode : node.getNextNodes()) {
+        for (OthelloNode nextNode : node.getNextNodes(false)) {
+            if (nextNode==null){
+                break;
+            }
             int score = maxValue(nextNode, depth - 1, alpha, beta);
             if (score < bestScore) {
                 bestScore = score;
@@ -112,6 +122,6 @@ public class AaronFish implements szte.mi.Player {
     }
 
     public int getGoalDepth(long remainingTime) {
-        return 4;
+        return 2;
     }
 }

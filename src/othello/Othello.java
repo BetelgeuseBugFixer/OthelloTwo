@@ -1,5 +1,6 @@
 package othello;
 
+import othelloTrees.ArrayTree;
 import szte.mi.Move;
 
 import java.util.HashMap;
@@ -19,20 +20,37 @@ public class Othello {
         this.blackPlayerDiscs = blackPlayerDiscs;
     }
 
+    public void makeMove(int move, boolean playerOne) {
+        if (move == -1) {
+            return;
+        }
+
+        long discsToFlip = getDiscsToFlip(move, playerOne);
+        blackPlayerDiscs ^= discsToFlip;
+        whitePLayerDiscs ^= discsToFlip;
+        if (playerOne) {
+            blackPlayerDiscs |= 1L << move;
+        } else {
+            whitePLayerDiscs |= 1L << move;
+        }
+    }
+
     public void makeMove(Move move, boolean playerOne) {
         if (move == null) {
             return;
         }
-        int row = move.y;
-        int col = move.x;
-        long discsToFlip = getPiecesToFlip(row, col, playerOne);
-        blackPlayerDiscs ^= discsToFlip;
-        whitePLayerDiscs ^= discsToFlip;
-        if (playerOne) {
-            blackPlayerDiscs |= 1L << (row * 8 + col);
-        } else {
-            whitePLayerDiscs |= 1L << (row * 8 + col);
+        makeMove(getIntFromMove(move), playerOne);
+    }
+
+    public static int getIntFromMove(Move move) {
+        if (move==null){
+            return -1;
         }
+        return move.y * 8 + move.x;
+    }
+
+    public static Move getMoveFromInt(int move) {
+        return new Move(move % 8, move / 8);
     }
 
     public MoveWithResult[] getPossibleMoves(boolean playerOne) {
@@ -42,37 +60,67 @@ public class Othello {
         MoveWithResult[] possibleMoves = new MoveWithResult[33];
         int index = 0;
         //iterate over every field
-        for (int row = 0; row < 8; row++) {
-            for (int col = 0; col < 8; col++) {
-                long discsToFlip = getPiecesToFlip(row, col, playerOne);
-                if (discsToFlip != 0) {
-                    Move move = new Move(col, row);
-                    long newWhiteDiscs = whitePLayerDiscs ^ discsToFlip;
-                    long newBlackDiscs = blackPlayerDiscs ^ discsToFlip;
-                    //add new disc
-                    if (playerOne) {
-                        newBlackDiscs |= 1L << (row * 8 + col);
-                    } else {
-                        newWhiteDiscs |= 1L << (row * 8 + col);
-                    }
-                    Othello newBoard = new Othello(newBlackDiscs, newWhiteDiscs);
-                    possibleMoves[index] = new MoveWithResult(move, newBoard);
-                    index++;
+        for (int i = 0; i < 64; i++) {
+            long discsToFlip = getDiscsToFlip(i, playerOne);
+            if (discsToFlip != 0) {
+                long newWhiteDiscs = whitePLayerDiscs ^ discsToFlip;
+                long newBlackDiscs = blackPlayerDiscs ^ discsToFlip;
+                //add new disc
+                if (playerOne) {
+                    newBlackDiscs |= 1L << i;
+                } else {
+                    newWhiteDiscs |= 1L << i;
                 }
-
+                Othello newBoard = new Othello(newBlackDiscs, newWhiteDiscs);
+                possibleMoves[index] = new MoveWithResult(i, newBoard);
+                index++;
             }
+
         }
+
         if (possibleMoves[0] == null) {
             Othello newBoard = new Othello(blackPlayerDiscs, whitePLayerDiscs);
-            possibleMoves[0] = new MoveWithResult(null, newBoard);
+            possibleMoves[0] = new MoveWithResult(-1, newBoard);
         }
         return possibleMoves;
     }
 
-    public long getPiecesToFlip(int row, int col, boolean playerOne) {
+    public ArrayTree.ArrayNode[] getPossibleMovesAsNodes(boolean playerOne) {
+        //according to
+        //https://jxiv.jst.go.jp/index.php/jxiv/preprint/view/480
+        //33 is the maximum number of moves in reachable positions
+        ArrayTree.ArrayNode[] possibleMoves = new ArrayTree.ArrayNode[33];
+        int index = 0;
+        //iterate over every field
+        for (int i = 0; i < 64; i++) {
+            long discsToFlip = getDiscsToFlip(i, playerOne);
+            if (discsToFlip != 0) {
+                long newWhiteDiscs = whitePLayerDiscs ^ discsToFlip;
+                long newBlackDiscs = blackPlayerDiscs ^ discsToFlip;
+                //add new disc
+                if (playerOne) {
+                    newBlackDiscs |= 1L << i;
+                } else {
+                    newWhiteDiscs |= 1L << i;
+                }
+                Othello newBoard = new Othello(newBlackDiscs, newWhiteDiscs);
+                possibleMoves[index] = new ArrayTree.ArrayNode(newBoard,i);
+                index++;
+            }
+
+        }
+
+        if (possibleMoves[0] == null) {
+            Othello newBoard = new Othello(blackPlayerDiscs, whitePLayerDiscs);
+            possibleMoves[0] = new ArrayTree.ArrayNode(newBoard,-1);
+        }
+        return possibleMoves;
+    }
+
+    public long getDiscsToFlip(int i, boolean playerOne) {
         //check if field is occupied
-        long targetPosition = 1L << (row * 8 + col);
-        if ((targetPosition&blackPlayerDiscs)!=0 || (targetPosition&whitePLayerDiscs)!=0){
+        long targetPosition = 1L << i;
+        if ((targetPosition & blackPlayerDiscs) != 0 || (targetPosition & whitePLayerDiscs) != 0) {
             return 0;
         }
 
@@ -96,8 +144,8 @@ public class Othello {
                 long currentFlips = 0L;
 
 
-                int curRow = row+rowDir;
-                int curCol = col+colDir;
+                int curRow = (i / 8) + rowDir;
+                int curCol = (i % 8) + colDir;
 
                 while (curRow >= 0 && curRow <= 7 && curCol >= 0 && curCol <= 7) {
 
@@ -141,6 +189,10 @@ public class Othello {
         }
     }
 
+    public String getCurrentGameResult(){
+        return "black:white "+this.blackPlayerDiscs+": "+this.whitePLayerDiscs;
+    }
+
     @Override
     public String toString() {
         HashMap<Integer, String> intToDisc = new HashMap<>();
@@ -176,12 +228,16 @@ public class Othello {
     }
 
     public static class MoveWithResult {
-        public Move move;
+        public int move;
         public Othello board;
 
-        public MoveWithResult(Move move, Othello board) {
+        public MoveWithResult(int move, Othello board) {
             this.move = move;
             this.board = board;
         }
+    }
+
+    public boolean boardIsFull(){
+        return this.blackPlayerDiscs+this.whitePLayerDiscs==-1;
     }
 }
