@@ -122,6 +122,6 @@ public class AaronFish implements szte.mi.Player {
     }
 
     public int getGoalDepth(long remainingTime) {
-        return 2;
+        return 4;
     }
 }

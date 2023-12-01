@@ -1,4 +1,5 @@
 import ai.AaronFish;
+import ai.BetterGrader;
 import oldOthello.OldOthello;
 import othello.Othello;
 import progressbar.Progressbar;
@@ -6,6 +7,7 @@ import progressbar.Timer;
 import szte.mi.Move;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Random;
 
 public class Test {
@@ -211,12 +213,7 @@ public class Test {
 
     public static void main(String[] args) {
 
-        int n=100_000;
-        Progressbar test=new Progressbar("simulate games",n);
-        for (int i = 0; i < n; i++) {
-            //randomOthelloGame(new Random(42),false);
-            test.countUp();
-        }
+
     }
 
     public static String moveToString(Move move) {
