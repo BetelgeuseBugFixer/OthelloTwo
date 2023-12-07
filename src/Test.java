@@ -1,13 +1,10 @@
 import ai.AaronFish;
-import ai.BetterGrader;
 import oldOthello.OldOthello;
 import othello.Othello;
 import progressbar.Progressbar;
-import progressbar.Timer;
 import szte.mi.Move;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Random;
 
 public class Test {
@@ -212,8 +209,42 @@ public class Test {
     }
 
     public static void main(String[] args) {
+        boolean cornerOne=false;
+        boolean cornerTwo=false;
+        boolean third = true;
+
+        if (cornerOne||cornerTwo||third){
+            System.out.println("if");
+        }else if (!cornerTwo&&!cornerOne){
+            System.out.println("else");
+        }
 
 
+    }
+
+    public interface TestShifter {
+        long shift(long x);
+    }
+
+    public static long rightShift(long x){
+        return x<<1;
+    }
+
+    public static void performShiftsWithInterface(long test , int n, TestShifter shifter){
+        Progressbar testBar=new Progressbar("shifts",n);
+        for (int i = 0; i < n; i++) {
+            long temp= shifter.shift(test);
+            testBar.countUp();
+        }
+    }
+
+    public static void performShifts(Long test ,int n){
+        Progressbar testBar=new Progressbar("shifts",n);
+
+        for (int i = 0; i < n; i++) {
+            long temp = test << 1;
+            testBar.countUp();
+        }
     }
 
     public static String moveToString(Move move) {

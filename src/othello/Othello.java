@@ -191,6 +191,16 @@ public class Othello {
         }
     }
 
+    public int getDiscAtField(long bitmask){
+        if ((this.blackPlayerDiscs&bitmask)!=0L){
+            return 1;
+        }else if ((this.whitePLayerDiscs&bitmask)!=0L){
+            return 2;
+        }else {
+            return 0;
+        }
+    }
+
     public String getCurrentGameResult(){
         return "black:white "+this.blackPlayerDiscs+": "+this.whitePLayerDiscs;
     }
