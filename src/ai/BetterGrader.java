@@ -4,6 +4,7 @@ import othello.Othello;
 import othelloTrees.OthelloTree;
 
 import java.util.Arrays;
+import java.util.HashMap;
 
 public class BetterGrader implements BoardGrader {
     static final long leftBorderBitMask = 0b1111111011111110111111101111111011111110111111101111111011111110L;
@@ -24,6 +25,7 @@ public class BetterGrader implements BoardGrader {
     static long[] endCorner = {upRightCornerMask, downLeftCornerMask, downRightCornerMask, downRightCornerMask};
     static Shifter[] shifts = {BetterGrader::shiftRight, BetterGrader::shiftDown, BetterGrader::shiftDown, BetterGrader::shiftRight};
     static long[] borderMasks = {upperBorderBitMask, leftBorderBitMask, rightBorderBitMask, downBorderBitMask};
+
     public int[] weights = {20, 10, -20, 30, 40, 30, 30, 20, -20, 10, 15, 10, -5, -50, 20, -10, 60, 1, 20, 10, -5, 30, 40, 30, 30, 20, -20, 10, 15, 10, -5, -50, 20, -10, 50, 2, 30};
     //to include in metric:
     //-two unbalanced edges next to each other
@@ -67,26 +69,9 @@ public class BetterGrader implements BoardGrader {
     int eDiscDifferenceWeightIndex = 35;
     int eFlippableEdgeWeightIndex = 36;
 
-    @Override
-    public int gradeBoard(OthelloTree.OthelloNode node, boolean playerOne) {
-        Othello board = node.getBoard();
-        int discsSet = Long.bitCount(board.blackPlayerDiscs & board.whitePLayerDiscs);
-        boolean startWeights = discsSet < weights[sMovesEnd];
-
-        int score = 0;
-
-        score += getPossibleMovesScore(node, playerOne, startWeights);
-        score += getFrontierDiscsScore(board, startWeights);
-        score += getCornerAndStableDiscs(board, startWeights);
-        score += getEdgeScores(board,playerOne,startWeights);
-
-
-        return score;
-    }
-
     public static void main(String[] args) {
-        long test = 0x1281018080000100L;
-        long test2 = 0x7100000000800081L;
+        long test = 281474976710657L;
+        long test2 = 0x100000001000100L;
         BetterGrader grader = new BetterGrader();
         grader.getEdgeScores(new Othello(test, test2), true, false);
     }
@@ -144,6 +129,16 @@ public class BetterGrader implements BoardGrader {
         return stableDiscs;
     }
 
+    public static int getLastChainFromCurrent(int currentChain) {
+        if (currentChain == 1) {
+            return 4;
+        } else if (currentChain == 2) {
+            return 5;
+        } else {
+            return 0;
+        }
+    }
+
     public static int getChainBreakCase(int lastChain, int currentChain, int newDisc) {
         //0: before border, 1: gap with length > 1, 2: single gap ending with black
         //3: single gap ending in white, 4: black discs, 5: white discs
@@ -153,7 +148,7 @@ public class BetterGrader implements BoardGrader {
             return 0;
         } else if (lastChain == 0 && ((currentChain == 1 && newDisc == 2) || (currentChain == 2 && newDisc == 1))) {
             //edge beginns with row of discs, that is interrupted by other discs -> we need to check for a safe flip
-            return 1;
+            return 7;
         } else if (lastChain == 1 && ((currentChain == 1 && newDisc == 2) || currentChain == 2 && newDisc == 1)) {
             //a gap >1 is followed by 2 lines od adversary discs. to the left there is a safe flip, but maybe also to the right
             return 2;
@@ -184,7 +179,7 @@ public class BetterGrader implements BoardGrader {
         } else if (lastChain == 3 && currentChain == 1 && newDisc == 0) {
             //same as above with reverse discs
             return 2;
-        } else return 7;
+        } else return 8;
     }
 
     public static int[] shortenAndSortArray(int[] original, int actualSize) {
@@ -194,6 +189,54 @@ public class BetterGrader implements BoardGrader {
 
     }
 
+    private static long shiftLeft(long x) {
+        return (x >>> 1) & rightBorderBitMask;
+    }
+
+    private static long shiftRight(long x) {
+        return (x << 1) & leftBorderBitMask;
+    }
+
+    private static long shiftUp(long x) {
+        return (x >>> 8);
+    }
+
+    private static long shiftDown(long x) {
+        return (x << 8);
+    }
+
+    private static long shiftUpRight(long x) {
+        return (x >>> 7) & leftBorderBitMask;
+    }
+
+    private static long shiftUpLeft(long x) {
+        return (x >>> 9) & rightBorderBitMask;
+    }
+
+    private static long shiftDownRight(long x) {
+        return (x << 9) & leftBorderBitMask;
+    }
+
+    private static long shiftDownLeft(long x) {
+        return (x << 7) & rightBorderBitMask;
+    }
+
+    @Override
+    public int gradeBoard(OthelloTree.OthelloNode node, boolean playerOne) {
+        Othello board = node.getBoard();
+        int discsSet = Long.bitCount(board.blackPlayerDiscs & board.whitePLayerDiscs);
+        boolean startWeights = discsSet < weights[sMovesEnd];
+
+        int score = 0;
+
+        score += getPossibleMovesScore(node, playerOne, startWeights);
+        score += getFrontierDiscsScore(board, startWeights);
+        score += getCornerAndStableDiscs(board, startWeights);
+        score += getEdgeScores(board, playerOne, startWeights);
+
+
+        return score;
+    }
 
     private int getPossibleMovesScore(OthelloTree.OthelloNode node, boolean playerOne, boolean startWeights) {
         int score = 0;
@@ -318,7 +361,7 @@ public class BetterGrader implements BoardGrader {
         int pairSum = 0;
         int balancedEdgeSum = 0;
         int unbalancedEdgeSum = 0;
-        //16 is as rough estimate of the number of flippable stones
+        //16 is as rough estimate of the maximum number of contested flips
         int[] contestedFlips = new int[16];
         int contestedFlipsSize = 0;
         //All edges are represented as start and end edge, and the shift to get from start to end
@@ -339,8 +382,8 @@ public class BetterGrader implements BoardGrader {
                 //0: before border, 1: gap with length > 1, 2: single gap ending with black
                 //3: single gap ending in white, 4: black discs, 5: white discs
                 int lastChain = 0;
-                //0:gap, 1:black, 2:white
-                int currentChain = 0;
+                //-1: no value, 0: gap, 1: black, 2: white
+                int currentChain = -1;
                 int currentChainLength = 0;
 
                 long currentPosition = startCorner[i];
@@ -360,7 +403,7 @@ public class BetterGrader implements BoardGrader {
                             currentChainLength = 1;
                         } else if (breakCase == 1) {
                             //now we check for a safe flip
-                            int flipScore = currentChainLength + getSafeFlipScore(currentChain, newDisc, edgeIndex, currentPosition, shifts[i], board);
+                            int flipScore = currentChainLength + getSafeFlipScoreWithLookaheadCheck(currentChain, newDisc, edgeIndex, currentPosition, shifts[i], board);
                             if (currentChain == 1) {
                                 safelyFlippableDiscsSum += flipScore;
                             } else {
@@ -368,22 +411,30 @@ public class BetterGrader implements BoardGrader {
                             }
 
                             //update variables
-                            lastChain = currentChain;
+                            lastChain = getLastChainFromCurrent(currentChain);
                             currentChain = newDisc;
                             currentChainLength = 1;
 
                         } else if (breakCase == 2) {
                             //last chain was a gap, so we have a safe skip for new disc, but if current may have a
                             //safe skip too
-                            int safeSkipAlongEdge = getSafeFlipScore(currentChain, newDisc, edgeIndex, currentPosition, shifts[i], board);
+                            int safeSkipAlongEdge = getSafeFlipScoreWithLookaheadCheck(currentChain, newDisc, edgeIndex, currentPosition, shifts[i], board);
                             if (safeSkipAlongEdge != 0) {
                                 //flip in both directions is possible
                                 int safeFlip = currentChainLength + safeSkipAlongEdge;
                                 contestedFlips[contestedFlipsSize] = safeFlip;
                                 contestedFlipsSize++;
+                            } else {
+                                if (newDisc == 1) {
+                                    safelyFlippableDiscsSum += currentChainLength;
+                                } else {
+                                    safelyFlippableDiscsSum -= currentChainLength;
+
+                                }
                             }
+
                             //update variables
-                            lastChain = currentChain;
+                            lastChain = getLastChainFromCurrent(currentChain);
                             currentChain = newDisc;
                             currentChainLength = 1;
 
@@ -429,18 +480,30 @@ public class BetterGrader implements BoardGrader {
                             //white wedge
                             wedgeSum -= currentChainLength;
 
-                            lastChain = currentChain;
+                            lastChain = getLastChainFromCurrent(currentChain);
                             currentChain = newDisc;
                             currentChainLength = 1;
                         } else if (breakCase == 6) {
                             //black wedge
                             wedgeSum += currentChainLength;
 
-                            lastChain = currentChain;
+                            lastChain = getLastChainFromCurrent(currentChain);
+                            currentChain = newDisc;
+                            currentChainLength = 1;
+                        } else if (breakCase == 7) {
+                            int flipScore = currentChainLength + getSafeFlipScore(currentChain, newDisc, edgeIndex, currentPosition, shifts[i], board);
+                            if (currentChain == 1) {
+                                safelyFlippableDiscsSum += flipScore;
+                            } else {
+                                safelyFlippableDiscsSum -= flipScore;
+                            }
+
+                            //update variables
+                            lastChain = getLastChainFromCurrent(currentChain);
                             currentChain = newDisc;
                             currentChainLength = 1;
                         } else {
-                            lastChain = currentChain;
+                            lastChain = getLastChainFromCurrent(currentChain);
                             currentChain = newDisc;
                             currentChainLength = 1;
                         }
@@ -555,7 +618,7 @@ public class BetterGrader implements BoardGrader {
         }
     }
 
-    public int getSafeFlipScore(int currentChain, int newDisc, int edgeIndex, long currentPosition, Shifter shift, Othello board) {
+    public int getSafeFlipScoreWithLookaheadCheck(int currentChain, int newDisc, int edgeIndex, long currentPosition, Shifter shift, Othello board) {
         int safelyFlippableDiscsSum = 0;
         //shift to see if we have a safe flip
         currentPosition = shift.shift(currentPosition);
@@ -567,7 +630,7 @@ public class BetterGrader implements BoardGrader {
             lookAheadIndex++;
             lookAheadDisc = board.getDiscAtField(currentPosition);
         }
-        if (lookAheadDisc == newDisc) {
+        if (lookAheadDisc == 0) {
             return 0;
         }
         if (lookAheadDisc != currentChain) {
@@ -584,39 +647,25 @@ public class BetterGrader implements BoardGrader {
         return safelyFlippableDiscsSum;
     }
 
+    public int getSafeFlipScore(int currentChain, int newDisc, int edgeIndex, long currentPosition, Shifter shift, Othello board) {
+        int safelyFlippableDiscsSum = 0;
+        //shift to see if we have a safe flip
+        currentPosition = shift.shift(currentPosition);
+        int lookAheadIndex = edgeIndex + 1;
+        int lookAheadDisc = board.getDiscAtField(currentPosition);
+        //shift ahead to next chain breaker
+        while (lookAheadDisc == newDisc && lookAheadIndex < 8) {
+            currentPosition = shift.shift(currentPosition);
+            lookAheadIndex++;
+            lookAheadDisc = board.getDiscAtField(currentPosition);
+        }
+        if (lookAheadDisc == newDisc) {
+            return 0;
+        }
+        return safelyFlippableDiscsSum += lookAheadIndex - edgeIndex;
+    }
+
     public interface Shifter {
         long shift(long x);
-    }
-
-    private static long shiftLeft(long x) {
-        return (x >>> 1) & rightBorderBitMask;
-    }
-
-    private static long shiftRight(long x) {
-        return (x << 1) & leftBorderBitMask;
-    }
-
-    private static long shiftUp(long x) {
-        return (x >>> 8);
-    }
-
-    private static long shiftDown(long x) {
-        return (x << 8);
-    }
-
-    private static long shiftUpRight(long x) {
-        return (x >>> 7) & leftBorderBitMask;
-    }
-
-    private static long shiftUpLeft(long x) {
-        return (x >>> 9) & rightBorderBitMask;
-    }
-
-    private static long shiftDownRight(long x) {
-        return (x << 9) & leftBorderBitMask;
-    }
-
-    private static long shiftDownLeft(long x) {
-        return (x << 7) & rightBorderBitMask;
     }
 }
