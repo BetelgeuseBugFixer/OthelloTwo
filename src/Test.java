@@ -12,7 +12,7 @@ public class Test {
     private static long[] testGameWithPlus() {
         Othello othello = new Othello();
         int roundsPassed = 0;
-        long current = 0;
+        long current;
         long[] decoy = new long[2];
 
         boolean playerOne = false;
@@ -48,7 +48,7 @@ public class Test {
     private static long[] testGameWitBit() {
         Othello othello = new Othello();
         int roundsPassed = 0;
-        long current = 0;
+        long current;
         long[] decoy = new long[2];
 
         boolean playerOne = false;

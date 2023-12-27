@@ -159,11 +159,8 @@ public class Othello {
                         if ((currentPosition & playerThatFlips) != 0) {
                             //row of opponents discs ends with own disc and the discs can be flipped
                             toFLip = toFLip | currentFlips;
-                            break;
-                        } else {
-                            //row of opponents discs ends no disc and can't be flipped
-                            break;
                         }
+                        break;
                     }
                     curRow += rowDir;
                     curCol += colDir;
