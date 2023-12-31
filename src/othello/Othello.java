@@ -6,7 +6,8 @@ import szte.mi.Move;
 import java.util.HashMap;
 
 public class Othello {
-
+    static final long leftBorderBitMask = 0b1111111011111110111111101111111011111110111111101111111011111110L;
+    static final long rightBorderBitMask = 0b111111101111111011111110111111101111111011111110111111101111111L;
     public long whitePLayerDiscs;
     public long blackPlayerDiscs;
 
@@ -18,6 +19,34 @@ public class Othello {
     public Othello(long blackPlayerDiscs, long whitePLayerDiscs) {
         this.whitePLayerDiscs = whitePLayerDiscs;
         this.blackPlayerDiscs = blackPlayerDiscs;
+    }
+
+    public static int getIntFromMove(Move move) {
+        if (move == null) {
+            return -1;
+        }
+        return move.y * 8 + move.x;
+    }
+
+    public static Move getMoveFromInt(int move) {
+        return new Move(move % 8, move / 8);
+    }
+
+    //helper method for debugging
+    public static String singleLongToField(long board) {
+        StringBuilder sb = new StringBuilder();
+        for (int row = 0; row < 8; row++) {
+            for (int col = 0; col < 8; col++) {
+                long curPos = 1L << (row * 8 + col);
+                if ((curPos & board) != 0) {
+                    sb.append("|X");
+                } else {
+                    sb.append("| ");
+                }
+            }
+            sb.append("|\n");
+        }
+        return sb.toString();
     }
 
     public void makeMove(int move, boolean playerOne) {
@@ -40,17 +69,6 @@ public class Othello {
             return;
         }
         makeMove(getIntFromMove(move), playerOne);
-    }
-
-    public static int getIntFromMove(Move move) {
-        if (move==null){
-            return -1;
-        }
-        return move.y * 8 + move.x;
-    }
-
-    public static Move getMoveFromInt(int move) {
-        return new Move(move % 8, move / 8);
     }
 
     public MoveWithResult[] getPossibleMoves(boolean playerOne) {
@@ -106,7 +124,7 @@ public class Othello {
                     newWhiteDiscs |= 1L << i;
                 }
                 Othello newBoard = new Othello(newBlackDiscs, newWhiteDiscs);
-                possibleMoves[index] = new ArrayTree.ArrayNode(newBoard,i);
+                possibleMoves[index] = new ArrayTree.ArrayNode(newBoard, i);
                 index++;
             }
 
@@ -114,7 +132,7 @@ public class Othello {
 
         if (possibleMoves[0] == null) {
             Othello newBoard = new Othello(blackPlayerDiscs, whitePLayerDiscs);
-            possibleMoves[0] = new ArrayTree.ArrayNode(newBoard,-1);
+            possibleMoves[0] = new ArrayTree.ArrayNode(newBoard, -1);
         }
         return possibleMoves;
     }
@@ -188,18 +206,18 @@ public class Othello {
         }
     }
 
-    public int getDiscAtField(long bitmask){
-        if ((this.blackPlayerDiscs&bitmask)!=0L){
+    public int getDiscAtField(long bitmask) {
+        if ((this.blackPlayerDiscs & bitmask) != 0L) {
             return 1;
-        }else if ((this.whitePLayerDiscs&bitmask)!=0L){
+        } else if ((this.whitePLayerDiscs & bitmask) != 0L) {
             return 2;
-        }else {
+        } else {
             return 0;
         }
     }
 
-    public String getCurrentGameResult(){
-        return "black:white "+this.blackPlayerDiscs+": "+this.whitePLayerDiscs;
+    public String getCurrentGameResult() {
+        return "black:white " + this.blackPlayerDiscs + ": " + this.whitePLayerDiscs;
     }
 
     @Override
@@ -219,21 +237,87 @@ public class Othello {
         return sb.toString();
     }
 
-    //helper method for debugging
-    public static String singleLongToField(long board) {
-        StringBuilder sb = new StringBuilder();
-        for (int row = 0; row < 8; row++) {
-            for (int col = 0; col < 8; col++) {
-                long curPos = 1L << (row * 8 + col);
-                if ((curPos & board) != 0) {
-                    sb.append("|X");
-                } else {
-                    sb.append("| ");
-                }
+    public boolean boardIsFull() {
+        return this.blackPlayerDiscs + this.whitePLayerDiscs == -1;
+    }
+
+    public int getDiscDifference() {
+        return Long.bitCount(this.blackPlayerDiscs) - Long.bitCount(this.whitePLayerDiscs);
+    }
+
+
+    //shamelessly stolen from
+    //https://stackoverflow.com/questions/5944230/optimization-of-moves-calculation-in-othello-bitboard
+    public long getLegalMovesAsLong(Boolean playerOne){
+            long legal = 0L;
+            long potentialMoves;
+            long currentBoard;
+            long opponentBoard;
+            if (playerOne){
+                currentBoard = this.blackPlayerDiscs;
+                opponentBoard = this.whitePLayerDiscs;
+            }else {
+                currentBoard = this.whitePLayerDiscs;
+                opponentBoard = this.blackPlayerDiscs;
             }
-            sb.append("|\n");
-        }
-        return sb.toString();
+            long emptyBoard = ~(this.blackPlayerDiscs|this.whitePLayerDiscs);
+            // UP
+            potentialMoves = (currentBoard >>> 8)  & opponentBoard;
+            while (potentialMoves != 0L) {
+                long tmp = (potentialMoves >>> 8);
+                legal |= tmp & emptyBoard;
+                potentialMoves = tmp & opponentBoard;
+            }
+            // DOWN
+            potentialMoves = (currentBoard << 8) & opponentBoard;
+            while (potentialMoves != 0L) {
+                long tmp = (potentialMoves << 8);
+                legal |= tmp & emptyBoard;
+                potentialMoves = tmp & opponentBoard;
+            }
+            // LEFT
+            potentialMoves = (currentBoard >>> 1L) & rightBorderBitMask & opponentBoard;
+            while (potentialMoves != 0L) {
+                long tmp = (potentialMoves >>> 1L) & rightBorderBitMask;
+                legal |= tmp & emptyBoard;
+                potentialMoves = tmp & opponentBoard;
+            }
+            // RIGHT
+            potentialMoves = (currentBoard << 1L) & leftBorderBitMask & opponentBoard;
+            while (potentialMoves != 0L) {
+                long tmp = (potentialMoves << 1L) & leftBorderBitMask;
+                legal |= tmp & emptyBoard;
+                potentialMoves = tmp & opponentBoard;
+            }
+            // UP LEFT
+            potentialMoves = (currentBoard >>>9) & leftBorderBitMask & opponentBoard;
+            while (potentialMoves != 0L) {
+                long tmp = (potentialMoves >>> 9) & leftBorderBitMask;
+                legal |= tmp & emptyBoard;
+                potentialMoves = tmp & opponentBoard;
+            }
+            // UP RIGHT
+            potentialMoves = (currentBoard >>> 7) & leftBorderBitMask & opponentBoard;
+            while (potentialMoves != 0L) {
+                long tmp = (potentialMoves >>> 7) & leftBorderBitMask;
+                legal |= tmp & emptyBoard;
+                potentialMoves = tmp & opponentBoard;
+            }
+            // DOWN LEFT
+            potentialMoves = (currentBoard << 7) & rightBorderBitMask & opponentBoard;
+            while (potentialMoves != 0L) {
+                long tmp = (potentialMoves << 7) & rightBorderBitMask;
+                legal |= tmp & emptyBoard;
+                potentialMoves = tmp & opponentBoard;
+            }
+            // DOWN RIGHT
+            potentialMoves = (currentBoard << 9) & leftBorderBitMask & opponentBoard;
+            while (potentialMoves != 0L) {
+                long tmp = (potentialMoves << 9) & leftBorderBitMask;
+                legal |= tmp & emptyBoard;
+                potentialMoves = tmp & opponentBoard;
+            }
+        return legal;
     }
 
     public static class MoveWithResult {
@@ -244,9 +328,5 @@ public class Othello {
             this.move = move;
             this.board = board;
         }
-    }
-
-    public boolean boardIsFull(){
-        return this.blackPlayerDiscs+this.whitePLayerDiscs==-1;
     }
 }
