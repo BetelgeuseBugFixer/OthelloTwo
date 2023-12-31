@@ -1,6 +1,8 @@
 package ai;
+
 import othello.Othello;
 import othelloTrees.OthelloTree;
+
 import java.util.Arrays;
 
 public class BetterGrader implements BoardGrader {
@@ -14,17 +16,16 @@ public class BetterGrader implements BoardGrader {
     static final long downRightCornerMask = 0x8000000000000000L;
     //All edges are represented as start and end edge, and the shift to get from start to end
     //startEdges[i], endEdges[i] and shift[i] is therefore the upper edge
+    final Shifter[] allShifts={BetterGrader::shiftUp,BetterGrader::shiftDown,
+            BetterGrader::shiftLeft,BetterGrader::shiftRight,
+            BetterGrader::shiftUpLeft,BetterGrader::shiftUpRight,
+            BetterGrader::shiftDownLeft,BetterGrader::shiftDownRight};
     static final long[] startCorner = {upLeftCornerMask, upLeftCornerMask, upRightCornerMask, downLeftCornerMask};
     static final long[] endCorner = {upRightCornerMask, downLeftCornerMask, downRightCornerMask, downRightCornerMask};
-    static final Shifter[] shifts = {BetterGrader::shiftRight, BetterGrader::shiftDown, BetterGrader::shiftDown, BetterGrader::shiftRight};
-    static final long[] borderMasks = {~upperBorderBitMask, ~leftBorderBitMask, ~rightBorderBitMask, ~downBorderBitMask};
-
-    public int[] weights = {20, 10, -20, 30, 40, 30, 30, 20, -20, 10, 15, 10, -5, -50, 20, -10, 60, 1, 20, 10, -5, 30, 40, 30, 30, 20, -20, 10, 15, 10, -5, -50, 20, -10, 50, 2, 30};
-    //to include in metric:
-    //-two unbalanced edges next to each other
-    //-parity
-    //-corner capture
-    int sMovesEnd = 0;
+    static final Shifter[] shiftsAlongEdge = {BetterGrader::shiftRight, BetterGrader::shiftDown, BetterGrader::shiftDown, BetterGrader::shiftRight};
+    static final long[] edgeMasks = {~upperBorderBitMask, ~leftBorderBitMask, ~rightBorderBitMask, ~downBorderBitMask};
+    public int[] weights = {20, 10, -20, 30, 40, 30, 30, 20, -20, 10, 15, 10, -5, -50, 20, -10, 60, 1, 20, 70, -20, 10, -5, 30, 40, 30, 30, 20, -20, 10, 15, 10, -5, -50, 20, -10, 50, 2, 30, 90, -60};
+    int moveChange = 0;
     int sPossibleMovesIndex = 1;
     int sFrontierDiscsIndex = 2;
     int sStableDiscsIndex = 3;
@@ -43,36 +44,55 @@ public class BetterGrader implements BoardGrader {
     int sCornerDiscsIndex = 16;
     int sDiscDifferenceWeightIndex = 17;
     int sFlippableEdgeWeightIndex = 18;
-    int ePossibleMovesIndex = 19;
-    int eFrontierDiscsIndex = 20;
-    int eStableDiscsIndex = 21;
-    int eBalancedEdgeIndex = 22;
-    int eUnbalancedEdgeIndex = 23;
-    int ePairIndex = 24;
-    int eWedgeIndex = 25;
-    int eUnevenEdgeGapIndex = 26;
-    int eEvenEdgeGapIndex = 27;
-    int eCenter4StonesIndex = 28;
-    int eNextToCenterDiscsIndex = 29;
-    int eNextToEdgeDiscsIndex = 30;
-    int eDangerDiscsIndex = 31;
-    int eEdgeDiscsIndex = 32;
-    int eEdgeNextToCornerDiscsIndex = 33;
-    int eCornerDiscsIndex = 34;
-    int eDiscDifferenceWeightIndex = 35;
-    int eFlippableEdgeWeightIndex = 36;
+    int sParityWeightIndex = 19;
+    int sParityInDangerIndex = 20;
+    int ePossibleMovesIndex = 21;
+    int eFrontierDiscsIndex = 22;
+    int eStableDiscsIndex = 23;
+    int eBalancedEdgeIndex = 24;
+    int eUnbalancedEdgeIndex = 25;
+    int ePairIndex = 26;
+    int eWedgeIndex = 27;
+    int eUnevenEdgeGapIndex = 28;
+    int eEvenEdgeGapIndex = 29;
+    int eCenter4StonesIndex = 30;
+    int eNextToCenterDiscsIndex = 31;
+    int eNextToEdgeDiscsIndex = 32;
+    int eDangerDiscsIndex = 33;
+    int eEdgeDiscsIndex = 34;
+    int eEdgeNextToCornerDiscsIndex = 35;
+    int eCornerDiscsIndex = 36;
+    int eDiscDifferenceWeightIndex = 37;
+    int eFlippableEdgeWeightIndex = 38;
+    int eParityWeightIndex = 39;
+    int eParityInDangerIndex = 40;
 
+    long center4StonesMask = 0x1818000000L;
+    long nextToCenterStonesMask = 0x3c24243c0000L;
+    long nextToEdgeStonesMask = 0x3c424242423c00L;
+    long edgeDiscsMask = 0x3c0081818181003cL;
+    //to include in metric:
+    //-two unbalanced edges next to each other
+    //-corner capture
+    @Override
+    public int gradeBoard(OthelloTree.OthelloNode node, boolean playerOneMadeLastMove) {
+        Othello board = node.getBoard();
+        int discsSet = Long.bitCount(board.blackPlayerDiscs & board.whitePLayerDiscs);
+        long possibleMoves = board.getLegalMovesAsLong(!playerOneMadeLastMove);
+        boolean startWeights = discsSet < weights[moveChange];
 
-    public void setWeights(int[] weights){
-        this.weights=weights;
+        int score = 0;
+
+        score += getPossibleMovesScore(possibleMoves, playerOneMadeLastMove, startWeights);
+        score += getFrontierDiscsScore(board, startWeights);
+        score += getCornerAndStableDiscs(board, startWeights);
+        score += getEdgeScores(board, playerOneMadeLastMove, startWeights);
+        score += getDiscDifferenceScore(board, startWeights);
+        score += getDiscPositionScore(board, startWeights);
+        score += getParityScore(board, playerOneMadeLastMove, startWeights,possibleMoves);
+
+        return score;
     }
-
-    public void setAllWeightsToOne(){
-        for (int i = 0; i < this.weights.length; i++) {
-            weights[i]=1;
-        }
-    }
-
 
     private static long getStableDiscUpLeftCorner(long playerDiscs) {
         return getStableDiscFromCorner(playerDiscs, upLeftCornerMask, BetterGrader::shiftRight, BetterGrader::shiftDown, BetterGrader::shiftDownRight, BetterGrader::shiftUpRight, BetterGrader::shiftDownLeft);
@@ -219,32 +239,178 @@ public class BetterGrader implements BoardGrader {
         return (x << 7) & rightBorderBitMask;
     }
 
-    @Override
-    public int gradeBoard(OthelloTree.OthelloNode node, boolean playerOne) {
-        Othello board = node.getBoard();
-        int discsSet = Long.bitCount(board.blackPlayerDiscs & board.whitePLayerDiscs);
-        boolean startWeights = discsSet < weights[sMovesEnd];
-
-        int score = 0;
-
-        score += getPossibleMovesScore(node, playerOne, startWeights);
-        score += getFrontierDiscsScore(board, startWeights);
-        score += getCornerAndStableDiscs(board, startWeights);
-        score += getEdgeScores(board, playerOne, startWeights);
-
-
-        return score;
+    public void setWeights(int[] weights) {
+        this.weights = weights;
     }
 
-    private int getPossibleMovesScore(OthelloTree.OthelloNode node, boolean playerOne, boolean startWeights) {
-        int score = 0;
-        for (OthelloTree.OthelloNode nextMove : node.getNextNodes(!playerOne)) {
-            if (nextMove == null) {
-                break;
-            }
-            score++;
+    public void setAllWeightsToOne() {
+        for (int i = 0; i < this.weights.length; i++) {
+            weights[i] = 1;
         }
-        if (!playerOne) {
+    }
+
+
+    public int getParityScore(Othello board, boolean playerOneMadeLastMove, boolean startWeights,long possibleMoves) {
+        int parity = -1;
+        int parityInDanger = 0;
+        long allDiscs = (board.blackPlayerDiscs | board.whitePLayerDiscs);
+        boolean nextMoveIsPass = possibleMoves == 0;
+
+        if (Long.bitCount(allDiscs) % 2 == 0) {
+            //even number of discs -> player that places next disc has no parity
+            if (playerOneMadeLastMove && (!nextMoveIsPass)) {
+                //if black made the last move and the next move is no pass:
+                //the next disc is placed by white and black has parity
+                parity = 1;
+
+            } else if ((!playerOneMadeLastMove) && nextMoveIsPass) {
+                //if white made the last move but the next move is a pass:
+                //the next disc is placed by white and black has parity
+                parity = 1;
+            }
+            //parity in danger is awarded to the same player as the parity
+            if (checkForRegionWithUnevenDiscs(allDiscs)) {
+                parityInDanger = parity;
+            }
+        } else {
+            //uneven number of discs -> player that places the next disc has parity
+            if ((!playerOneMadeLastMove) && (!nextMoveIsPass)) {
+                //if white made the last move and the next move is no pass:
+                // black places the next disc and therefore has parity
+                parity = 1;
+            } else if (playerOneMadeLastMove && nextMoveIsPass) {
+                //if black made the last move and the next move is a pass:
+                // black places the next disc and therefore has parity
+                parity = 1;
+            }
+            //have to update the moves to the next discs that can be placed
+            if (nextMoveIsPass) {
+                possibleMoves = board.getLegalMovesAsLong(playerOneMadeLastMove);
+            }
+            //if there is a Region, where the player with parity has no move,
+            // or there are more than 1 uneven regions
+            // parity is in danger
+            long[] unevenRegions = getUnevenRegions(allDiscs);
+            if (unevenRegions != null) {
+                for (long unevenRegion : unevenRegions) {
+                    //if there is no move for the player with parity in a region with an uneven number of
+                    //squares, parity is in danger
+                    if (unevenRegion==0){
+                        break;
+                    }
+                    if ((possibleMoves & unevenRegion) == 0) {
+                        parityInDanger = parity;
+                        break;
+                    }
+                }
+            } else {
+                parityInDanger = parity;
+            }
+        }
+        if (startWeights) {
+            return parity * weights[sParityWeightIndex] + parityInDanger * weights[sParityInDangerIndex];
+        }
+        return parity * weights[eParityWeightIndex] + parityInDanger * weights[eParityInDangerIndex];
+
+    }
+
+
+    public long[] getUnevenRegions(long allDiscs) {
+        long alreadyCoveredRegions = allDiscs;
+        long emptySquares = ~alreadyCoveredRegions;
+        long[] regions = new long[2];
+        int regionsSize = 0;
+
+        for (int i = 0; i < 64; i++) {
+            long region = 1L << i;
+            if ((alreadyCoveredRegions & region) == 0) {
+                //shift to cover all adjacent squares, that are empty
+                long newRegions = getAllAdjacentSquares(region) & emptySquares;
+                while (newRegions != region) {
+                    region = newRegions;
+                    newRegions = getAllAdjacentSquares(region) & emptySquares;
+                }
+
+
+                if ((Long.bitCount(region) % 2) == 1) {
+                    regions[regionsSize] = region;
+                    regionsSize++;
+                    if (regionsSize == 2) {
+                        return null;
+                    }
+                }
+                alreadyCoveredRegions |= region;
+                if (alreadyCoveredRegions == -1) {
+                    break;
+                }
+            }
+        }
+        return regions;
+    }
+
+    public boolean checkForRegionWithUnevenDiscs(long allDiscs) {
+        //safe every square, that is either occupied by a disc or where we already counted its region
+        long alreadyCoveredRegions = allDiscs;
+        long emptySquares = ~alreadyCoveredRegions;
+        for (int i = 0; i < 64; i++) {
+            long region = 1L << i;
+            if ((alreadyCoveredRegions & region) == 0) {
+                //shift to cover all adjacent squares, that are empty
+                long newRegions = getAllAdjacentSquares(region) & emptySquares;
+                while (newRegions != region) {
+                    region = newRegions;
+                    newRegions = getAllAdjacentSquares(region) & emptySquares;
+                }
+                if ((Long.bitCount(region) % 2) == 1) {
+                    return true;
+                }
+                alreadyCoveredRegions |= region;
+                if (alreadyCoveredRegions == -1) {
+                    break;
+                }
+            }
+        }
+        return false;
+    }
+
+    public long getAllAdjacentSquares(long position) {
+        long result=position;
+        for (Shifter shifter : allShifts) {
+            result |= shifter.shift(position);
+        }
+        return result;
+    }
+
+    private int getDiscPositionScore(Othello board, boolean startWeights) {
+
+
+        int center4StonesSum = Long.bitCount(board.blackPlayerDiscs & center4StonesMask);
+        center4StonesSum -= Long.bitCount(board.whitePLayerDiscs & center4StonesMask);
+
+        int nextToCenterStonesSum = Long.bitCount(board.blackPlayerDiscs & nextToCenterStonesMask);
+        nextToCenterStonesSum -= Long.bitCount(board.whitePLayerDiscs & nextToCenterStonesMask);
+
+        int nextToEdgeStoneSum = Long.bitCount(board.blackPlayerDiscs & nextToEdgeStonesMask);
+        nextToEdgeStoneSum -= Long.bitCount(board.whitePLayerDiscs & nextToEdgeStonesMask);
+
+        int edgeDiscsSum = Long.bitCount(board.blackPlayerDiscs & edgeDiscsMask);
+        edgeDiscsSum -= Long.bitCount(board.whitePLayerDiscs & edgeDiscsMask);
+
+        if (startWeights) {
+            return center4StonesSum * weights[sCenter4StonesIndex]
+                    + nextToCenterStonesSum * weights[sNextToCenterDiscsIndex]
+                    + nextToEdgeStoneSum * weights[sNextToEdgeDiscsIndex]
+                    + edgeDiscsSum * weights[sEdgeDiscsIndex];
+        }
+        return center4StonesSum * weights[eCenter4StonesIndex]
+                + nextToCenterStonesSum * weights[eNextToCenterDiscsIndex]
+                + nextToEdgeStoneSum * weights[eNextToEdgeDiscsIndex]
+                + edgeDiscsSum * weights[eEdgeDiscsIndex];
+    }
+
+    private int getPossibleMovesScore(long possibleMoves, boolean playerOneMadeLastMove, boolean startWeights) {
+        int score = Long.bitCount(possibleMoves);
+        if (playerOneMadeLastMove) {
             score = score * -1;
         }
         if (startWeights) {
@@ -345,13 +511,19 @@ public class BetterGrader implements BoardGrader {
         int stableDiscSum = Long.bitCount(blackStableDiscs) - Long.bitCount(whiteStableDiscs);
 
         if (startWeights) {
-            return weights[sCornerDiscsIndex] * cornerSum + weights[sStableDiscsIndex] * stableDiscSum + weights[sDangerDiscsIndex] + dangerousDiscsSum + weights[sEdgeNextToCornerDiscsIndex] * discsNextToCornerOnEdgeSum;
+            return weights[sCornerDiscsIndex] * cornerSum
+                    + weights[sStableDiscsIndex] * stableDiscSum
+                    + weights[sDangerDiscsIndex] * dangerousDiscsSum
+                    + weights[sEdgeNextToCornerDiscsIndex] * discsNextToCornerOnEdgeSum;
         } else {
-            return weights[eCornerDiscsIndex] * cornerSum + weights[eStableDiscsIndex] * stableDiscSum + weights[eDangerDiscsIndex] + dangerousDiscsSum + weights[eEdgeNextToCornerDiscsIndex] * discsNextToCornerOnEdgeSum;
+            return weights[eCornerDiscsIndex] * cornerSum
+                    + weights[eStableDiscsIndex] * stableDiscSum
+                    + weights[eDangerDiscsIndex] * dangerousDiscsSum
+                    + weights[eEdgeNextToCornerDiscsIndex] * discsNextToCornerOnEdgeSum;
         }
     }
 
-    public int getEdgeScores(Othello board, boolean playerOne, boolean startWeight) {
+    public int getEdgeScores(Othello board, boolean playerOneMadeLastMove, boolean startWeight) {
         int evenGapSum = 0;
         int unEvenGapSum = 0;
         int wedgeSum = 0;
@@ -372,8 +544,8 @@ public class BetterGrader implements BoardGrader {
             //check if both corners are occupied
             boolean startCornerIsOcc = (startCorner[i] & occupancy) != 0L;
             boolean endCornerIsOcc = (endCorner[i] & occupancy) != 0L;
-            boolean blackPlayerOnEdge = (borderMasks[i] & blackPlayer) != 0L;
-            boolean whitePlayerOnEdge = (borderMasks[i] & whitePlayer) != 0L;
+            boolean blackPlayerOnEdge = (edgeMasks[i] & blackPlayer) != 0L;
+            boolean whitePlayerOnEdge = (edgeMasks[i] & whitePlayer) != 0L;
             boolean bothPlayerOnEdge = blackPlayerOnEdge && whitePlayerOnEdge;
 
             if (startCornerIsOcc || endCornerIsOcc || bothPlayerOnEdge) {
@@ -404,7 +576,7 @@ public class BetterGrader implements BoardGrader {
                             //white has no safe flip to the left, but black might have to the right
                             //white might have a safe flip, if the chain ends in a corner
                             //or reverse colours
-                            LookAheadChain lookAheadChain=new LookAheadChain(currentChain, newDisc, edgeIndex, currentPosition, shifts[i], board);
+                            LookAheadChain lookAheadChain = new LookAheadChain(currentChain, newDisc, edgeIndex, currentPosition, shiftsAlongEdge[i], board);
                             if (lookAheadChain.safeFlipToRight) {
                                 if (currentChain == 1) {
                                     safelyFlippableDiscsSum += currentChainLength + lookAheadChain.chainLength;
@@ -432,13 +604,13 @@ public class BetterGrader implements BoardGrader {
                         } else if (breakCase == 2) {
                             //last chain was a gap, so we have a safe skip for new disc, but if current may have a
                             //safe skip too
-                            LookAheadChain lookAheadChain=new LookAheadChain(currentChain, newDisc, edgeIndex, currentPosition, shifts[i], board);
+                            LookAheadChain lookAheadChain = new LookAheadChain(currentChain, newDisc, edgeIndex, currentPosition, shiftsAlongEdge[i], board);
                             if (lookAheadChain.safeFlipToRight) {
                                 //flip in both directions is possible
                                 int safeFlip = currentChainLength + lookAheadChain.chainLength;
                                 contestedFlips[contestedFlipsSize] = safeFlip;
                                 contestedFlipsSize++;
-                            } else if (lookAheadChain.chainBreaker!=currentChain){
+                            } else if (lookAheadChain.chainBreaker != currentChain) {
                                 //but it also could be a wedge if the chain is broken by current chain
                                 if (newDisc == 1) {
                                     safelyFlippableDiscsSum += currentChainLength + lookAheadChain.chainLength;
@@ -508,7 +680,7 @@ public class BetterGrader implements BoardGrader {
                             currentChain = newDisc;
                             currentChainLength = 1;
                         } else if (breakCase == 7) {
-                            int flipScore = getSafeFlipScore(newDisc, edgeIndex, currentPosition, shifts[i], board);
+                            int flipScore = getSafeFlipScore(newDisc, edgeIndex, currentPosition, shiftsAlongEdge[i], board);
                             if (flipScore > 0) {
                                 if (currentChain == 1) {
                                     safelyFlippableDiscsSum += flipScore + currentChainLength;
@@ -528,7 +700,7 @@ public class BetterGrader implements BoardGrader {
 
                     }
 
-                    currentPosition = shifts[i].shift(currentPosition);
+                    currentPosition = shiftsAlongEdge[i].shift(currentPosition);
                 }
                 //check for pair, wedges, balanced and unbalanced edge
             } else {
@@ -539,12 +711,12 @@ public class BetterGrader implements BoardGrader {
                 } else {
                     playerOnEdge = whitePlayer;
                 }
-                int[] gaps = new int[]{1,0,0,0};
+                int[] gaps = new int[]{1, 0, 0, 0};
 
                 int gapsFound = 1;
                 boolean currentlyOnGap = true;
 
-                long currentPosition = shifts[i].shift(startCorner[i]);
+                long currentPosition = shiftsAlongEdge[i].shift(startCorner[i]);
                 for (int edgeIndex = 1; edgeIndex < 8; edgeIndex++) {
                     boolean isOnGap = (currentPosition & playerOnEdge) == 0L;
                     if (currentlyOnGap) {
@@ -558,7 +730,7 @@ public class BetterGrader implements BoardGrader {
                         gapsFound++;
                         currentlyOnGap = true;
                     }
-                    currentPosition = shifts[i].shift(currentPosition);
+                    currentPosition = shiftsAlongEdge[i].shift(currentPosition);
 
                 }
 
@@ -582,12 +754,12 @@ public class BetterGrader implements BoardGrader {
                 } else {
                     int tempEvenGapSum = 0;
                     int tempUnevenGapSum = 0;
-                    for (int gapIndex = 1; gapIndex < gapsFound-1; gapIndex++) {
+                    for (int gapIndex = 1; gapIndex < gapsFound - 1; gapIndex++) {
                         int gapLength = gaps[gapIndex];
                         if (gapLength % 2 == 0) {
-                            tempEvenGapSum ++;
+                            tempEvenGapSum++;
                         } else {
-                            tempUnevenGapSum ++;
+                            tempUnevenGapSum++;
                         }
                     }
                     if (whitePlayerOnEdge) {
@@ -607,9 +779,9 @@ public class BetterGrader implements BoardGrader {
         }
         //add contested flips
         contestedFlips = shortenAndSortArray(contestedFlips, contestedFlipsSize);
-        int playerThatFlips = -1;
-        if (playerOne) {
-            playerThatFlips = 1;
+        int playerThatFlips = 1;
+        if (playerOneMadeLastMove) {
+            playerThatFlips = -1;
         }
 
         for (int i = 0; i < contestedFlipsSize; i++) {
@@ -638,6 +810,15 @@ public class BetterGrader implements BoardGrader {
     }
 
 
+    private int getDiscDifferenceScore(Othello board, boolean startWeight) {
+        int dif = board.getDiscDifference();
+        if (startWeight) {
+            return dif * weights[sDiscDifferenceWeightIndex];
+        }
+        return dif * weights[eDiscDifferenceWeightIndex];
+
+    }
+
     public int getSafeFlipScore(int newDisc, int edgeIndex, long currentPosition, Shifter shift, Othello board) {
         if (edgeIndex >= 7) {
             return 0;
@@ -662,16 +843,16 @@ public class BetterGrader implements BoardGrader {
         long shift(long x);
     }
 
-    public class LookAheadChain {
+    public static class LookAheadChain {
         int chainBreaker;
         boolean safeFlipToRight;
         int chainLength;
 
         public LookAheadChain(int currentChain, int newDisc, int edgeIndex, long currentPosition, Shifter shift, Othello board) {
             if (edgeIndex >= 7) {
-                this.safeFlipToRight=false;
-                this.chainBreaker=-1;
-                this.chainLength =1;
+                this.safeFlipToRight = false;
+                this.chainBreaker = -1;
+                this.chainLength = 1;
                 return;
             }
             //shift to see if we have a safe flip
@@ -684,9 +865,9 @@ public class BetterGrader implements BoardGrader {
                 lookAheadIndex++;
                 lookAheadDisc = board.getDiscAtField(currentPosition);
             }
-            this.chainBreaker=lookAheadDisc;
-            if (lookAheadDisc==newDisc){
-                this.chainBreaker=-1;
+            this.chainBreaker = lookAheadDisc;
+            if (lookAheadDisc == newDisc) {
+                this.chainBreaker = -1;
             }
             this.chainLength = lookAheadIndex - edgeIndex;
             //check if corner
@@ -696,11 +877,11 @@ public class BetterGrader implements BoardGrader {
                 // chain, it is a safe flip
                 //it also a safe flip, if we are at a corner
                 if (lookAheadIndex == 7) {
-                    this.safeFlipToRight=true;
+                    this.safeFlipToRight = true;
                 } else {
                     int newLookAheadDisc = board.getDiscAtField(shift.shift(currentPosition));
                     if (newLookAheadDisc == 0 || newLookAheadDisc == currentChain) {
-                        this.safeFlipToRight=true;
+                        this.safeFlipToRight = true;
                     }
                 }
             } else {
