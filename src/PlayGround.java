@@ -7,7 +7,7 @@ import szte.mi.Move;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class Test {
+public class PlayGround {
 
     private static long[] testGameWithPlus() {
         Othello othello = new Othello();
@@ -209,37 +209,25 @@ public class Test {
     }
 
     public static void main(String[] args) {
-        boolean cornerOne=false;
-        boolean cornerTwo=false;
-        boolean third = true;
-
-        if (cornerOne||cornerTwo||third){
-            System.out.println("if");
-        }else if (!cornerTwo&&!cornerOne){
-            System.out.println("else");
-        }
-
+        Random rnd=new Random(42);
+        randomOthelloGame(rnd,true);
 
     }
 
-    public interface TestShifter {
-        long shift(long x);
+    public static long rightShift(long x) {
+        return x << 1;
     }
 
-    public static long rightShift(long x){
-        return x<<1;
-    }
-
-    public static void performShiftsWithInterface(long test , int n, TestShifter shifter){
-        Progressbar testBar=new Progressbar("shifts",n);
+    public static void performShiftsWithInterface(long test, int n, TestShifter shifter) {
+        Progressbar testBar = new Progressbar("shifts", n);
         for (int i = 0; i < n; i++) {
-            long temp= shifter.shift(test);
+            long temp = shifter.shift(test);
             testBar.countUp();
         }
     }
 
-    public static void performShifts(Long test ,int n){
-        Progressbar testBar=new Progressbar("shifts",n);
+    public static void performShifts(Long test, int n) {
+        Progressbar testBar = new Progressbar("shifts", n);
 
         for (int i = 0; i < n; i++) {
             long temp = test << 1;
@@ -338,5 +326,9 @@ public class Test {
          */
 
         return orderedFields;
+    }
+
+    public interface TestShifter {
+        long shift(long x);
     }
 }
