@@ -1,5 +1,4 @@
 import ai.AaronFish;
-import oldOthello.OldOthello;
 import othello.Othello;
 import progressbar.Progressbar;
 import szte.mi.Move;
@@ -81,21 +80,6 @@ public class PlayGround {
         return decoy;
     }
 
-    public static void playOldOthelloGame() {
-        OldOthello game = new OldOthello();
-        int player = 1;
-        for (int i = 0; i < 60; i++) {
-            ArrayList<Move> curMoves = game.allMovesMoves(player);
-            Move move = null;
-            if (curMoves.size() > 0) {
-                move = curMoves.get(0);
-
-            }
-            game.move(move);
-            player = game.otherPlayer(player);
-        }
-
-    }
 
     public static void newOthelloGame() {
         Othello othello = new Othello();
