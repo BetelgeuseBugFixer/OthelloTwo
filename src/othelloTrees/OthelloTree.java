@@ -2,7 +2,6 @@ package othelloTrees;
 
 import ai.BoardGrader;
 import othello.Othello;
-import szte.mi.Move;
 
 public interface OthelloTree {
 
@@ -17,6 +16,12 @@ public interface OthelloTree {
         private final Othello board;
         private boolean isTerminalNode;
 
+        //TODO implement these
+        /*
+        public abstract boolean isDefinitiveNode();
+        public abstract int getDefinitiveScore();
+
+         */
         public OthelloNode(Othello board, int previousMove) {
             this.board = board;
             this.previousMove = previousMove;
