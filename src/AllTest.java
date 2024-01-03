@@ -1,4 +1,5 @@
 import ai.BetterGrader;
+import ai.genetic.AiAgent;
 import othello.Othello;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -150,9 +151,15 @@ class AllTest {
     }
 
     @org.junit.jupiter.api.Test
-    void getPossibleMovesScore() {
-        Othello boards = new Othello(0x3e60c04040c83f00L, 0x11f3fbfbf37003eL);
+    void getSplitArraySum(){
+        int[] testToSum={1,35,2,5,6,7,7,6,2};
+        int[] endpoints={3,6,testToSum.length};
 
+        int[] result= AiAgent.getAbsolutSplitArraySum(endpoints,testToSum);
+        int[] expected={38,18,15};
+        for (int i = 0; i < expected.length; i++) {
+            assertEquals(expected[i],result[i]);
+        }
 
     }
 }
