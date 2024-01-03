@@ -44,7 +44,7 @@ public class PlayGround {
         return decoy;
     }
 
-    private static long[] testGameWitBit() {
+    private static long[] testGameWithBit() {
         Othello othello = new Othello();
         int roundsPassed = 0;
         long current;
@@ -193,8 +193,32 @@ public class PlayGround {
     }
 
     public static void main(String[] args) {
-        Random rnd=new Random(42);
-        randomOthelloGame(rnd,true);
+        int[] weightsOne={5,10,2};
+        int[] weightsTwo={8,5,4};
+
+        int sumOne=5+10+2;
+        int sumTwo=8+5+4;
+
+        double beginPercent=8.0/sumTwo;
+        double resultingWeight=(8*(10+2))/(sumTwo-8.0);
+        System.out.println(resultingWeight);
+        System.out.println(beginPercent);
+        System.out.println(resultingWeight/(resultingWeight+10+2.0));
+        weightsOne[0]=(int)resultingWeight;
+
+        System.out.println("-------");
+        double otherWeight=(4*(8+5.0))/(sumTwo-4);
+        System.out.println(4.0/sumTwo);
+        System.out.println("-------");
+
+        weightsOne[2]=(int) otherWeight;
+        int sum=0;
+        for (int i = 0; i < weightsOne.length; i++) {
+            sum+=weightsOne[i];
+        }
+        for (int i = 0; i < weightsOne.length; i++) {
+            System.out.println((weightsTwo[i]*1.0/sumOne)+"->"+(weightsOne[i]/(sum*1.0)));
+        }
 
     }
 
