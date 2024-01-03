@@ -2,6 +2,7 @@ package ai.genetic;
 
 import ai.AaronFish;
 import ai.BetterGrader;
+import org.apache.commons.math3.distribution.NormalDistribution;
 import othello.Othello;
 import progressbar.Progressbar;
 import szte.mi.Move;
@@ -17,19 +18,20 @@ import java.util.concurrent.TimeUnit;
 
 
 public class GeneticAlgorithm {
-    static final int gamesPlayedPerMatchUp = 3;
-    static final int numOfThreads = 5;
+    static final int gamesPlayedPerMatchUp = 2;
+    static final int numOfThreads = 4;
     static final int populationSize = 50;
     static final int singleParentPercentage = 50;
     static final int mutationSV = 5;
-    static final int crossoverPercentage = 10;
+    static final int crossoverPercentage = 15;
     static final File outputFile = new File("src/ai/genetic/weights.tsv");
     static final File bestFile = new File("src/ai/genetic/best.txt");
 
 
     public static void main(String[] args) throws InterruptedException, IOException {
         GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm();
-        geneticAlgorithm.start();
+        geneticAlgorithm.start(100);
+
     }
 
     static public AaronFish initAi(AiAgent agent, int order) {
@@ -46,7 +48,16 @@ public class GeneticAlgorithm {
         return aaronFish;
     }
 
-    public void start() throws InterruptedException, IOException {
+    public static int gaussSum(int n) {
+        return n * (n + 1) / 2;
+    }
+
+    public static int getWeightsSize() {
+        BetterGrader grader = new BetterGrader();
+        return grader.weights.length;
+    }
+
+    public void start(int generations) throws InterruptedException, IOException {
         //initialize population randomly
         int weightSize = getWeightsSize();
         AiAgent[] aiAgents = new AiAgent[populationSize];
@@ -54,46 +65,95 @@ public class GeneticAlgorithm {
             aiAgents[i] = new AiAgent(weightSize);
         }
 
-        simulateGamesWithMultiThreading(aiAgents);
-        //simulateGamesNormal(aiAgents);
-
-        //TODO add games against Benchmarks and plot their result
-
-        Arrays.sort(aiAgents);
-        safeCurrentAgents(aiAgents);
-        updateBest(aiAgents[aiAgents.length-1]);
-
+        train(aiAgents, generations);
 
     }
 
-    public void train(AiAgent[] currentAgents){
+    public void train(AiAgent[] currentAgents, int generations) throws IOException, InterruptedException {
+        NormalDistribution distribution = new NormalDistribution(0, mutationSV);
 
+        Progressbar bar = new Progressbar("generations", generations);
+        for (int generation = 0; generation < generations; generation++) {
+
+
+            simulateGamesWithMultiThreading(currentAgents);
+            //simulateGamesNormal(aiAgents);
+
+            //TODO add games against Benchmarks and plot their result
+
+
+            Arrays.sort(currentAgents);
+            safeCurrentAgents(currentAgents);
+            updateBest(currentAgents[currentAgents.length - 1],generation);
+            currentAgents = getNextGeneration(currentAgents, distribution);
+            bar.countUp();
+
+        }
+    }
+
+    public AiAgent[] getNextGeneration(AiAgent[] previousGenration, NormalDistribution distribution) {
+        AiAgent[] nextGeneration = new AiAgent[populationSize];
+        int[] rankArray = getProportionalRankArray();
+        Random random = new Random();
+
+        for (int i = 0; i < populationSize; i++) {
+            boolean isSingleParent = singleParentPercentage < random.nextInt(100);
+            if (isSingleParent) {
+                AiAgent parent = previousGenration[rankArray[random.nextInt(rankArray.length)]];
+                nextGeneration[i] = AiAgent.mutate(parent, distribution);
+            } else {
+                AiAgent mother = previousGenration[rankArray[random.nextInt(rankArray.length)]];
+                AiAgent father = previousGenration[rankArray[random.nextInt(rankArray.length)]];
+
+                nextGeneration[i] = AiAgent.recombine(mother, father, crossoverPercentage, distribution);
+            }
+
+        }
+
+        return nextGeneration;
+    }
+
+    public int[] getProportionalRankArray() {
+        int size = gaussSum(populationSize);
+        int[] ranks = new int[size];
+
+        int currentIndex = 0;
+        for (int rank = 1; rank <= populationSize; rank++) {
+            for (int i = 0; i < rank; i++) {
+                ranks[currentIndex] = rank - 1;
+                currentIndex++;
+            }
+
+        }
+
+        return ranks;
     }
 
     public void safeCurrentAgents(AiAgent[] sortedAiAgents) throws IOException {
-        BufferedWriter writer=new BufferedWriter(new FileWriter(outputFile));
+        BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile));
         for (AiAgent sortedAiAgent : sortedAiAgents) {
             writer.write(sortedAiAgent.toString());
             writer.newLine();
         }
         writer.flush();
+        writer.close();
     }
 
-
-    public void updateBest(AiAgent contender) throws IOException {
+    public void updateBest(AiAgent contender, int generation) throws IOException {
         AiAgent bestAgent = getBestAgent();
         //TODO include other agents as metric
         contender.resetPoints();
 
-        playFullMatchUp(bestAgent,contender);
+        playFullMatchUp(bestAgent, contender);
 
-        if (bestAgent.points.get()<contender.points.get()){
-            BufferedWriter writer =new BufferedWriter(new FileWriter(bestFile));
-            for (int weight : contender.weights) {
-                writer.write(weight);
-                writer.newLine();
-                writer.flush();
-            }
+        if (bestAgent.points.get() < contender.points.get()) {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(bestFile));
+            System.out.println("\rnew best found in generation "+generation);
+
+            writer.write(contender.toString());
+
+            writer.flush();
+            writer.close();
         }
 
     }
@@ -104,8 +164,10 @@ public class GeneticAlgorithm {
         BufferedReader br = new BufferedReader(new FileReader(bestFile));
         String line;
         while ((line = br.readLine()) != null) {
-            int intValue = Integer.parseInt(line);
-            integerList.add(intValue);
+            for (String field : line.split("\t")) {
+                int intValue = Integer.parseInt(field);
+                integerList.add(intValue);
+            }
         }
 
         int[] intArray = new int[integerList.size()];
@@ -129,7 +191,7 @@ public class GeneticAlgorithm {
             }
         }
         executorService.shutdown();
-        if (!executorService.awaitTermination(120, TimeUnit.SECONDS)) {
+        if (!executorService.awaitTermination(300, TimeUnit.SECONDS)) {
             System.out.println("is still running");
         }
 
@@ -147,11 +209,6 @@ public class GeneticAlgorithm {
         }
     }
 
-    public int getWeightsSize() {
-        BetterGrader grader = new BetterGrader();
-        return grader.weights.length;
-    }
-
     public void playFullMatchUp(AiAgent agentOne, AiAgent agentTwo) {
         playSingleMatchUp(agentOne, agentTwo);
         playSingleMatchUp(agentTwo, agentOne);
@@ -160,7 +217,7 @@ public class GeneticAlgorithm {
     public void playSingleMatchUp(AiAgent agentOne, AiAgent agentTwo) {
         int result = 0;
         for (int i = 0; i < gamesPlayedPerMatchUp; i++) {
-            result += playSingleGame(agentOne,agentTwo);
+            result += playSingleGame(agentOne, agentTwo);
         }
         if (result == 0) {
             agentOne.addDraw();
@@ -172,7 +229,7 @@ public class GeneticAlgorithm {
         }
     }
 
-    public int playSingleGame(AiAgent agentOne,AiAgent agentTwo){
+    public int playSingleGame(AiAgent agentOne, AiAgent agentTwo) {
         AiOthelloGame aiOthelloGame = new AiOthelloGame();
 
         AaronFish[] ais = new AaronFish[2];
