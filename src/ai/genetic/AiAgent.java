@@ -1,5 +1,7 @@
 package ai.genetic;
 
+import ai.AaronFish;
+import ai.BetterGrader;
 import org.apache.commons.math3.distribution.NormalDistribution;
 
 import java.util.Random;
@@ -102,6 +104,20 @@ public class AiAgent implements Comparable<AiAgent> {
 
     public void addDraw() {
         this.points.getAndAdd(1);
+    }
+
+     public AaronFish initAi( int order) {
+        Random rnd = new Random();
+
+        AaronFish aaronFish = new AaronFish();
+        aaronFish.init(order, 8, rnd);
+        aaronFish.setDepthGoalCalculatorToRandom();
+
+        BetterGrader grader = new BetterGrader();
+        grader.weights = this.weights;
+        aaronFish.setBoardGrader(grader);
+
+        return aaronFish;
     }
 
     @Override

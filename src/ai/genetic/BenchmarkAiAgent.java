@@ -1,6 +1,10 @@
 package ai.genetic;
 
 public interface BenchmarkAiAgent {
+    public String getName();
     public int getPoints();
-    public int playAgainstNormalAgent(AiAgent agent);
+    public void playAgainstNormalAgent(AiAgent agent,int gamesPerMatchUp);
+
+    public void resetPoints();
+
 }

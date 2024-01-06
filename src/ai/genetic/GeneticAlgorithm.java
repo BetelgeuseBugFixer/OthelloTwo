@@ -2,10 +2,12 @@ package ai.genetic;
 
 import ai.AaronFish;
 import ai.BetterGrader;
+import ai.genetic.aai.AaiWrapper;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import othello.Othello;
 import progressbar.Progressbar;
 import szte.mi.Move;
+import szte.mi.Player;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -34,20 +36,6 @@ public class GeneticAlgorithm {
 
     }
 
-    static public AaronFish initAi(AiAgent agent, int order) {
-        Random rnd = new Random();
-
-        AaronFish aaronFish = new AaronFish();
-        aaronFish.init(order, 8, rnd);
-        aaronFish.setDepthGoalCalculatorToRandom();
-
-        BetterGrader grader = new BetterGrader();
-        grader.weights = agent.weights;
-        aaronFish.setBoardGrader(grader);
-
-        return aaronFish;
-    }
-
     public static int gaussSum(int n) {
         return n * (n + 1) / 2;
     }
@@ -72,19 +60,20 @@ public class GeneticAlgorithm {
     public void train(AiAgent[] currentAgents, int generations) throws IOException, InterruptedException {
         NormalDistribution distribution = new NormalDistribution(0, mutationSV);
 
+        BenchmarkAiAgent[] benchmarks={new AaiWrapper(),new HandCraftedWeights(),};
+
         Progressbar bar = new Progressbar("generations", generations);
         for (int generation = 0; generation < generations; generation++) {
 
 
             simulateGamesWithMultiThreading(currentAgents);
-            //simulateGamesNormal(aiAgents);
 
             //TODO add games against Benchmarks and plot their result
 
 
             Arrays.sort(currentAgents);
             safeCurrentAgents(currentAgents);
-            updateBest(currentAgents[currentAgents.length - 1],generation);
+            updateBest(currentAgents[currentAgents.length - 1], generation);
             currentAgents = getNextGeneration(currentAgents, distribution);
             bar.countUp();
 
@@ -148,7 +137,7 @@ public class GeneticAlgorithm {
 
         if (bestAgent.points.get() < contender.points.get()) {
             BufferedWriter writer = new BufferedWriter(new FileWriter(bestFile));
-            System.out.println("\rnew best found in generation "+generation);
+            System.out.println("\rnew best found in generation " + generation);
 
             writer.write(contender.toString());
 
@@ -209,12 +198,12 @@ public class GeneticAlgorithm {
         }
     }
 
-    public void playFullMatchUp(AiAgent agentOne, AiAgent agentTwo) {
+    public static void playFullMatchUp(AiAgent agentOne, AiAgent agentTwo) {
         playSingleMatchUp(agentOne, agentTwo);
         playSingleMatchUp(agentTwo, agentOne);
     }
 
-    public void playSingleMatchUp(AiAgent agentOne, AiAgent agentTwo) {
+    public static void playSingleMatchUp(AiAgent agentOne, AiAgent agentTwo) {
         int result = 0;
         for (int i = 0; i < gamesPlayedPerMatchUp; i++) {
             result += playSingleGame(agentOne, agentTwo);
@@ -229,21 +218,26 @@ public class GeneticAlgorithm {
         }
     }
 
-    public int playSingleGame(AiAgent agentOne, AiAgent agentTwo) {
-        AiOthelloGame aiOthelloGame = new AiOthelloGame();
+    public static int playSingleGame(AiAgent agentOne, AiAgent agentTwo) {
+        AaronFish black = agentOne.initAi(0);
+        AaronFish white = agentTwo.initAi(1);
 
-        AaronFish[] ais = new AaronFish[2];
-        ais[0] = initAi(agentOne, 0);
-        ais[1] = initAi(agentTwo, 1);
+        return playSingleGameWithPlayerInterface(black,white);
+    }
+
+    public static int playSingleGameWithPlayerInterface(Player black, Player white) {
+        Player[] players = {black, white};
+        AiOthelloGame aiOthelloGame = new AiOthelloGame();
 
         Move prevMove = null;
         int player = 0;
         while (aiOthelloGame.gameIsStillRunning) {
-            prevMove = ais[player].nextMove(prevMove, 8, 8);
+            prevMove = players[player].nextMove(prevMove, 8, 8);
             aiOthelloGame.makeMove(prevMove, player == 0);
             player = (player + 1) % 2;
         }
         return aiOthelloGame.getResult();
+
     }
 
 
