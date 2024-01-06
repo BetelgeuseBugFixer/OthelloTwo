@@ -10,8 +10,6 @@ import othelloTrees.OthelloTree;
 import java.util.Random;
 
 public class AaronFish implements szte.mi.Player {
-
-
     BoardGrader boardGrader;
     boolean playerOne;
     Othello board;
@@ -19,13 +17,13 @@ public class AaronFish implements szte.mi.Player {
     int currentMove;
     DepthGoalCalculator depthGoalCalculator;
 
-    public void setBoardGrader(BoardGrader boardGrader) {
-        this.boardGrader = boardGrader;
-    }
-
-    public AaronFish(){
+    public AaronFish() {
         this.depthGoalCalculator = new changingDepth();
         this.boardGrader = new BetterGrader();
+    }
+
+    public void setBoardGrader(BoardGrader boardGrader) {
+        this.boardGrader = boardGrader;
     }
 
     @Override
@@ -41,35 +39,35 @@ public class AaronFish implements szte.mi.Player {
     }
 
 
-
     public void setDepthGoalCalculator(DepthGoalCalculator newDepthGoalCalculator) {
         this.depthGoalCalculator = newDepthGoalCalculator;
     }
 
-    public void setDepthGoalCalculatorToRandom(){
+    public void setDepthGoalCalculatorToRandom() {
         setDepthGoalCalculator(new RandomDepth());
     }
+
 
     @Override
     public Move nextMove(Move prevMove, long tOpponent, long t) {
         this.currentMove += 2;
-        if (prevMove != null) {
+        if (currentMove != 1) {
             this.boardTree.move(Othello.getIntFromMove(prevMove), !this.playerOne);
         }
-        int goalDepth = depthGoalCalculator.getGoalDepth(t);
+        int remainingSpaces = this.boardTree.getRoot().getBoard().getRemainingSpaces();
+        int goalDepth = depthGoalCalculator.getGoalDepth(t, remainingSpaces);
         return calculateNextMove(goalDepth);
     }
 
     public Move calculateNextMove(int depth) {
         int alpha = Integer.MIN_VALUE;
         int beta = Integer.MAX_VALUE;
-        OthelloNode root=this.boardTree.getRoot();
-
+        OthelloNode root = this.boardTree.getRoot();
 
         int bestMove = -1;
         if (playerOne) {
             //check if the next move is a pass
-            if (root.getNextNodes(true)[0].getPreviousMove()==-1){
+            if (root.getNextNodes(true)[0].getPreviousMove() == -1) {
                 return null;
             }
             for (OthelloNode node : root.getNextNodes(true)) {
@@ -80,11 +78,15 @@ public class AaronFish implements szte.mi.Player {
                 if (score > alpha) {
                     alpha = score;
                     bestMove = node.getPreviousMove();
+                    if (score == Integer.MAX_VALUE) {
+                        break;
+                    }
                 }
             }
+            System.out.println("current position: " + alpha);
         } else {
             //check if the next move is a pass
-            if (root.getNextNodes(false)[0].getPreviousMove()==-1){
+            if (root.getNextNodes(false)[0].getPreviousMove() == -1) {
                 return null;
             }
             for (OthelloNode node : root.getNextNodes(false)) {
@@ -95,16 +97,20 @@ public class AaronFish implements szte.mi.Player {
                 if (score < beta) {
                     beta = score;
                     bestMove = node.getPreviousMove();
+                    if (score == Integer.MIN_VALUE) {
+                        break;
+                    }
                 }
             }
-
+            System.out.println("current position: " + beta);
         }
+        //TODO Ai passes if optimal Opponent play leads to loss
         this.boardTree.move(bestMove, this.playerOne);
         return Othello.getMoveFromInt(bestMove);
     }
 
     public int maxValue(OthelloTree.OthelloNode node, int depth, int alpha, int beta) {
-        if (node.getIsTerminalNode(true) || depth == 0) {
+        if (node.getIsTerminalNode(true) || depth == 0 || node.getIsFullyCalculated()) {
             return node.getScore(this.boardGrader, true);
         }
 
@@ -124,11 +130,15 @@ public class AaronFish implements szte.mi.Player {
                 break;
             }
         }
+        if (bestScore == Integer.MIN_VALUE || bestScore == Integer.MAX_VALUE || bestScore == 0) {
+            node.setToFullyCalculated();
+            node.setScore(bestScore);
+        }
         return bestScore;
     }
 
     public int minValue(OthelloTree.OthelloNode node, int depth, int alpha, int beta) {
-        if (node.getIsTerminalNode(false) || depth == 0) {
+        if (node.getIsTerminalNode(false) || depth == 0 || node.getIsFullyCalculated()) {
             return node.getScore(this.boardGrader, false);
         }
 
@@ -148,24 +158,40 @@ public class AaronFish implements szte.mi.Player {
                 break;
             }
         }
+        if (bestScore == Integer.MIN_VALUE || bestScore == Integer.MAX_VALUE || bestScore == 0) {
+            node.setToFullyCalculated();
+            node.setScore(bestScore);
+        }
         return bestScore;
     }
 
     public interface DepthGoalCalculator {
-        public int getGoalDepth(long remainingTime);
+        public int getGoalDepth(long remainingTime, int remainingEmptySpaces);
     }
 
-    private static class ConstantDepth implements DepthGoalCalculator {
-        public int getGoalDepth(long remainingTime) {
+    public static class ConstantDepth implements DepthGoalCalculator {
+        public int getGoalDepth(long remainingTime, int remainingEmptySpaces) {
             return 2;
         }
     }
 
-    private static class RandomDepth implements DepthGoalCalculator{
-        Random rnd=new Random();
+    private static class RandomDepth implements DepthGoalCalculator {
+        Random rnd = new Random();
+
         @Override
-        public int getGoalDepth(long remainingTime) {
-            return rnd.nextInt(2,4);
+        public int getGoalDepth(long remainingTime, int remainingEmptySpaces) {
+            return rnd.nextInt(2, 4);
+        }
+    }
+
+    public static class changingDepth implements DepthGoalCalculator {
+        @Override
+        public int getGoalDepth(long remainingTime, int remainingEmptySpaces) {
+            if (remainingEmptySpaces < 13) {
+                return 25;
+            } else {
+                return 2;
+            }
         }
     }
 
