@@ -14,14 +14,8 @@ public interface OthelloTree {
     abstract class OthelloNode {
         private final int previousMove;
         private final Othello board;
-        private boolean isTerminalNode;
 
-        //TODO implement these
-        /*
-        public abstract boolean isDefinitiveNode();
-        public abstract int getDefinitiveScore();
 
-         */
         public OthelloNode(Othello board, int previousMove) {
             this.board = board;
             this.previousMove = previousMove;
@@ -47,5 +41,11 @@ public interface OthelloTree {
         public abstract int getScore(BoardGrader grader, boolean playerOne);
 
         public abstract OthelloNode[] getNextNodes(boolean playerOne);
+
+        public abstract boolean getIsFullyCalculated();
+
+        public abstract void setToFullyCalculated();
+
+        public abstract void setScore(int score);
     }
 }
