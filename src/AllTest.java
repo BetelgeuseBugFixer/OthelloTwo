@@ -115,51 +115,83 @@ class AllTest {
 
         boolean[] startWeights = {true, false};
         for (boolean startWeight : startWeights) {
-        for (int i = 0; i < boards.length; i++) {
-            Othello board = boards[i];
-            int expectedScore = expectedScores[i];
-            boolean playerOneDidLastMove = playerOneDidLastMoveArray[i];
-            long possibleMoves = board.getLegalMovesAsLong(!playerOneDidLastMove);
+            for (int i = 0; i < boards.length; i++) {
+                Othello board = boards[i];
+                int expectedScore = expectedScores[i];
+                boolean playerOneDidLastMove = playerOneDidLastMoveArray[i];
+                long possibleMoves = board.getLegalMovesAsLong(!playerOneDidLastMove);
 
-            int score = grader.getParityScore(board, playerOneDidLastMove, startWeight, possibleMoves);
-            if (expectedScore != score) {
-                System.out.println("Bug at example " + i + ("(normal direction)"));
-                System.out.println(board);
-                score = grader.getParityScore(board, playerOneDidLastMove, startWeight, possibleMoves);
+                int score = grader.getParityScore(board, playerOneDidLastMove, startWeight, possibleMoves);
+                if (expectedScore != score) {
+                    System.out.println("Bug at example " + i + ("(normal direction)"));
+                    System.out.println(board);
+                    score = grader.getParityScore(board, playerOneDidLastMove, startWeight, possibleMoves);
+
+                }
+                assertEquals(expectedScore, score);
+
+                //reverse
+                Othello reverseBoard = new Othello(board.whitePLayerDiscs, board.blackPlayerDiscs);
+                int reverseExpectedScore = expectedScore * -1;
+                boolean reverseLastPlayer = !playerOneDidLastMove;
+                long reversePossibleMoves = reverseBoard.getLegalMovesAsLong(playerOneDidLastMove);
+
+
+                int reverseScore = grader.getParityScore(reverseBoard, reverseLastPlayer, startWeight, reversePossibleMoves);
+                if (reverseExpectedScore != reverseScore) {
+                    System.out.println("Bug at example " + i + "(reverse)");
+                    System.out.println(reverseBoard);
+                    reverseScore = grader.getParityScore(reverseBoard, reverseLastPlayer, startWeight, reversePossibleMoves);
+
+                }
+                assertEquals(reverseExpectedScore, reverseScore);
 
             }
-            assertEquals(expectedScore, score);
-
-            //reverse
-            Othello reverseBoard = new Othello(board.whitePLayerDiscs, board.blackPlayerDiscs);
-            int reverseExpectedScore = expectedScore * -1;
-            boolean reverseLastPlayer = !playerOneDidLastMove;
-            long reversePossibleMoves = reverseBoard.getLegalMovesAsLong(playerOneDidLastMove);
-
-
-            int reverseScore = grader.getParityScore(reverseBoard, reverseLastPlayer, startWeight, reversePossibleMoves);
-            if (reverseExpectedScore != reverseScore) {
-                System.out.println("Bug at example " + i + "(reverse)");
-                System.out.println(reverseBoard);
-                reverseScore = grader.getParityScore(reverseBoard, reverseLastPlayer, startWeight, reversePossibleMoves);
-
-            }
-            assertEquals(reverseExpectedScore, reverseScore);
-
         }
-    }
     }
 
     @org.junit.jupiter.api.Test
-    void getSplitArraySum(){
-        int[] testToSum={1,35,2,5,6,7,7,6,2};
-        int[] endpoints={3,6,testToSum.length};
+    void getSplitArraySum() {
+        int[] testToSum = {1, 35, 2, 5, 6, 7, 7, 6, 2};
+        int[] endpoints = {3, 6, testToSum.length};
 
-        int[] result= AiAgent.getAbsolutSplitArraySum(endpoints,testToSum);
-        int[] expected={38,18,15};
+        int[] result = AiAgent.getAbsolutSplitArraySum(endpoints, testToSum);
+        int[] expected = {38, 18, 15};
         for (int i = 0; i < expected.length; i++) {
-            assertEquals(expected[i],result[i]);
+            assertEquals(expected[i], result[i]);
         }
 
     }
+
+    @org.junit.jupiter.api.Test
+    void getCornerAndStableDiscs() {
+        BetterGrader grader = new BetterGrader();
+        grader.setAllWeightsToOne();
+
+        Othello[] boards = {new Othello(0, 0x40c0000000000000L),
+                new Othello(0x200L, 0x40000000000000L),
+                new Othello(0x200, 0xc0c0000000000000L),
+                new Othello(0x200L, 0xc0808080808000L),
+                new Othello(0x3L, 0x4101000000000000L),
+                new Othello(0x1L, 0xe0c0800000000000L)
+                , new Othello(0x8000800000800000L, 0x80008080008080L)};
+        int[] expectedResults = {-3, 0, -2, -2, -1, -5, -2};
+
+        for (int i = 0; i < boards.length; i++) {
+            int actualResult = grader.getCornerAndStableDiscs(boards[i], true);
+            if (i == boards.length - 1) {
+                System.out.println("Watch out for bug");
+                actualResult = grader.getCornerAndStableDiscs(boards[i], true);
+            }
+
+            assertEquals(expectedResults[i], actualResult);
+
+            Othello reverseBoard = new Othello(boards[i].whitePLayerDiscs, boards[i].blackPlayerDiscs);
+            int reverseResult = grader.getCornerAndStableDiscs(reverseBoard, true);
+            assertEquals(expectedResults[i] * -1, reverseResult);
+
+        }
+
+    }
+
 }
