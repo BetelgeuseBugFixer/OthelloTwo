@@ -23,6 +23,11 @@ public class AaronFish implements szte.mi.Player {
         this.boardGrader = boardGrader;
     }
 
+    public AaronFish(){
+        this.depthGoalCalculator = new changingDepth();
+        this.boardGrader = new BetterGrader();
+    }
+
     @Override
     public void init(int order, long t, Random rnd) {
         this.depthGoalCalculator = new ConstantDepth();
