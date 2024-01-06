@@ -103,6 +103,11 @@ public class Othello {
         return possibleMoves;
     }
 
+    public int getRemainingSpaces(){
+        return Long.bitCount(~(this.blackPlayerDiscs|whitePLayerDiscs));
+    }
+
+
     public ArrayTree.ArrayNode[] getPossibleMovesAsNodes(boolean playerOne) {
         //TODO Alternative version here:
         // https://stackoverflow.com/questions/5944230/optimization-of-moves-calculation-in-othello-bitboard
@@ -328,5 +333,13 @@ public class Othello {
             this.move = move;
             this.board = board;
         }
+    }
+
+    public int getResult(){
+        int discDifference = this.getDiscDifference();
+        return Integer.compare(discDifference, 0);
+    }
+    public boolean isOver(){
+        return boardIsFull()||(getLegalMovesAsLong(true)==0&&getLegalMovesAsLong(false)==0);
     }
 }
