@@ -30,8 +30,6 @@ public class AaronFish implements szte.mi.Player {
 
     @Override
     public void init(int order, long t, Random rnd) {
-        this.depthGoalCalculator = new ConstantDepth();
-        this.boardGrader = new BetterGrader();
         this.board = new Othello();
         this.boardTree = new ArrayTree();
         if (order == 0) {
