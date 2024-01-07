@@ -36,6 +36,33 @@ public class ArrayTree implements OthelloTree {
             isGraded = false;
         }
 
+
+        @Override
+        public LastHopeNode getWinChances(boolean nextPlayer) {
+            LastHopeNode lhn=new LastHopeNode();
+            for (OthelloNode nextNode : this.getNextNodes(nextPlayer)) {
+                if (nextNode==null){
+                    break;
+                }
+                if (nextNode.getIsFullyCalculated()){
+                    if (nextNode.getScoreWithoutCalcCheck()==Integer.MAX_VALUE){
+                        lhn.wins+=1;
+                    }else if(nextNode.getScoreWithoutCalcCheck()==0){
+                        lhn.draws+=1;
+                    }else {
+                        lhn.loses+=1;
+                    }
+                }else {
+                    lhn.uncalculated+=1;
+                }
+            }
+            return lhn;
+        }
+
+        public int getScoreWithoutCalcCheck(){
+            return this.score;
+        }
+
         public ArrayNode(Othello board, int previousMove) {
             super(board, previousMove);
             isGraded = false;
@@ -69,7 +96,7 @@ public class ArrayTree implements OthelloTree {
         }
 
         @Override
-        public int getScore(BoardGrader grader, boolean playerOne) {
+        public int getScoreWithoutCalcCheck(BoardGrader grader, boolean playerOne) {
             if (!this.isGraded) {
                 if (getIsTerminalNode(playerOne)) {
                     this.fullyCalculated = true;

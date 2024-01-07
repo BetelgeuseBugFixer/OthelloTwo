@@ -15,6 +15,8 @@ public interface OthelloTree {
         private final int previousMove;
         private final Othello board;
 
+        public abstract LastHopeNode getWinChances(boolean nextPlayer);
+
 
         public OthelloNode(Othello board, int previousMove) {
             this.board = board;
@@ -38,7 +40,7 @@ public interface OthelloTree {
 
         public abstract boolean getIsTerminalNode(boolean playerOne);
 
-        public abstract int getScore(BoardGrader grader, boolean playerOne);
+        public abstract int getScoreWithoutCalcCheck(BoardGrader grader, boolean playerOne);
 
         public abstract OthelloNode[] getNextNodes(boolean playerOne);
 
@@ -47,5 +49,35 @@ public interface OthelloTree {
         public abstract void setToFullyCalculated();
 
         public abstract void setScore(int score);
+
+        public abstract int getScoreWithoutCalcCheck();
+    }
+
+    public class LastHopeNode{
+        int wins;
+        int draws;
+        int uncalculated;
+        int loses;
+
+        public int sumOfGames(){
+            return wins+draws+uncalculated+loses;
+        }
+
+        public boolean isGreater(LastHopeNode other) {
+            double thisAllGames=this.sumOfGames();
+            double otherAllGames=other.sumOfGames();
+
+            if (this.wins/thisAllGames > other.wins/otherAllGames){
+                return true;
+            } else if (this.wins/thisAllGames<other.wins/otherAllGames){
+                return false;
+            }
+            if (this.draws/thisAllGames > other.draws/otherAllGames){
+                return true;
+            } else if (this.draws/thisAllGames<other.draws/otherAllGames){
+                return false;
+            }
+            return thisAllGames > otherAllGames;
+        }
     }
 }

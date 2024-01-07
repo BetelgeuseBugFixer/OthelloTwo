@@ -141,6 +141,7 @@ public class Runner extends Application implements EventHandler<MouseEvent> {
                         //System.out.println("moves calculated: "+uc);
                         //System.out.println("uc: "+aiPlayer.getUtilCounter());
                         if (next != null) {
+                            System.out.println(next.x+", "+next.y);
                             toFlip = game.checkFlips(next.x, next.y, game.getPlayer());
                             if (toFlip.size() > 0) {
                                 board.get(game.xyToindex(next.x, next.y)).paint(game.getPlayer());
@@ -180,14 +181,12 @@ public class Runner extends Application implements EventHandler<MouseEvent> {
             gridPane.add(board.get(i), i % 8, i / 8);
         }
 
-        AaronFish ai=new AaronFish();
-        aiPlayer = ai;
+        aiPlayer = new AaronFish();
         aiPlayer2 = new AaronFish();
         previous = null;
 
         long timeForInnit = System.currentTimeMillis();
         aiPlayer.init(0, 8000, new Random(42));
-        ai.setBoardGrader(new MonteCarloBoardGrader());
         timeForInnit=System.currentTimeMillis()-timeForInnit;
         //System.out.println(timeForInnit);
 

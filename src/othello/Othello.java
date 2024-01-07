@@ -29,6 +29,9 @@ public class Othello {
     }
 
     public static Move getMoveFromInt(int move) {
+        if (move==-1){
+            return null;
+        }
         return new Move(move % 8, move / 8);
     }
 

@@ -1,5 +1,6 @@
 package ai;
 
+import ai.genetic.mcst.MonteCarloBoardGrader;
 import othello.Othello;
 import othelloTrees.ArrayTree;
 import szte.mi.Move;
@@ -38,6 +39,11 @@ public class AaronFish implements szte.mi.Player {
         }
     }
 
+    public void setToMonteCarloGrader() {
+        this.setDepthGoalCalculator(new MonteCarloDepth());
+        this.setBoardGrader(new MonteCarloBoardGrader());
+    }
+
 
     public void setDepthGoalCalculator(DepthGoalCalculator newDepthGoalCalculator) {
         this.depthGoalCalculator = newDepthGoalCalculator;
@@ -52,6 +58,10 @@ public class AaronFish implements szte.mi.Player {
     public Move nextMove(Move prevMove, long tOpponent, long t) {
         this.currentMove += 2;
         if (currentMove != 1) {
+            if (this.boardTree.getRoot().getNextNode(Othello.getIntFromMove(prevMove), !playerOne) == null) {
+                System.out.println(boardTree.getRoot().getBoard());
+                System.out.println(prevMove.x + "," + prevMove.y);
+            }
             this.boardTree.move(Othello.getIntFromMove(prevMove), !this.playerOne);
         }
         int remainingSpaces = this.boardTree.getRoot().getBoard().getRemainingSpaces();
@@ -64,12 +74,13 @@ public class AaronFish implements szte.mi.Player {
         int beta = Integer.MAX_VALUE;
         OthelloNode root = this.boardTree.getRoot();
 
+        if (root.getNextNodes(playerOne).length == 1) {
+            int move = root.getNextNodes(playerOne)[0].getPreviousMove();
+            return Othello.getMoveFromInt(move);
+        }
         int bestMove = -1;
         if (playerOne) {
-            //check if the next move is a pass
-            if (root.getNextNodes(true)[0].getPreviousMove() == -1) {
-                return null;
-            }
+            //check if there is only one move
             for (OthelloNode node : root.getNextNodes(true)) {
                 if (node == null) {
                     break;
@@ -84,11 +95,10 @@ public class AaronFish implements szte.mi.Player {
                 }
             }
             System.out.println("current position: " + alpha);
-        } else {
-            //check if the next move is a pass
-            if (root.getNextNodes(false)[0].getPreviousMove() == -1) {
-                return null;
+            if (alpha == Integer.MIN_VALUE) {
+                bestMove = getMoveWithHighestWinProbability();
             }
+        } else {
             for (OthelloNode node : root.getNextNodes(false)) {
                 if (node == null) {
                     break;
@@ -103,15 +113,17 @@ public class AaronFish implements szte.mi.Player {
                 }
             }
             System.out.println("current position: " + beta);
+            if (beta == Integer.MAX_VALUE) {
+                bestMove = getMoveWithHighestWinProbability();
+            }
         }
-        //TODO Ai passes if optimal Opponent play leads to loss
         this.boardTree.move(bestMove, this.playerOne);
         return Othello.getMoveFromInt(bestMove);
     }
 
     public int maxValue(OthelloTree.OthelloNode node, int depth, int alpha, int beta) {
         if (node.getIsTerminalNode(true) || depth == 0 || node.getIsFullyCalculated()) {
-            return node.getScore(this.boardGrader, true);
+            return node.getScoreWithoutCalcCheck(this.boardGrader, true);
         }
 
         int bestScore = Integer.MIN_VALUE;
@@ -139,7 +151,7 @@ public class AaronFish implements szte.mi.Player {
 
     public int minValue(OthelloTree.OthelloNode node, int depth, int alpha, int beta) {
         if (node.getIsTerminalNode(false) || depth == 0 || node.getIsFullyCalculated()) {
-            return node.getScore(this.boardGrader, false);
+            return node.getScoreWithoutCalcCheck(this.boardGrader, false);
         }
 
         int bestScore = Integer.MAX_VALUE;
@@ -163,6 +175,41 @@ public class AaronFish implements szte.mi.Player {
             node.setScore(bestScore);
         }
         return bestScore;
+    }
+
+    public int getMoveWithHighestWinProbability() {
+        //OthelloNode root = this.boardTree.getRoot();
+        OthelloNode[] nextMoves = this.boardTree.getRoot().getNextNodes(this.playerOne);
+
+        int bestMove = nextMoves[0].getPreviousMove();
+        OthelloTree.LastHopeNode bestScore = nextMoves[0].getWinChances(!this.playerOne);
+        if (playerOne) {
+            for (int i = 1; i < nextMoves.length; i++) {
+                if (nextMoves[i] == null) {
+                    break;
+                }
+                OthelloTree.LastHopeNode current = nextMoves[i].getWinChances(!this.playerOne);
+                if (current.isGreater(bestScore)) {
+                    bestMove = nextMoves[i].getPreviousMove();
+                    bestScore = current;
+                }
+
+            }
+        } else {
+            for (int i = 0; i < nextMoves.length; i++) {
+                if (nextMoves[i] == null) {
+                    break;
+                }
+                OthelloTree.LastHopeNode current = nextMoves[i].getWinChances(!this.playerOne);
+                if (bestScore.isGreater(current)) {
+                    bestMove = nextMoves[i].getPreviousMove();
+                    bestScore = current;
+                }
+
+            }
+        }
+
+        return bestMove;
     }
 
     public interface DepthGoalCalculator {
@@ -190,7 +237,19 @@ public class AaronFish implements szte.mi.Player {
             if (remainingEmptySpaces < 13) {
                 return 25;
             } else {
-                return 2;
+                return 5;
+            }
+        }
+    }
+
+    public static class MonteCarloDepth implements DepthGoalCalculator {
+
+        @Override
+        public int getGoalDepth(long remainingTime, int remainingEmptySpaces) {
+            if (remainingEmptySpaces < 13) {
+                return 25;
+            } else {
+                return 1;
             }
         }
     }
