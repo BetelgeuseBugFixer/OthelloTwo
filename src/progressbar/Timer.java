@@ -41,7 +41,11 @@ public class Timer {
     }
 
     public long getCurrentTimeInMilliSeconds() {
-        return this.currentTime;
+        if (isRunning) {
+            return (System.currentTimeMillis() - this.timeStart) ;
+        } else {
+            return this.currentTime;
+        }
     }
 
     public double getCurrentTimeInSeconds() {

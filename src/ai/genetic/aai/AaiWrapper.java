@@ -4,22 +4,23 @@ import AIaaron.Aai01;
 import ai.AaronFish;
 import ai.genetic.AiAgent;
 import ai.genetic.BenchmarkAiAgent;
-import ai.genetic.GeneticAlgorithm;
+import ai.genetic.Games;
 
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import static ai.genetic.GeneticAlgorithm.playSingleGameWithPlayerInterface;
 
 public class AaiWrapper implements BenchmarkAiAgent {
     Aai01 ai;
     String name;
     int points;
+    int gamesPlayed = 0;
+    int timeForMoveInMilliseconds;
 
-    public AaiWrapper() {
+    public AaiWrapper(int timeForMoveInMilliseconds) {
         this.ai = new Aai01();
         this.name = "Aai";
         this.points = 0;
+        this.timeForMoveInMilliseconds = timeForMoveInMilliseconds;
     }
 
     @Override
@@ -33,14 +34,23 @@ public class AaiWrapper implements BenchmarkAiAgent {
     }
 
     @Override
+    public int getMatchesPlayed() {
+        return this.gamesPlayed;
+    }
+
+    @Override
     public void playAgainstNormalAgent(AiAgent agent, int gamesPerMatchUp) {
         Random rnd = new Random();
         int result = 0;
         for (int order = 0; order < 2; order++) {
             for (int i = 0; i < gamesPerMatchUp; i++) {
                 this.ai.init(order, 3, rnd);
-                AaronFish aiAgent = agent.initAi((order+1)%2);
-                result += playSingleGameWithPlayerInterface(this.ai, aiAgent);
+                AaronFish aiAgent = agent.initAi((order + 1) % 2);
+                if (order == 0) {
+                    result += Games.playSingleGameWithPlayerInterface(this.ai, aiAgent, this.timeForMoveInMilliseconds);
+                } else {
+                    result += Games.playSingleGameWithPlayerInterface(aiAgent, this.ai, this.timeForMoveInMilliseconds);
+                }
             }
             if (result == 0) {
                 this.points += 1;
@@ -50,11 +60,13 @@ public class AaiWrapper implements BenchmarkAiAgent {
             } else {
                 agent.addWin();
             }
+            this.gamesPlayed++;
         }
     }
 
     @Override
     public void resetPoints() {
         this.points = 0;
+        this.gamesPlayed = 0;
     }
 }
