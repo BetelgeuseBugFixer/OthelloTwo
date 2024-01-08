@@ -1,13 +1,11 @@
 package ai.genetic;
 
-import ai.AaronFish;
 import ai.BetterGrader;
 import ai.genetic.aai.AaiWrapper;
+import ai.genetic.mcst.MCBoardGraderBenchmark;
+import ai.genetic.mcst.MCTWPlayer;
 import org.apache.commons.math3.distribution.NormalDistribution;
-import othello.Othello;
 import progressbar.Progressbar;
-import szte.mi.Move;
-import szte.mi.Player;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -20,19 +18,25 @@ import java.util.concurrent.TimeUnit;
 
 
 public class GeneticAlgorithm {
-    static final int gamesPlayedPerMatchUp = 2;
-    static final int numOfThreads = 4;
-    static final int populationSize = 50;
-    static final int singleParentPercentage = 50;
-    static final int mutationSV = 5;
-    static final int crossoverPercentage = 15;
-    static final File outputFile = new File("src/ai/genetic/weights.tsv");
+    static  int gamesPlayedPerMatchUp = 2;
+    static  int numOfThreads = 4;
+    static  int populationSize = 20;
+    static  int singleParentPercentage = 50;
+    static  int mutationSV = 5;
+    static  int crossoverPercentage = 15;
+    static final File weightFile = new File("src/ai/genetic/weights.tsv");
     static final File bestFile = new File("src/ai/genetic/best.txt");
 
+    static final File allBenchmark = new File("src/ai/genetic/benchMarkAgainstAll.tsv");
+
+    static final File bestBenchmark = new File("src/ai/genetic/benchmarkAgainstBest.tsv");
+    public final File weightsInGenerations = new File("src/ai/genetic/weights.tsv");
+
+    public final File generationFile = new File("src/ai/genetic/generation.tsv");
 
     public static void main(String[] args) throws InterruptedException, IOException {
         GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm();
-        geneticAlgorithm.start(100);
+        geneticAlgorithm.start(2);
 
     }
 
@@ -45,7 +49,25 @@ public class GeneticAlgorithm {
         return grader.weights.length;
     }
 
+    public static void makeFilesEmptyOrCreate(File[] files) {
+        for (File file : files) {
+            try {
+                if (file.exists()) {
+                    // If the file exists, empty it
+                    new FileWriter(file, false).close();
+                } else {
+                    // If the file does not exist, create a new, empty file
+                    file.createNewFile();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     public void start(int generations) throws InterruptedException, IOException {
+        File[] files = {weightFile, bestFile, weightsInGenerations, allBenchmark, bestBenchmark, generationFile};
+        makeFilesEmptyOrCreate(files);
         //initialize population randomly
         int weightSize = getWeightsSize();
         AiAgent[] aiAgents = new AiAgent[populationSize];
@@ -53,28 +75,39 @@ public class GeneticAlgorithm {
             aiAgents[i] = new AiAgent(weightSize);
         }
 
-        train(aiAgents, generations);
+        train(aiAgents, 0, generations);
 
     }
 
-    public void train(AiAgent[] currentAgents, int generations) throws IOException, InterruptedException {
+    public void continueTraining(int generationsToTrain) throws IOException, InterruptedException {
+        AiAgent[] agents=readAiAgents();
+        populationSize=agents.length;
+        int current= Integer.parseInt(String.valueOf(new FileReader(generationFile).read()));
+        train(agents,current,current+generationsToTrain);
+    }
+
+    public void train(AiAgent[] currentAgents, int startGen, int generations) throws IOException, InterruptedException {
         NormalDistribution distribution = new NormalDistribution(0, mutationSV);
 
-        BenchmarkAiAgent[] benchmarks={new AaiWrapper(),new HandCraftedWeights(),};
+        BenchmarkAiAgent[] benchmarks = {new AaiWrapper(50), new HandCraftedWeights(), new MCTWPlayer(50), new MCBoardGraderBenchmark(500)};
 
         Progressbar bar = new Progressbar("generations", generations);
-        for (int generation = 0; generation < generations; generation++) {
+        for (int generation = startGen; generation < generations; generation++) {
 
 
             simulateGamesWithMultiThreading(currentAgents);
-
-            //TODO add games against Benchmarks and plot their result
-
+            playAgainstBenchmarks(benchmarks, currentAgents);
 
             Arrays.sort(currentAgents);
             safeCurrentAgents(currentAgents);
+            writeBenchMark(benchmarks, generation, allBenchmark);
             updateBest(currentAgents[currentAgents.length - 1], generation);
             currentAgents = getNextGeneration(currentAgents, distribution);
+
+            FileWriter generationWriter = new FileWriter(generationFile);
+            generationWriter.write(generation+"\n");
+            generationWriter.flush();
+            generationWriter.close();
             bar.countUp();
 
         }
@@ -119,7 +152,7 @@ public class GeneticAlgorithm {
     }
 
     public void safeCurrentAgents(AiAgent[] sortedAiAgents) throws IOException {
-        BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile));
+        BufferedWriter writer = new BufferedWriter(new FileWriter(weightFile));
         for (AiAgent sortedAiAgent : sortedAiAgents) {
             writer.write(sortedAiAgent.toString());
             writer.newLine();
@@ -128,23 +161,39 @@ public class GeneticAlgorithm {
         writer.close();
     }
 
-    public void updateBest(AiAgent contender, int generation) throws IOException {
-        AiAgent bestAgent = getBestAgent();
-        //TODO include other agents as metric
-        contender.resetPoints();
+    public void updateBest(AiAgent contender, int generation) throws IOException, InterruptedException {
+        BenchmarkAiAgent[] benchmarks = {new AaiWrapper(2000), new HandCraftedWeights(), new MCTWPlayer(3000), new MCBoardGraderBenchmark(2000)};
+        AiAgent bestAgent = contender;
+        if (generation < 0) {
 
-        playFullMatchUp(bestAgent, contender);
+            bestAgent = getBestAgent();
+            contender.resetPoints();
+            AiAgent[] bestAgents = {contender, bestAgent};
 
-        if (bestAgent.points.get() < contender.points.get()) {
-            BufferedWriter writer = new BufferedWriter(new FileWriter(bestFile));
-            System.out.println("\rnew best found in generation " + generation);
+            Games.playFullMatchUp(bestAgent, contender, gamesPlayedPerMatchUp);
+            playAgainstBenchmarks(benchmarks, bestAgents);
 
+
+            if (bestAgent.points.get() < contender.points.get()) {
+                FileWriter writer = (new FileWriter(bestFile));
+                System.out.println("\rnew best found in generation " + generation);
+                writer.write(contender.toString());
+                writer.flush();
+                writer.close();
+                bestAgent = contender;
+            }
+        } else {
+            AiAgent[] bestAgents = {contender};
+            playAgainstBenchmarks(benchmarks, bestAgents);
+
+            FileWriter writer = (new FileWriter(bestFile));
             writer.write(contender.toString());
-
             writer.flush();
             writer.close();
-        }
 
+        }
+        writeWeights(bestAgent, generation);
+        writeBenchMark(benchmarks, generation, bestBenchmark);
     }
 
     public AiAgent getBestAgent() throws IOException {
@@ -176,7 +225,7 @@ public class GeneticAlgorithm {
                 AiAgent agentOne = aiAgents[i];
                 AiAgent agentTwo = aiAgents[j];
 
-                executorService.submit(() -> playFullMatchUp(agentOne, agentTwo));
+                executorService.submit(() -> Games.playFullMatchUp(agentOne, agentTwo, gamesPlayedPerMatchUp));
             }
         }
         executorService.shutdown();
@@ -186,93 +235,75 @@ public class GeneticAlgorithm {
 
     }
 
+    public void playAgainstBenchmarks(BenchmarkAiAgent[] benchmarks, AiAgent[] aiAgents) throws InterruptedException {
+        //ExecutorService executorService = Executors.newFixedThreadPool(numOfThreads);
+
+        for (BenchmarkAiAgent benchmark : benchmarks) {
+           // executorService.submit(() -> benchmarkAgainstAll(benchmark,aiAgents));
+            benchmarkAgainstAll(benchmark,aiAgents);
+        }
+
+       // executorService.shutdown();
+       // if (!executorService.awaitTermination(300, TimeUnit.SECONDS)) {
+        //    System.out.println("is still running");
+       // }
+    }
+
+    public void benchmarkAgainstAll(BenchmarkAiAgent benchmark, AiAgent[] agents){
+        for (AiAgent aiAgent : agents) {
+            benchmark.playAgainstNormalAgent(aiAgent, gamesPlayedPerMatchUp);
+        }
+    }
+
     public void simulateGamesNormal(AiAgent[] aiAgents) {
         Progressbar normalTimer = new Progressbar("normal", populationSize - 1);
         for (int i = 0; i < populationSize - 1; i++) {
             for (int j = i + 1; j < populationSize; j++) {
                 AiAgent agentOne = aiAgents[i];
                 AiAgent agentTwo = aiAgents[j];
-                playFullMatchUp(agentOne, agentTwo);
+                Games.playFullMatchUp(agentOne, agentTwo, gamesPlayedPerMatchUp);
             }
             normalTimer.countUp();
         }
     }
 
-    public static void playFullMatchUp(AiAgent agentOne, AiAgent agentTwo) {
-        playSingleMatchUp(agentOne, agentTwo);
-        playSingleMatchUp(agentTwo, agentOne);
+    public void writeBenchMark(BenchmarkAiAgent[] benchmarks, int generation, File outputFile) throws IOException {
+        FileWriter writer = new FileWriter(outputFile, true);
+        for (BenchmarkAiAgent benchmark : benchmarks) {
+            writer.write(BenchmarkAiAgent.getStatistic(benchmark, generation));
+            writer.write("\n");
+        }
+        writer.flush();
+        writer.close();
     }
 
-    public static void playSingleMatchUp(AiAgent agentOne, AiAgent agentTwo) {
-        int result = 0;
-        for (int i = 0; i < gamesPlayedPerMatchUp; i++) {
-            result += playSingleGame(agentOne, agentTwo);
-        }
-        if (result == 0) {
-            agentOne.addDraw();
-            agentTwo.addDraw();
-        } else if (result > 0) {
-            agentOne.addWin();
-        } else {
-            agentTwo.addWin();
-        }
+    public void writeWeights(AiAgent contender, int generation) throws IOException {
+        FileWriter writer = new FileWriter(weightsInGenerations);
+        writer.write(generation + "\t" + contender.toString());
+        writer.flush();
+        writer.close();
     }
 
-    public static int playSingleGame(AiAgent agentOne, AiAgent agentTwo) {
-        AaronFish black = agentOne.initAi(0);
-        AaronFish white = agentTwo.initAi(1);
-
-        return playSingleGameWithPlayerInterface(black,white);
-    }
-
-    public static int playSingleGameWithPlayerInterface(Player black, Player white) {
-        Player[] players = {black, white};
-        AiOthelloGame aiOthelloGame = new AiOthelloGame();
-
-        Move prevMove = null;
-        int player = 0;
-        while (aiOthelloGame.gameIsStillRunning) {
-            prevMove = players[player].nextMove(prevMove, 8, 8);
-            aiOthelloGame.makeMove(prevMove, player == 0);
-            player = (player + 1) % 2;
-        }
-        return aiOthelloGame.getResult();
-
-    }
-
-
-    private static class AiOthelloGame {
-        Othello game;
-        int roundsPassed;
-        boolean gameIsStillRunning;
-
-        public AiOthelloGame() {
-            this.game = new Othello();
-            this.roundsPassed = 0;
-            this.gameIsStillRunning = true;
-        }
-
-        public void makeMove(Move move, boolean playerOne) {
-            if (move == null) {
-                this.roundsPassed++;
-            } else {
-                this.roundsPassed = 0;
-                this.game.makeMove(move, playerOne);
+    public AiAgent[] readAiAgents() throws IOException {
+        ArrayList<int[]> allWeights = new ArrayList<>();
+        BufferedReader agentFileReader = new BufferedReader(new FileReader(weightFile));
+        String line = agentFileReader.readLine();
+        while (line != null&&!line.isEmpty()) {
+            String[] stringWeights = line.split("\t");
+            int[] weights = new int[stringWeights.length];
+            for (int i = 0; i < stringWeights.length; i++) {
+                weights[i] = Integer.parseInt(stringWeights[i]);
             }
-            if (this.roundsPassed == 2 || this.game.boardIsFull()) {
-                this.gameIsStillRunning = false;
-            }
+            allWeights.add(weights);
+            line = agentFileReader.readLine();
         }
+        AiAgent[] agents=new AiAgent[allWeights.size()];
 
-        public int getResult() {
-            int blackScore = Long.bitCount(this.game.blackPlayerDiscs);
-            int whiteScore = Long.bitCount(this.game.whitePLayerDiscs);
-            if (blackScore > whiteScore) {
-                return 1;
-            } else if (whiteScore > blackScore) {
-                return -1;
-            }
-            return 0;
+        for (int i = 0; i < agents.length; i++) {
+            agents[i]=new AiAgent(allWeights.get(i));
         }
+        return agents;
     }
+
+
 }

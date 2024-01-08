@@ -7,7 +7,13 @@ import othelloTrees.OthelloTree;
 import java.util.Random;
 
 public class MonteCarloBoardGrader implements BoardGrader {
-    int numberOfGames = 2000;
+    int numberOfGames = 500;
+
+    public MonteCarloBoardGrader(){}
+
+    public MonteCarloBoardGrader(int numberOfGames){
+        this.numberOfGames=numberOfGames;
+    }
 
     @Override
     public int gradeBoard(OthelloTree.OthelloNode node, boolean playerOne) {

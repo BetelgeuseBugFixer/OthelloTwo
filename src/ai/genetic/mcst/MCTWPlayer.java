@@ -3,28 +3,27 @@ package ai.genetic.mcst;
 import ai.AaronFish;
 import ai.genetic.AiAgent;
 import ai.genetic.BenchmarkAiAgent;
+import ai.genetic.Games;
 import othello.Othello;
 import szte.mi.Move;
 import szte.mi.Player;
-
 import java.util.Random;
-
-import static ai.genetic.GeneticAlgorithm.playSingleGameWithPlayerInterface;
 
 public class MCTWPlayer implements BenchmarkAiAgent, Player {
 
-    int maxTimeInSeconds;
+    int maxTimeInMilliseconds;
     String name;
     int points;
     boolean playerOne;
     MonteCarloTreeSearch monteCarloTree;
     Random random;
 
+    int matchesPlayed=0;
     Othello board;
 
-    public MCTWPlayer() {
+    public MCTWPlayer(int maxTimeInMilliseconds) {
         this.name = "MCTS";
-        this.maxTimeInSeconds = 5;
+        this.maxTimeInMilliseconds = maxTimeInMilliseconds;
         this.board = new Othello();
         this.monteCarloTree = new MonteCarloTreeSearch();
     }
@@ -40,6 +39,11 @@ public class MCTWPlayer implements BenchmarkAiAgent, Player {
     }
 
     @Override
+    public int getMatchesPlayed() {
+        return this.matchesPlayed;
+    }
+
+    @Override
     public void playAgainstNormalAgent(AiAgent agent, int gamesPerMatchUp) {
         Random rnd = new Random();
         int result = 0;
@@ -47,7 +51,12 @@ public class MCTWPlayer implements BenchmarkAiAgent, Player {
             for (int i = 0; i < gamesPerMatchUp; i++) {
                 this.init(order, 3, rnd);
                 AaronFish aiAgent = agent.initAi((order + 1) % 2);
-                result += playSingleGameWithPlayerInterface(this, aiAgent);
+                if (order==0) {
+                    result += Games.playSingleGameWithPlayerInterface(this, aiAgent);
+                }else {
+                    result += Games.playSingleGameWithPlayerInterface(aiAgent,this);
+
+                }
             }
             if (result == 0) {
                 this.points += 1;
@@ -57,12 +66,14 @@ public class MCTWPlayer implements BenchmarkAiAgent, Player {
             } else {
                 agent.addWin();
             }
+            this.matchesPlayed++;
         }
     }
 
     @Override
     public void resetPoints() {
         this.points = 0;
+        this.matchesPlayed=0;
     }
 
     @Override
@@ -73,13 +84,15 @@ public class MCTWPlayer implements BenchmarkAiAgent, Player {
             this.playerOne = false;
         }
         this.random=rnd;
+        this.board = new Othello();
+        this.monteCarloTree=new MonteCarloTreeSearch();
     }
 
     @Override
     public Move nextMove(Move prevMove, long tOpponent, long t) {
         board.makeMove(prevMove, !this.playerOne);
         long legalMoves = board.getLegalMovesAsLong(playerOne);
-        if (Long.bitCount(legalMoves) < 1) {
+        if (Long.bitCount(legalMoves) <= 1) {
             int index = -1;
             if (legalMoves != 0) {
                 for (int i = 0; i < 64; i++) {
@@ -92,7 +105,7 @@ public class MCTWPlayer implements BenchmarkAiAgent, Player {
             return Othello.getMoveFromInt(index);
         }
 
-        Othello newBoard = monteCarloTree.findNextMove(board, this.playerOne, maxTimeInSeconds,this.random);
+        Othello newBoard = monteCarloTree.findNextMove(board, this.playerOne, maxTimeInMilliseconds,this.random);
         Move next = getLastMoveFromTwoBoards(this.board, newBoard);
         this.board = newBoard;
         return next;

@@ -13,7 +13,7 @@ public class MonteCarloTreeSearch {
     int level;
     boolean opponent;
 
-    public Othello findNextMove(Othello board, boolean playerOne, int maxTime,Random random) {
+    public Othello findNextMove(Othello board, boolean playerOne, int maxTimeMilliseconds,Random random) {
 
         Timer timer = new Timer();
         opponent = !playerOne;
@@ -22,7 +22,7 @@ public class MonteCarloTreeSearch {
 
         timer.startTimer();
 
-            while (timer.getCurrentTimeInSeconds() < maxTime) {
+            while (timer.getCurrentTimeInMilliSeconds() < maxTimeMilliseconds) {
             Node promisingNode = selectPromisingNode(rootNode);
             if (!promisingNode.getState().getBoard().isOver()) {
                 expandNode(promisingNode);

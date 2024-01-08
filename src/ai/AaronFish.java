@@ -35,6 +35,7 @@ public class AaronFish implements szte.mi.Player {
             this.playerOne = true;
             currentMove = -1;
         } else {
+            this.playerOne = false;
             currentMove = 0;
         }
     }
@@ -42,6 +43,10 @@ public class AaronFish implements szte.mi.Player {
     public void setToMonteCarloGrader() {
         this.setDepthGoalCalculator(new MonteCarloDepth());
         this.setBoardGrader(new MonteCarloBoardGrader());
+    }
+    public void setToMonteCarloGrader(int numberOfGames) {
+        this.setDepthGoalCalculator(new MonteCarloDepth());
+        this.setBoardGrader(new MonteCarloBoardGrader(numberOfGames));
     }
 
 
@@ -53,15 +58,10 @@ public class AaronFish implements szte.mi.Player {
         setDepthGoalCalculator(new RandomDepth());
     }
 
-
     @Override
     public Move nextMove(Move prevMove, long tOpponent, long t) {
         this.currentMove += 2;
         if (currentMove != 1) {
-            if (this.boardTree.getRoot().getNextNode(Othello.getIntFromMove(prevMove), !playerOne) == null) {
-                System.out.println(boardTree.getRoot().getBoard());
-                System.out.println(prevMove.x + "," + prevMove.y);
-            }
             this.boardTree.move(Othello.getIntFromMove(prevMove), !this.playerOne);
         }
         int remainingSpaces = this.boardTree.getRoot().getBoard().getRemainingSpaces();
@@ -94,7 +94,6 @@ public class AaronFish implements szte.mi.Player {
                     }
                 }
             }
-            System.out.println("current position: " + alpha);
             if (alpha == Integer.MIN_VALUE) {
                 bestMove = getMoveWithHighestWinProbability();
             }
@@ -112,7 +111,6 @@ public class AaronFish implements szte.mi.Player {
                     }
                 }
             }
-            System.out.println("current position: " + beta);
             if (beta == Integer.MAX_VALUE) {
                 bestMove = getMoveWithHighestWinProbability();
             }
@@ -227,7 +225,11 @@ public class AaronFish implements szte.mi.Player {
 
         @Override
         public int getGoalDepth(long remainingTime, int remainingEmptySpaces) {
-            return rnd.nextInt(2, 4);
+            if (remainingEmptySpaces < 6) {
+                return 10;
+            } else {
+                 return rnd.nextInt(2, 4);
+            }
         }
     }
 
