@@ -6,6 +6,7 @@ import ai.genetic.mcst.MCBoardGraderBenchmark;
 import ai.genetic.mcst.MCTWPlayer;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import progressbar.Progressbar;
+import progressbar.Timer;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -20,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 public class GeneticAlgorithm {
     static  int gamesPlayedPerMatchUp = 2;
     static  int numOfThreads = 4;
-    static  int populationSize = 20;
+    static  int populationSize = 75;
     static  int singleParentPercentage = 50;
     static  int mutationSV = 5;
     static  int crossoverPercentage = 15;
@@ -35,8 +36,9 @@ public class GeneticAlgorithm {
     public final File generationFile = new File("src/ai/genetic/generation.tsv");
 
     public static void main(String[] args) throws InterruptedException, IOException {
+
         GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm();
-        geneticAlgorithm.start(2);
+        geneticAlgorithm.start(20);
 
     }
 
@@ -89,19 +91,22 @@ public class GeneticAlgorithm {
     public void train(AiAgent[] currentAgents, int startGen, int generations) throws IOException, InterruptedException {
         NormalDistribution distribution = new NormalDistribution(0, mutationSV);
 
-        BenchmarkAiAgent[] benchmarks = {new AaiWrapper(50), new HandCraftedWeights(), new MCTWPlayer(50), new MCBoardGraderBenchmark(500)};
+        BenchmarkAiAgent[] benchmarks = {new AaiWrapper(50), new HandCraftedWeights(), new MCTWPlayer(10)};
+
 
         Progressbar bar = new Progressbar("generations", generations);
         for (int generation = startGen; generation < generations; generation++) {
 
 
-            simulateGamesWithMultiThreading(currentAgents);
-            playAgainstBenchmarks(benchmarks, currentAgents);
+
+            this.simulateAllGames(benchmarks,currentAgents);
 
             Arrays.sort(currentAgents);
             safeCurrentAgents(currentAgents);
             writeBenchMark(benchmarks, generation, allBenchmark);
+
             updateBest(currentAgents[currentAgents.length - 1], generation);
+
             currentAgents = getNextGeneration(currentAgents, distribution);
 
             FileWriter generationWriter = new FileWriter(generationFile);
@@ -162,58 +167,70 @@ public class GeneticAlgorithm {
     }
 
     public void updateBest(AiAgent contender, int generation) throws IOException, InterruptedException {
-        BenchmarkAiAgent[] benchmarks = {new AaiWrapper(2000), new HandCraftedWeights(), new MCTWPlayer(3000), new MCBoardGraderBenchmark(2000)};
+        BenchmarkAiAgent[] benchmarks = {new AaiWrapper(400), new HandCraftedWeights(), new MCTWPlayer(75)};
         AiAgent bestAgent = contender;
-        if (generation < 0) {
-
+        contender.resetPoints();
+        playAgainstBenchmarks(benchmarks,contender);
+        if (generation > 0) {
             bestAgent = getBestAgent();
-            contender.resetPoints();
-            AiAgent[] bestAgents = {contender, bestAgent};
+            int bestGameDifference=Games.playBestMatchUp(bestAgent,contender,gamesPlayedPerMatchUp);
 
-            Games.playFullMatchUp(bestAgent, contender, gamesPlayedPerMatchUp);
-            playAgainstBenchmarks(benchmarks, bestAgents);
-
-
-            if (bestAgent.points.get() < contender.points.get()) {
-                FileWriter writer = (new FileWriter(bestFile));
+            if (bestAgent.points.get()+bestGameDifference < contender.points.get()) {
                 System.out.println("\rnew best found in generation " + generation);
-                writer.write(contender.toString());
-                writer.flush();
-                writer.close();
                 bestAgent = contender;
             }
-        } else {
-            AiAgent[] bestAgents = {contender};
-            playAgainstBenchmarks(benchmarks, bestAgents);
-
-            FileWriter writer = (new FileWriter(bestFile));
-            writer.write(contender.toString());
-            writer.flush();
-            writer.close();
 
         }
+        writeBest(bestAgent);
         writeWeights(bestAgent, generation);
         writeBenchMark(benchmarks, generation, bestBenchmark);
+    }
+    public void playAgainstBenchmarks(BenchmarkAiAgent[] benchmarks, AiAgent agent) throws InterruptedException {
+        ExecutorService executorService = Executors.newFixedThreadPool(numOfThreads);
+
+        for (BenchmarkAiAgent benchmark : benchmarks) {
+            executorService.submit(()->benchmark.playAgainstNormalAgent(agent,gamesPlayedPerMatchUp));
+        }
+        executorService.shutdown();
+        if (!executorService.awaitTermination(100, TimeUnit.SECONDS)) {
+            System.out.println("is still running");
+        }
+    }
+
+    public void writeBest(AiAgent newBest) throws IOException {
+        FileWriter writer = (new FileWriter(bestFile));
+        writer.write(newBest.toString());
+        writer.write("\n");
+        writer.write(newBest.points.toString());
+        writer.write("\n");
+
+        writer.flush();
+        writer.close();
     }
 
     public AiAgent getBestAgent() throws IOException {
         List<Integer> integerList = new ArrayList<>();
 
         BufferedReader br = new BufferedReader(new FileReader(bestFile));
-        String line;
-        while ((line = br.readLine()) != null) {
-            for (String field : line.split("\t")) {
-                int intValue = Integer.parseInt(field);
-                integerList.add(intValue);
-            }
+
+        String weights = br.readLine();
+        for (String field : weights.split("\t")) {
+            int intValue = Integer.parseInt(field);
+            integerList.add(intValue);
         }
+
+        int points=Integer.parseInt(br.readLine());
+
 
         int[] intArray = new int[integerList.size()];
         for (int i = 0; i < integerList.size(); i++) {
             intArray[i] = integerList.get(i);
         }
+        AiAgent best=new AiAgent(intArray);
+        best.points.set(points);
 
-        return new AiAgent(intArray);
+
+        return best;
     }
 
     public void simulateGamesWithMultiThreading(AiAgent[] aiAgents) throws InterruptedException {
@@ -234,19 +251,65 @@ public class GeneticAlgorithm {
         }
 
     }
+    public void simulateAllGamesMeasuringTime(BenchmarkAiAgent[] benchmarks,AiAgent[] aiAgents) throws InterruptedException {
 
-    public void playAgainstBenchmarks(BenchmarkAiAgent[] benchmarks, AiAgent[] aiAgents) throws InterruptedException {
-        //ExecutorService executorService = Executors.newFixedThreadPool(numOfThreads);
+        Timer timer=new Timer();
+        timer.startTimer();
+        for (int i = 0; i < populationSize - 1; i++) {
+            for (int j = i + 1; j < populationSize; j++) {
+                AiAgent agentOne = aiAgents[i];
+                AiAgent agentTwo = aiAgents[j];
 
+                Games.playFullMatchUp(agentOne, agentTwo, gamesPlayedPerMatchUp);
+            }
+        }
+        timer.stopTimer();
+        System.out.println("all matches: "+ timer.getCurrentTimeInSeconds());
         for (BenchmarkAiAgent benchmark : benchmarks) {
-           // executorService.submit(() -> benchmarkAgainstAll(benchmark,aiAgents));
+            timer=new Timer();
+            timer.startTimer();
             benchmarkAgainstAll(benchmark,aiAgents);
+            System.out.println(benchmark.getName()+": "+ timer.getCurrentTimeInSeconds());
+
         }
 
-       // executorService.shutdown();
-       // if (!executorService.awaitTermination(300, TimeUnit.SECONDS)) {
-        //    System.out.println("is still running");
-       // }
+
+    }
+
+    public void simulateAllGames(BenchmarkAiAgent[] benchmarks,AiAgent[] aiAgents) throws InterruptedException {
+        ExecutorService executorService = Executors.newFixedThreadPool(numOfThreads);
+
+        for (BenchmarkAiAgent benchmark : benchmarks) {
+            executorService.submit(() -> benchmarkAgainstAll(benchmark,aiAgents));
+        }
+
+        for (int i = 0; i < populationSize - 1; i++) {
+            for (int j = i + 1; j < populationSize; j++) {
+                AiAgent agentOne = aiAgents[i];
+                AiAgent agentTwo = aiAgents[j];
+
+                executorService.submit(() -> Games.playFullMatchUp(agentOne, agentTwo, gamesPlayedPerMatchUp));
+            }
+        }
+
+
+        executorService.shutdown();
+        if (!executorService.awaitTermination(300, TimeUnit.SECONDS)) {
+            System.out.println("is still running");
+        }
+    }
+
+    public void playAgainstBenchmarks(BenchmarkAiAgent[] benchmarks, AiAgent[] aiAgents) throws InterruptedException {
+        ExecutorService executorService = Executors.newFixedThreadPool(numOfThreads);
+
+        for (BenchmarkAiAgent benchmark : benchmarks) {
+           executorService.submit(() -> benchmarkAgainstAll(benchmark,aiAgents));
+        }
+
+       executorService.shutdown();
+       if (!executorService.awaitTermination(300, TimeUnit.SECONDS)) {
+            System.out.println("is still running");
+       }
     }
 
     public void benchmarkAgainstAll(BenchmarkAiAgent benchmark, AiAgent[] agents){
@@ -278,7 +341,7 @@ public class GeneticAlgorithm {
     }
 
     public void writeWeights(AiAgent contender, int generation) throws IOException {
-        FileWriter writer = new FileWriter(weightsInGenerations);
+        FileWriter writer = new FileWriter(weightsInGenerations,true);
         writer.write(generation + "\t" + contender.toString());
         writer.flush();
         writer.close();

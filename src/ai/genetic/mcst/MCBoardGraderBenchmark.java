@@ -18,7 +18,7 @@ public class MCBoardGraderBenchmark implements BenchmarkAiAgent {
         this.name = "Monte-Carlo Board Grader";
         this.points = 0;
         this.ai = new AaronFish();
-        ai.setToMonteCarloGrader(numberOfRandomGames);
+        ai.setToMonteCarloGrader(numberOfRandomGames, true);
     }
 
     @Override
@@ -44,7 +44,7 @@ public class MCBoardGraderBenchmark implements BenchmarkAiAgent {
             for (int i = 0; i < gamesPerMatchUp; i++) {
                 this.ai.init(order, 3, rnd);
                 AaronFish aiAgent = agent.initAi((order + 1) % 2);
-                if (order == 1) {
+                if (order == 0) {
                     result += Games.playSingleGameWithPlayerInterface(this.ai, aiAgent);
                 } else {
                     result += Games.playSingleGameWithPlayerInterface(aiAgent, this.ai);
@@ -66,6 +66,6 @@ public class MCBoardGraderBenchmark implements BenchmarkAiAgent {
     @Override
     public void resetPoints() {
         this.points = 0;
-        this.gamesPlayed=0;
+        this.gamesPlayed = 0;
     }
 }

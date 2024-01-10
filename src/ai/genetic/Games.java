@@ -29,6 +29,23 @@ public class Games {
         }
     }
 
+    public static int playBestMatchUp(AiAgent best, AiAgent contender, int gamesPlayedPerMatchUp) {
+        int[] gameResults = {0, 0};
+        for (int i = 0; i < gamesPlayedPerMatchUp; i++) {
+            gameResults[0] += playSingleGame(best, contender);
+            gameResults[1] += playSingleGame(contender, best);
+        }
+        int endResult = 0;
+        for (int result : gameResults) {
+            if (result > 0) {
+                endResult += 3;
+            } else if (result != 0) {
+                endResult -= 3;
+            }
+        }
+        return endResult;
+    }
+
     public static int playSingleGame(AiAgent agentOne, AiAgent agentTwo) {
         AaronFish black = agentOne.initAi(0);
         AaronFish white = agentTwo.initAi(1);
@@ -37,9 +54,10 @@ public class Games {
     }
 
     public static int playSingleGameWithPlayerInterface(Player black, Player white) {
-        return playSingleGameWithPlayerInterface(black,white,8);
+        return playSingleGameWithPlayerInterface(black, white, 8);
 
     }
+
     public static int playSingleGameWithPlayerInterface(Player black, Player white, int time) {
         Player[] players = {black, white};
         AiOthelloGame aiOthelloGame = new AiOthelloGame();
@@ -47,9 +65,15 @@ public class Games {
         Move prevMove = null;
         int player = 0;
         while (aiOthelloGame.gameIsStillRunning) {
-                prevMove = players[player].nextMove(prevMove, time, time);
+            prevMove = players[player].nextMove(prevMove, time, time);
+            if (Othello.isValidMove(aiOthelloGame.game, prevMove, player == 0)) {
                 aiOthelloGame.makeMove(prevMove, player == 0);
                 player = (player + 1) % 2;
+            } else {
+                System.out.println(Othello.isValidMove(aiOthelloGame.game, prevMove, player == 0));
+                System.out.println(aiOthelloGame.game);
+                System.out.println(prevMove.x + ", " + prevMove.y);
+            }
         }
         return aiOthelloGame.getResult();
 

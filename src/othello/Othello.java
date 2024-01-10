@@ -29,7 +29,7 @@ public class Othello {
     }
 
     public static Move getMoveFromInt(int move) {
-        if (move==-1){
+        if (move == -1) {
             return null;
         }
         return new Move(move % 8, move / 8);
@@ -50,6 +50,15 @@ public class Othello {
             sb.append("|\n");
         }
         return sb.toString();
+    }
+
+    public static boolean isValidMove(Othello board, Move move, boolean playerOne) {
+        long legal = board.getLegalMovesAsLong(playerOne);
+        if (move == null) {
+            return legal == 0L;
+        }
+        int index = Othello.getIntFromMove(move);
+        return (legal & (1L << index)) != 0;
     }
 
     public void makeMove(int move, boolean playerOne) {
@@ -106,10 +115,9 @@ public class Othello {
         return possibleMoves;
     }
 
-    public int getRemainingSpaces(){
-        return Long.bitCount(~(this.blackPlayerDiscs|whitePLayerDiscs));
+    public int getRemainingSpaces() {
+        return Long.bitCount(~(this.blackPlayerDiscs | whitePLayerDiscs));
     }
-
 
     public ArrayTree.ArrayNode[] getPossibleMovesAsNodes(boolean playerOne) {
         //TODO Alternative version here:
@@ -253,79 +261,87 @@ public class Othello {
         return Long.bitCount(this.blackPlayerDiscs) - Long.bitCount(this.whitePLayerDiscs);
     }
 
-
     //shamelessly stolen from
     //https://stackoverflow.com/questions/5944230/optimization-of-moves-calculation-in-othello-bitboard
-    public long getLegalMovesAsLong(Boolean playerOne){
-            long legal = 0L;
-            long potentialMoves;
-            long currentBoard;
-            long opponentBoard;
-            if (playerOne){
-                currentBoard = this.blackPlayerDiscs;
-                opponentBoard = this.whitePLayerDiscs;
-            }else {
-                currentBoard = this.whitePLayerDiscs;
-                opponentBoard = this.blackPlayerDiscs;
-            }
-            long emptyBoard = ~(this.blackPlayerDiscs|this.whitePLayerDiscs);
-            // UP
-            potentialMoves = (currentBoard >>> 8)  & opponentBoard;
-            while (potentialMoves != 0L) {
-                long tmp = (potentialMoves >>> 8);
-                legal |= tmp & emptyBoard;
-                potentialMoves = tmp & opponentBoard;
-            }
-            // DOWN
-            potentialMoves = (currentBoard << 8) & opponentBoard;
-            while (potentialMoves != 0L) {
-                long tmp = (potentialMoves << 8);
-                legal |= tmp & emptyBoard;
-                potentialMoves = tmp & opponentBoard;
-            }
-            // LEFT
-            potentialMoves = (currentBoard >>> 1L) & rightBorderBitMask & opponentBoard;
-            while (potentialMoves != 0L) {
-                long tmp = (potentialMoves >>> 1L) & rightBorderBitMask;
-                legal |= tmp & emptyBoard;
-                potentialMoves = tmp & opponentBoard;
-            }
-            // RIGHT
-            potentialMoves = (currentBoard << 1L) & leftBorderBitMask & opponentBoard;
-            while (potentialMoves != 0L) {
-                long tmp = (potentialMoves << 1L) & leftBorderBitMask;
-                legal |= tmp & emptyBoard;
-                potentialMoves = tmp & opponentBoard;
-            }
-            // UP LEFT
-            potentialMoves = (currentBoard >>>9) & leftBorderBitMask & opponentBoard;
-            while (potentialMoves != 0L) {
-                long tmp = (potentialMoves >>> 9) & leftBorderBitMask;
-                legal |= tmp & emptyBoard;
-                potentialMoves = tmp & opponentBoard;
-            }
-            // UP RIGHT
-            potentialMoves = (currentBoard >>> 7) & leftBorderBitMask & opponentBoard;
-            while (potentialMoves != 0L) {
-                long tmp = (potentialMoves >>> 7) & leftBorderBitMask;
-                legal |= tmp & emptyBoard;
-                potentialMoves = tmp & opponentBoard;
-            }
-            // DOWN LEFT
-            potentialMoves = (currentBoard << 7) & rightBorderBitMask & opponentBoard;
-            while (potentialMoves != 0L) {
-                long tmp = (potentialMoves << 7) & rightBorderBitMask;
-                legal |= tmp & emptyBoard;
-                potentialMoves = tmp & opponentBoard;
-            }
-            // DOWN RIGHT
-            potentialMoves = (currentBoard << 9) & leftBorderBitMask & opponentBoard;
-            while (potentialMoves != 0L) {
-                long tmp = (potentialMoves << 9) & leftBorderBitMask;
-                legal |= tmp & emptyBoard;
-                potentialMoves = tmp & opponentBoard;
-            }
+    public long getLegalMovesAsLong(Boolean playerOne) {
+        long legal = 0L;
+        long potentialMoves;
+        long currentBoard;
+        long opponentBoard;
+        if (playerOne) {
+            currentBoard = this.blackPlayerDiscs;
+            opponentBoard = this.whitePLayerDiscs;
+        } else {
+            currentBoard = this.whitePLayerDiscs;
+            opponentBoard = this.blackPlayerDiscs;
+        }
+        long emptyBoard = ~(this.blackPlayerDiscs | this.whitePLayerDiscs);
+        // UP
+        potentialMoves = (currentBoard >>> 8) & opponentBoard;
+        while (potentialMoves != 0L) {
+            long tmp = (potentialMoves >>> 8);
+            legal |= tmp & emptyBoard;
+            potentialMoves = tmp & opponentBoard;
+        }
+        // DOWN
+        potentialMoves = (currentBoard << 8) & opponentBoard;
+        while (potentialMoves != 0L) {
+            long tmp = (potentialMoves << 8);
+            legal |= tmp & emptyBoard;
+            potentialMoves = tmp & opponentBoard;
+        }
+        // LEFT
+        potentialMoves = (currentBoard >>> 1L) & rightBorderBitMask & opponentBoard;
+        while (potentialMoves != 0L) {
+            long tmp = (potentialMoves >>> 1L) & rightBorderBitMask;
+            legal |= tmp & emptyBoard;
+            potentialMoves = tmp & opponentBoard;
+        }
+        // RIGHT
+        potentialMoves = (currentBoard << 1L) & leftBorderBitMask & opponentBoard;
+        while (potentialMoves != 0L) {
+            long tmp = (potentialMoves << 1L) & leftBorderBitMask;
+            legal |= tmp & emptyBoard;
+            potentialMoves = tmp & opponentBoard;
+        }
+        // UP LEFT
+        potentialMoves = (currentBoard >>> 9) & rightBorderBitMask & opponentBoard;
+        while (potentialMoves != 0L) {
+            long tmp = (potentialMoves >>> 9) & rightBorderBitMask;
+            legal |= tmp & emptyBoard;
+            potentialMoves = tmp & opponentBoard;
+        }
+        // UP RIGHT
+        potentialMoves = (currentBoard >>> 7) & leftBorderBitMask & opponentBoard;
+        while (potentialMoves != 0L) {
+            long tmp = (potentialMoves >>> 7) & leftBorderBitMask;
+            legal |= tmp & emptyBoard;
+            potentialMoves = tmp & opponentBoard;
+        }
+        // DOWN LEFT
+        potentialMoves = (currentBoard << 7) & rightBorderBitMask & opponentBoard;
+        while (potentialMoves != 0L) {
+            long tmp = (potentialMoves << 7) & rightBorderBitMask;
+            legal |= tmp & emptyBoard;
+            potentialMoves = tmp & opponentBoard;
+        }
+        // DOWN RIGHT
+        potentialMoves = (currentBoard << 9) & leftBorderBitMask & opponentBoard;
+        while (potentialMoves != 0L) {
+            long tmp = (potentialMoves << 9) & leftBorderBitMask;
+            legal |= tmp & emptyBoard;
+            potentialMoves = tmp & opponentBoard;
+        }
         return legal;
+    }
+
+    public int getResult() {
+        int discDifference = this.getDiscDifference();
+        return Integer.compare(discDifference, 0);
+    }
+
+    public boolean isOver() {
+        return boardIsFull() || (getLegalMovesAsLong(true) == 0 && getLegalMovesAsLong(false) == 0);
     }
 
     public static class MoveWithResult {
@@ -336,13 +352,5 @@ public class Othello {
             this.move = move;
             this.board = board;
         }
-    }
-
-    public int getResult(){
-        int discDifference = this.getDiscDifference();
-        return Integer.compare(discDifference, 0);
-    }
-    public boolean isOver(){
-        return boardIsFull()||(getLegalMovesAsLong(true)==0&&getLegalMovesAsLong(false)==0);
     }
 }

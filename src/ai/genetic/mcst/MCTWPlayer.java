@@ -102,6 +102,7 @@ public class MCTWPlayer implements BenchmarkAiAgent, Player {
                     }
                 }
             }
+            this.board.makeMove(index,this.playerOne);
             return Othello.getMoveFromInt(index);
         }
 
