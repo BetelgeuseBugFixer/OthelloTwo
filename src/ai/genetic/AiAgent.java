@@ -132,6 +132,6 @@ public class AiAgent implements Comparable<AiAgent> {
             sb.append(weight);
             sb.append("\t");
         }
-        return sb.substring(0, sb.length() - 2);
+        return sb.substring(0, sb.length() - 1);
     }
 }
