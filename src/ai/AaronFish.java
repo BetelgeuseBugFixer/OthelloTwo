@@ -44,8 +44,12 @@ public class AaronFish implements szte.mi.Player {
         this.setDepthGoalCalculator(new MonteCarloDepth());
         this.setBoardGrader(new MonteCarloBoardGrader());
     }
-    public void setToMonteCarloGrader(int numberOfGames) {
-        this.setDepthGoalCalculator(new MonteCarloDepth());
+    public void setToMonteCarloGrader(int numberOfGames,boolean shallow) {
+        if (shallow) {
+            this.setDepthGoalCalculator(new MonteCarloDepth());
+        }else {
+            this.setDepthGoalCalculator(new ShallowMonteCarloDepth());
+        }
         this.setBoardGrader(new MonteCarloBoardGrader(numberOfGames));
     }
 
@@ -249,6 +253,18 @@ public class AaronFish implements szte.mi.Player {
         @Override
         public int getGoalDepth(long remainingTime, int remainingEmptySpaces) {
             if (remainingEmptySpaces < 13) {
+                return 25;
+            } else {
+                return 1;
+            }
+        }
+    }
+
+    public static class ShallowMonteCarloDepth implements DepthGoalCalculator {
+
+        @Override
+        public int getGoalDepth(long remainingTime, int remainingEmptySpaces) {
+            if (remainingEmptySpaces < 6) {
                 return 25;
             } else {
                 return 1;
