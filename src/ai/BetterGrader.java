@@ -237,6 +237,9 @@ public class BetterGrader implements BoardGrader {
         score += getDiscPositionScore(board, startWeights);
         score += getParityScore(board, playerOneMadeLastMove, startWeights, possibleMoves);
 
+        if (score == 0) {
+            return score + 1;
+        }
         return score;
     }
 
@@ -510,11 +513,11 @@ public class BetterGrader implements BoardGrader {
         }
 
         //if edge is full, add it to stable disc
-        long occupancy=blackPlayer|whitePlayer;
+        long occupancy = blackPlayer | whitePlayer;
         for (long edgeMask : edgeMasks) {
-            if ((edgeMask&occupancy)==edgeMask){
-                blackStableDiscs |= blackPlayer&edgeMask;
-                whiteStableDiscs |= whitePlayer&edgeMask;
+            if ((edgeMask & occupancy) == edgeMask) {
+                blackStableDiscs |= blackPlayer & edgeMask;
+                whiteStableDiscs |= whitePlayer & edgeMask;
             }
         }
 
