@@ -34,7 +34,7 @@ public class AaiWrapper implements BenchmarkAiAgent {
     }
 
     @Override
-    public int getMatchesPlayed() {
+    public int getGamesPlayed() {
         return this.gamesPlayed;
     }
 
@@ -68,5 +68,15 @@ public class AaiWrapper implements BenchmarkAiAgent {
     public void resetPoints() {
         this.points = 0;
         this.gamesPlayed = 0;
+    }
+
+    @Override
+    public void addPoints(int points) {
+        this.points+=points;
+    }
+
+    @Override
+    public void addGame() {
+        this.gamesPlayed++;
     }
 }

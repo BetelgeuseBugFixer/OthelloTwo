@@ -21,7 +21,7 @@ public class HandCraftedWeights implements BenchmarkAiAgent {
     }
 
     @Override
-    public int getMatchesPlayed() {
+    public int getGamesPlayed() {
         return this.matchesPlayed;
     }
 
@@ -35,5 +35,15 @@ public class HandCraftedWeights implements BenchmarkAiAgent {
     public void resetPoints() {
         this.agent.resetPoints();
         this.matchesPlayed = 0;
+    }
+
+    @Override
+    public void addPoints(int points) {
+        this.agent.points.getAndAdd(points);
+    }
+
+    @Override
+    public void addGame() {
+        this.matchesPlayed++;
     }
 }

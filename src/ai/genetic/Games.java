@@ -113,5 +113,30 @@ public class Games {
             }
             return 0;
         }
+
+        public void benchmarkWithPayerGame(BenchmarkAiAgent benchmark, AiAgent agent, Player ai, int gamesPerMatchUp, int timeForMoveInMilliseconds) {
+            Random rnd = new Random();
+            int result = 0;
+            for (int order = 0; order < 2; order++) {
+                for (int i = 0; i < gamesPerMatchUp; i++) {
+                    ai.init(order, 3, rnd);
+                    AaronFish aiAgent = agent.initAi((order + 1) % 2);
+                    if (order == 0) {
+                        result += Games.playSingleGameWithPlayerInterface(ai, aiAgent, timeForMoveInMilliseconds);
+                    } else {
+                        result += Games.playSingleGameWithPlayerInterface(aiAgent, ai, timeForMoveInMilliseconds);
+                    }
+                }
+                if (result == 0) {
+                    benchmark.addPoints(1);
+                    agent.addDraw();
+                } else if (result > 0) {
+                    benchmark.addPoints(3);
+                } else {
+                    agent.addWin();
+                }
+                benchmark.addGame();
+            }
+        }
     }
 }

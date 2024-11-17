@@ -18,7 +18,7 @@ public class MCTWPlayer implements BenchmarkAiAgent, Player {
     MonteCarloTreeSearch monteCarloTree;
     Random random;
 
-    int matchesPlayed=0;
+    int gamesPlayed =0;
     Othello board;
 
     public MCTWPlayer(int maxTimeInMilliseconds) {
@@ -39,8 +39,8 @@ public class MCTWPlayer implements BenchmarkAiAgent, Player {
     }
 
     @Override
-    public int getMatchesPlayed() {
-        return this.matchesPlayed;
+    public int getGamesPlayed() {
+        return this.gamesPlayed;
     }
 
     @Override
@@ -66,14 +66,24 @@ public class MCTWPlayer implements BenchmarkAiAgent, Player {
             } else {
                 agent.addWin();
             }
-            this.matchesPlayed++;
+            this.gamesPlayed++;
         }
     }
 
     @Override
     public void resetPoints() {
         this.points = 0;
-        this.matchesPlayed=0;
+        this.gamesPlayed =0;
+    }
+
+    @Override
+    public void addPoints(int points) {
+        this.points*=points;
+    }
+
+    @Override
+    public void addGame() {
+        this.gamesPlayed++;
     }
 
     @Override
