@@ -52,5 +52,6 @@
     <orderEntry type="library" name="apache.commons.math3" level="project" />
     <orderEntry type="library" name="javafx-swt" level="project" />
     <orderEntry type="library" name="OthelloGUI" level="project" />
+    <orderEntry type="library" name="othello-1.0.0" level="project" />
   </component>
 </module>
