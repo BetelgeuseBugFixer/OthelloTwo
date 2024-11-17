@@ -19,7 +19,7 @@ public class GeneticAlgorithm {
     static final File bestFile = new File("src/ai/genetic/best.txt");
     static final File allBenchmark = new File("src/ai/genetic/benchMarkAgainstAll.tsv");
     static final File bestBenchmark = new File("src/ai/genetic/benchmarkAgainstBest.tsv");
-    static int generationsPerBenchmark = 1;
+    static int generationsPerBenchmark = 5;
     static int gamesPlayedPerMatchUp = 2;
     static int numOfThreads = Runtime.getRuntime().availableProcessors();
     static int populationSize = 100;
