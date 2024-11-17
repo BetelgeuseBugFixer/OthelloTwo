@@ -22,7 +22,7 @@ public class GeneticAlgorithm {
     static int generationsPerBenchmark = 1;
     static int gamesPlayedPerMatchUp = 2;
     static int numOfThreads = Runtime.getRuntime().availableProcessors();
-    static int populationSize = 5;
+    static int populationSize = 100;
     static int singleParentPercentage = 50;
     static int mutationSV = 5;
     static int crossoverPercentage = 15;
@@ -33,15 +33,16 @@ public class GeneticAlgorithm {
     public static void main(String[] args) throws InterruptedException, IOException {
 
         GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm();
-        /*int generationsToTrain=Integer.parseInt(args[1]);
-        if (args[0].toLowerCase().equals("s")){
-            geneticAlgorithm.start(generationsToTrain);
+        if (args.length==1){
+            geneticAlgorithm.start(Integer.parseInt(args[0]));
         }else {
-            geneticAlgorithm.continueTraining(generationsToTrain);
+            int generationsToTrain = Integer.parseInt(args[1]);
+            if (args[0].equalsIgnoreCase("c")) {
+                geneticAlgorithm.continueTraining(generationsToTrain);
+            } else {
+                geneticAlgorithm.start(generationsToTrain);
+            }
         }
-
-         */
-        geneticAlgorithm.continueTraining(2);
     }
 
     public static int gaussSum(int n) {
