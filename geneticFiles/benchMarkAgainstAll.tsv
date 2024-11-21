@@ -1,6 +1,27 @@
-Aai	0	1.85
-Handcrafted Weights	0	2.8
-MCTS	0	1.925
-Aai	5	1.9875
-Handcrafted Weights	5	2.65
-MCTS	5	1.7625
+Aai	0	1.95
+Handcrafted Weights	0	2.845
+MCTS	0	1.945
+Aai	5	1.815
+Handcrafted Weights	5	2.785
+MCTS	5	1.865
+Aai	10	1.7175
+Handcrafted Weights	10	2.5375
+MCTS	10	1.68
+Aai	15	1.6366666666666667
+Handcrafted Weights	15	2.381666666666667
+MCTS	15	1.5166666666666666
+Aai	20	1.635
+Handcrafted Weights	20	2.2075
+MCTS	20	1.36375
+Aai	25	1.575
+Handcrafted Weights	25	1.485
+MCTS	25	1.07
+Aai	30	1.475
+Handcrafted Weights	30	1.445
+MCTS	30	0.99
+Aai	35	1.44
+Handcrafted Weights	35	1.325
+MCTS	35	0.9416666666666667
+Aai	40	1.37375
+Handcrafted Weights	40	1.22125
+MCTS	40	0.91375
