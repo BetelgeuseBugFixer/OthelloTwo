@@ -106,7 +106,7 @@ public class AiAgent implements Comparable<AiAgent> {
         this.points.getAndAdd(1);
     }
 
-     public AaronFish initAi( int order) {
+     public AaronFish initAi(int order) {
         Random rnd = new Random();
 
         AaronFish aaronFish = new AaronFish();

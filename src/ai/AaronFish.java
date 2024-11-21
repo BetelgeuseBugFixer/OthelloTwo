@@ -6,8 +6,6 @@ import othelloTrees.ArrayTree;
 import szte.mi.Move;
 import othelloTrees.OthelloTree.OthelloNode;
 import othelloTrees.OthelloTree;
-
-
 import java.util.Random;
 
 public class AaronFish implements szte.mi.Player {
@@ -240,7 +238,7 @@ public class AaronFish implements szte.mi.Player {
     public static class changingDepth implements DepthGoalCalculator {
         @Override
         public int getGoalDepth(long remainingTime, int remainingEmptySpaces) {
-            if (remainingEmptySpaces < 15) {
+            if (remainingEmptySpaces < 14) {
                 return 25;
             } else {
                 return 5;
