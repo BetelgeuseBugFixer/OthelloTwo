@@ -55,7 +55,6 @@ public class MCTWPlayer implements BenchmarkAiAgent, Player {
                     result += Games.playSingleGameWithPlayerInterface(this, aiAgent);
                 }else {
                     result += Games.playSingleGameWithPlayerInterface(aiAgent,this);
-
                 }
             }
             if (result == 0) {
