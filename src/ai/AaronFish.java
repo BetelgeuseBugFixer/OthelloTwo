@@ -240,7 +240,7 @@ public class AaronFish implements szte.mi.Player {
     public static class changingDepth implements DepthGoalCalculator {
         @Override
         public int getGoalDepth(long remainingTime, int remainingEmptySpaces) {
-            if (remainingEmptySpaces < 13) {
+            if (remainingEmptySpaces < 15) {
                 return 25;
             } else {
                 return 5;
