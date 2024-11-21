@@ -95,7 +95,8 @@ class GeneticFileHelper:
         """
         order = self.read_order()
         for i, name in enumerate(order):
-            print(f"int {name} = {i};")
+            print(f"int {name[:1].lower() + name[1:]} = {i};")
+
 
     def add_metric(self, new_name, s_weight, e_weight):
         """
@@ -142,6 +143,7 @@ class GeneticFileHelper:
 if __name__ == "__main__":
     # Initialize with default file paths
     helper = GeneticFileHelper()
-    helper.print_comparison()
-    helper.print_weight_changes()
-    helper.print_weights()
+    helper.print_declarations()
+    #helper.print_comparison()
+    #helper.print_weight_changes()
+    #helper.print_weights()

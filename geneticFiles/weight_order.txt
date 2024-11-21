@@ -1,4 +1,4 @@
-moveChange
+MoveChange
 PossibleMovesIndex
 FrontierDiscsIndex
 StableDiscsIndex
