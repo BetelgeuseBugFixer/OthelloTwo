@@ -19,7 +19,7 @@ def plot_file_separately(data, title, output_file):
 
     plt.title(title)
     plt.xlabel("Generation")
-    plt.ylabel("Average")
+    plt.ylabel("Average Points")
     plt.legend()
     plt.grid(True)
 
@@ -54,7 +54,7 @@ def plot_average(data, title, output_file, smooth=False, window=51, poly=3):
     if smooth:
         # Apply Savitzky-Golay filter for smoothing
         smooth_points = savgol_filter(avg_data["Average Points"], window_length=window, polyorder=poly)
-        plt.plot(avg_data["Generation"], smooth_points, label="Smoothed Average", color="blue", marker='o', alpha=0.8)
+        plt.plot(avg_data["Generation"], smooth_points, label="Smoothed Average Points", color="blue", marker='o', alpha=0.8)
     else:
         plt.plot(avg_data["Generation"], avg_data["Average Points"], label="Average", color="blue", marker='o')
 
@@ -81,7 +81,6 @@ def main(against_all_file, against_best_file):
     plot_each_category(against_best_data, "Against Best Agents", "plots/best_agents")
     plot_average(against_best_data, "Average Against Best Agents", "plots/average_best_agents.png")
     plot_average(against_best_data, "Smoothed Average Against Best Agents", "plots/smoothed_average_best_agents.png", smooth=True, window=51, poly=3)
-
 
 
 if __name__ == "__main__":
