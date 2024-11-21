@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 public class GeneticAlgorithm {
 	static final File weightFile = new File("geneticFiles/weights.tsv");
 	static final File bestFile = new File("geneticFiles/best.txt");
-	static final File allBenchmark = new File("geneticFiles/benchMarkAgainstAll.tsv");
+	static final File allBenchmark = new File("geneticFiles/benchmarkAgainstAll.tsv");
 	static final File bestBenchmark = new File("geneticFiles/benchmarkAgainstBest.tsv");
 	static int generationsPerBenchmark = 5;
 	static int gamesPlayedPerMatchUp = 2;
