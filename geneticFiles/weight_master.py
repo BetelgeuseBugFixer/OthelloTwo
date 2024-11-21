@@ -141,9 +141,6 @@ class GeneticFileHelper:
 
 
 if __name__ == "__main__":
-    # Initialize with default file paths
     helper = GeneticFileHelper()
-    helper.print_declarations()
-    #helper.print_comparison()
-    #helper.print_weight_changes()
-    #helper.print_weights()
+    helper.print_comparison()
+    helper.print_weight_changes()
