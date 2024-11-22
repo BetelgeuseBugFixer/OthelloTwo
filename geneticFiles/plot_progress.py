@@ -15,7 +15,7 @@ def plot_file_separately(data, title, output_file):
 
     for category in data["Category"].unique():
         subset = data[data["Category"] == category]
-        plt.plot(subset["Generation"], subset["Average Points"], label=category, marker='o')
+        plt.plot(subset["Generation"], subset["Average Points"], label=category)
 
     plt.title(title)
     plt.xlabel("Generation")
@@ -32,7 +32,7 @@ def plot_each_category(data, title_prefix, output_prefix):
     for category in data["Category"].unique():
         subset = data[data["Category"] == category]
         plt.figure(figsize=(16, 6))
-        plt.plot(subset["Generation"], subset["Average Points"], marker='o')
+        plt.plot(subset["Generation"], subset["Average Points"])
         plt.title(f"{title_prefix} - {category}")
         plt.xlabel("Generation")
         plt.ylabel("Average Points")
@@ -54,9 +54,9 @@ def plot_average(data, title, output_file, smooth=False, window=51, poly=3):
     if smooth:
         # Apply Savitzky-Golay filter for smoothing
         smooth_points = savgol_filter(avg_data["Average Points"], window_length=window, polyorder=poly)
-        plt.plot(avg_data["Generation"], smooth_points, label="Smoothed Average Points", color="blue", marker='o', alpha=0.8)
+        plt.plot(avg_data["Generation"], smooth_points, label="Smoothed Average Points", color="blue", alpha=0.8)
     else:
-        plt.plot(avg_data["Generation"], avg_data["Average Points"], label="Average", color="blue", marker='o')
+        plt.plot(avg_data["Generation"], avg_data["Average Points"], label="Average", color="blue")
 
     plt.title(title)
     plt.xlabel("Generation")
