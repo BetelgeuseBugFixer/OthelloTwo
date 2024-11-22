@@ -142,6 +142,9 @@ class GeneticFileHelper:
 
 if __name__ == "__main__":
     helper = GeneticFileHelper()
+    print("-"*10)
     helper.print_comparison()
+    print("-"*10)
     helper.print_weight_changes()
+    print("-"*10)
     helper.print_weights()
