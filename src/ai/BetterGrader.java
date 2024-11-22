@@ -24,7 +24,9 @@ public class BetterGrader implements BoardGrader {
 			BetterGrader::shiftLeft, BetterGrader::shiftRight,
 			BetterGrader::shiftUpLeft, BetterGrader::shiftUpRight,
 			BetterGrader::shiftDownLeft, BetterGrader::shiftDownRight};
-	public int[] weights = {20, 10, -20, 30, 40, 30, 30, 20, -20, 10, 15, 10, -5, -50, 20, -10, 60, 1, 20, 70, -20, 10, -5, 30, 40, 30, 30, 20, -20, 10, 15, 10, -5, -50, 20, -10, 50, 2, 30, 90, -60};
+
+	public int[] weights = {-89, 290, -173, -203, -28, -60, -10, -31, -57, 71, -43, 185, 73, -10, -180, 3, -82, -252, -210, -12, 74, 71, -189, 358, 208, 178, 155, 512, -136, 254, 72, 22, -188, -1317, 44, -704, 1535, -12, 14, -319, 20};
+	//public int[] weights = {20, 10, -20, 30, 40, 30, 30, 20, -20, 10, 15, 10, -5, -50, 20, -10, 60, 1, 20, 70, -20, 10, -5, 30, 40, 30, 30, 20, -20, 10, 15, 10, -5, -50, 20, -10, 50, 2, 30, 90, -60};
 	int moveChange = 0;
 	int sPossibleMovesIndex = 1;
 	int sFrontierDiscsIndex = 2;

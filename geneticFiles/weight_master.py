@@ -144,3 +144,4 @@ if __name__ == "__main__":
     helper = GeneticFileHelper()
     helper.print_comparison()
     helper.print_weight_changes()
+    helper.print_weights()

@@ -904,3 +904,918 @@ MCTS	300	0.5
 Aai	301	2.0
 Handcrafted Weights	301	0.0
 MCTS	301	2.0
+Aai	302	0.5
+Handcrafted Weights	302	0.0
+MCTS	302	0.5
+Aai	303	2.0
+Handcrafted Weights	303	1.0
+MCTS	303	0.5
+Aai	304	1.0
+Handcrafted Weights	304	1.0
+MCTS	304	0.5
+Aai	305	0.0
+Handcrafted Weights	305	0.5
+MCTS	305	0.0
+Aai	306	2.0
+Handcrafted Weights	306	0.0
+MCTS	306	0.5
+Aai	307	0.0
+Handcrafted Weights	307	0.0
+MCTS	307	0.5
+Aai	308	0.0
+Handcrafted Weights	308	2.0
+MCTS	308	0.5
+Aai	309	0.0
+Handcrafted Weights	309	0.0
+MCTS	309	0.5
+Aai	310	0.0
+Handcrafted Weights	310	0.0
+MCTS	310	0.0
+Aai	311	1.0
+Handcrafted Weights	311	1.5
+MCTS	311	0.5
+Aai	312	2.0
+Handcrafted Weights	312	0.0
+MCTS	312	0.5
+Aai	313	2.0
+Handcrafted Weights	313	0.0
+MCTS	313	0.5
+Aai	314	2.0
+Handcrafted Weights	314	0.0
+MCTS	314	0.5
+Aai	315	2.0
+Handcrafted Weights	315	0.0
+MCTS	315	0.0
+Aai	316	0.0
+Handcrafted Weights	316	0.0
+MCTS	316	0.5
+Aai	317	0.5
+Handcrafted Weights	317	0.5
+MCTS	317	0.5
+Aai	318	3.0
+Handcrafted Weights	318	1.5
+MCTS	318	0.5
+Aai	319	2.0
+Handcrafted Weights	319	0.0
+MCTS	319	0.5
+Aai	320	0.0
+Handcrafted Weights	320	0.0
+MCTS	320	1.0
+Aai	321	0.0
+Handcrafted Weights	321	0.0
+MCTS	321	1.0
+Aai	322	2.0
+Handcrafted Weights	322	1.5
+MCTS	322	0.5
+Aai	323	1.0
+Handcrafted Weights	323	0.5
+MCTS	323	0.5
+Aai	324	1.0
+Handcrafted Weights	324	0.5
+MCTS	324	2.0
+Aai	325	0.5
+Handcrafted Weights	325	0.5
+MCTS	325	0.5
+Aai	326	0.0
+Handcrafted Weights	326	0.0
+MCTS	326	0.5
+Aai	327	1.0
+Handcrafted Weights	327	0.0
+MCTS	327	0.5
+Aai	328	1.0
+Handcrafted Weights	328	0.5
+MCTS	328	0.5
+Aai	329	0.0
+Handcrafted Weights	329	0.0
+MCTS	329	0.5
+Aai	330	0.0
+Handcrafted Weights	330	0.0
+MCTS	330	0.5
+Aai	331	1.5
+Handcrafted Weights	331	0.0
+MCTS	331	2.0
+Aai	332	0.5
+Handcrafted Weights	332	0.5
+MCTS	332	0.5
+Aai	333	0.5
+Handcrafted Weights	333	0.0
+MCTS	333	0.5
+Aai	334	0.0
+Handcrafted Weights	334	0.0
+MCTS	334	0.5
+Aai	335	2.0
+Handcrafted Weights	335	0.0
+MCTS	335	0.5
+Aai	336	1.0
+Handcrafted Weights	336	0.5
+MCTS	336	0.0
+Aai	337	1.0
+Handcrafted Weights	337	0.5
+MCTS	337	0.5
+Aai	338	1.0
+Handcrafted Weights	338	0.5
+MCTS	338	0.5
+Aai	339	0.5
+Handcrafted Weights	339	0.5
+MCTS	339	0.0
+Aai	340	0.0
+Handcrafted Weights	340	1.0
+MCTS	340	0.5
+Aai	341	3.0
+Handcrafted Weights	341	0.0
+MCTS	341	0.5
+Aai	342	0.0
+Handcrafted Weights	342	0.0
+MCTS	342	0.5
+Aai	343	2.0
+Handcrafted Weights	343	0.0
+MCTS	343	0.5
+Aai	344	0.5
+Handcrafted Weights	344	0.0
+MCTS	344	1.0
+Aai	345	0.0
+Handcrafted Weights	345	0.5
+MCTS	345	0.5
+Aai	346	3.0
+Handcrafted Weights	346	0.5
+MCTS	346	0.5
+Aai	347	0.5
+Handcrafted Weights	347	0.5
+MCTS	347	0.5
+Aai	348	0.0
+Handcrafted Weights	348	0.0
+MCTS	348	0.0
+Aai	349	1.0
+Handcrafted Weights	349	0.0
+MCTS	349	0.5
+Aai	350	0.0
+Handcrafted Weights	350	0.5
+MCTS	350	0.0
+Aai	351	1.0
+Handcrafted Weights	351	0.5
+MCTS	351	0.5
+Aai	352	0.5
+Handcrafted Weights	352	0.5
+MCTS	352	0.5
+Aai	353	0.5
+Handcrafted Weights	353	0.0
+MCTS	353	2.0
+Aai	354	0.0
+Handcrafted Weights	354	0.0
+MCTS	354	0.5
+Aai	355	0.0
+Handcrafted Weights	355	0.5
+MCTS	355	0.5
+Aai	356	0.5
+Handcrafted Weights	356	0.0
+MCTS	356	2.0
+Aai	357	1.0
+Handcrafted Weights	357	0.0
+MCTS	357	2.0
+Aai	358	0.5
+Handcrafted Weights	358	0.5
+MCTS	358	0.5
+Aai	359	0.0
+Handcrafted Weights	359	0.5
+MCTS	359	0.5
+Aai	360	0.5
+Handcrafted Weights	360	1.0
+MCTS	360	0.0
+Aai	361	0.5
+Handcrafted Weights	361	0.5
+MCTS	361	0.5
+Aai	362	2.0
+Handcrafted Weights	362	0.0
+MCTS	362	0.5
+Aai	363	3.0
+Handcrafted Weights	363	0.5
+MCTS	363	0.0
+Aai	364	0.0
+Handcrafted Weights	364	0.5
+MCTS	364	0.5
+Aai	365	1.0
+Handcrafted Weights	365	0.0
+MCTS	365	0.0
+Aai	366	3.0
+Handcrafted Weights	366	0.5
+MCTS	366	2.0
+Aai	367	1.0
+Handcrafted Weights	367	0.0
+MCTS	367	0.5
+Aai	368	1.0
+Handcrafted Weights	368	0.0
+MCTS	368	1.0
+Aai	369	3.0
+Handcrafted Weights	369	0.0
+MCTS	369	0.5
+Aai	370	0.0
+Handcrafted Weights	370	0.0
+MCTS	370	0.5
+Aai	371	3.0
+Handcrafted Weights	371	0.0
+MCTS	371	0.5
+Aai	372	2.0
+Handcrafted Weights	372	0.5
+MCTS	372	2.0
+Aai	373	0.5
+Handcrafted Weights	373	0.0
+MCTS	373	0.5
+Aai	374	2.0
+Handcrafted Weights	374	0.5
+MCTS	374	0.5
+Aai	375	2.0
+Handcrafted Weights	375	1.5
+MCTS	375	0.0
+Aai	376	1.0
+Handcrafted Weights	376	0.5
+MCTS	376	2.0
+Aai	377	0.5
+Handcrafted Weights	377	0.0
+MCTS	377	0.0
+Aai	378	3.0
+Handcrafted Weights	378	0.5
+MCTS	378	2.0
+Aai	379	0.5
+Handcrafted Weights	379	0.0
+MCTS	379	2.0
+Aai	380	0.0
+Handcrafted Weights	380	0.0
+MCTS	380	0.5
+Aai	381	1.0
+Handcrafted Weights	381	0.0
+MCTS	381	0.5
+Aai	382	1.0
+Handcrafted Weights	382	0.0
+MCTS	382	0.5
+Aai	383	0.5
+Handcrafted Weights	383	0.0
+MCTS	383	0.5
+Aai	384	3.0
+Handcrafted Weights	384	0.5
+MCTS	384	0.0
+Aai	385	1.0
+Handcrafted Weights	385	0.0
+MCTS	385	2.0
+Aai	386	0.5
+Handcrafted Weights	386	0.0
+MCTS	386	0.5
+Aai	387	0.0
+Handcrafted Weights	387	0.5
+MCTS	387	0.5
+Aai	388	2.0
+Handcrafted Weights	388	0.5
+MCTS	388	2.0
+Aai	389	2.0
+Handcrafted Weights	389	0.0
+MCTS	389	0.5
+Aai	390	1.0
+Handcrafted Weights	390	0.0
+MCTS	390	0.5
+Aai	391	1.0
+Handcrafted Weights	391	0.0
+MCTS	391	0.5
+Aai	392	3.0
+Handcrafted Weights	392	0.0
+MCTS	392	0.0
+Aai	393	0.5
+Handcrafted Weights	393	0.0
+MCTS	393	2.0
+Aai	394	0.5
+Handcrafted Weights	394	0.0
+MCTS	394	0.5
+Aai	395	2.0
+Handcrafted Weights	395	1.5
+MCTS	395	0.5
+Aai	396	1.0
+Handcrafted Weights	396	0.5
+MCTS	396	0.5
+Aai	397	3.0
+Handcrafted Weights	397	0.5
+MCTS	397	0.5
+Aai	398	3.0
+Handcrafted Weights	398	0.0
+MCTS	398	0.5
+Aai	399	0.5
+Handcrafted Weights	399	0.0
+MCTS	399	2.0
+Aai	400	0.5
+Handcrafted Weights	400	0.5
+MCTS	400	0.5
+Aai	401	0.0
+Handcrafted Weights	401	0.5
+MCTS	401	0.5
+Aai	402	3.0
+Handcrafted Weights	402	0.0
+MCTS	402	0.5
+Aai	403	3.0
+Handcrafted Weights	403	0.0
+MCTS	403	2.0
+Aai	404	0.0
+Handcrafted Weights	404	0.5
+MCTS	404	0.5
+Aai	405	2.0
+Handcrafted Weights	405	0.0
+MCTS	405	0.5
+Aai	406	0.0
+Handcrafted Weights	406	0.5
+MCTS	406	0.5
+Aai	407	0.5
+Handcrafted Weights	407	0.0
+MCTS	407	0.5
+Aai	408	2.0
+Handcrafted Weights	408	1.0
+MCTS	408	0.5
+Aai	409	2.0
+Handcrafted Weights	409	0.5
+MCTS	409	0.5
+Aai	410	0.5
+Handcrafted Weights	410	0.5
+MCTS	410	0.5
+Aai	411	0.5
+Handcrafted Weights	411	0.0
+MCTS	411	0.5
+Aai	412	2.0
+Handcrafted Weights	412	0.0
+MCTS	412	0.0
+Aai	413	0.0
+Handcrafted Weights	413	0.0
+MCTS	413	0.5
+Aai	414	0.0
+Handcrafted Weights	414	0.0
+MCTS	414	0.5
+Aai	415	0.0
+Handcrafted Weights	415	0.5
+MCTS	415	0.5
+Aai	416	2.0
+Handcrafted Weights	416	0.5
+MCTS	416	0.5
+Aai	417	0.5
+Handcrafted Weights	417	0.5
+MCTS	417	0.5
+Aai	418	0.5
+Handcrafted Weights	418	0.0
+MCTS	418	0.5
+Aai	419	0.5
+Handcrafted Weights	419	0.0
+MCTS	419	1.0
+Aai	420	1.0
+Handcrafted Weights	420	0.0
+MCTS	420	0.5
+Aai	421	1.0
+Handcrafted Weights	421	0.5
+MCTS	421	0.5
+Aai	422	0.5
+Handcrafted Weights	422	0.5
+MCTS	422	0.5
+Aai	423	0.0
+Handcrafted Weights	423	0.0
+MCTS	423	0.5
+Aai	424	0.0
+Handcrafted Weights	424	1.5
+MCTS	424	2.0
+Aai	425	0.5
+Handcrafted Weights	425	0.0
+MCTS	425	0.5
+Aai	426	3.0
+Handcrafted Weights	426	0.5
+MCTS	426	0.5
+Aai	427	0.5
+Handcrafted Weights	427	0.0
+MCTS	427	0.5
+Aai	428	2.0
+Handcrafted Weights	428	0.0
+MCTS	428	0.5
+Aai	429	0.5
+Handcrafted Weights	429	0.0
+MCTS	429	2.0
+Aai	430	2.0
+Handcrafted Weights	430	0.5
+MCTS	430	0.5
+Aai	431	0.5
+Handcrafted Weights	431	0.5
+MCTS	431	0.5
+Aai	432	0.5
+Handcrafted Weights	432	0.0
+MCTS	432	2.0
+Aai	433	0.0
+Handcrafted Weights	433	0.0
+MCTS	433	0.5
+Aai	434	0.0
+Handcrafted Weights	434	0.0
+MCTS	434	0.5
+Aai	435	2.0
+Handcrafted Weights	435	0.0
+MCTS	435	0.5
+Aai	436	1.0
+Handcrafted Weights	436	0.0
+MCTS	436	0.0
+Aai	437	3.0
+Handcrafted Weights	437	0.0
+MCTS	437	0.0
+Aai	438	0.0
+Handcrafted Weights	438	0.5
+MCTS	438	0.5
+Aai	439	2.0
+Handcrafted Weights	439	0.5
+MCTS	439	0.5
+Aai	440	2.0
+Handcrafted Weights	440	0.5
+MCTS	440	0.0
+Aai	441	2.0
+Handcrafted Weights	441	0.0
+MCTS	441	0.5
+Aai	442	0.0
+Handcrafted Weights	442	0.0
+MCTS	442	0.5
+Aai	443	2.0
+Handcrafted Weights	443	0.0
+MCTS	443	0.5
+Aai	444	2.0
+Handcrafted Weights	444	0.5
+MCTS	444	0.0
+Aai	445	0.0
+Handcrafted Weights	445	0.0
+MCTS	445	0.5
+Aai	446	1.0
+Handcrafted Weights	446	0.0
+MCTS	446	0.5
+Aai	447	2.0
+Handcrafted Weights	447	0.0
+MCTS	447	0.5
+Aai	448	1.0
+Handcrafted Weights	448	0.0
+MCTS	448	0.5
+Aai	449	1.0
+Handcrafted Weights	449	0.5
+MCTS	449	0.5
+Aai	450	1.0
+Handcrafted Weights	450	0.5
+MCTS	450	0.5
+Aai	451	2.0
+Handcrafted Weights	451	0.0
+MCTS	451	0.5
+Aai	452	2.0
+Handcrafted Weights	452	0.0
+MCTS	452	0.0
+Aai	453	2.0
+Handcrafted Weights	453	0.5
+MCTS	453	0.5
+Aai	454	0.0
+Handcrafted Weights	454	0.0
+MCTS	454	0.5
+Aai	455	1.0
+Handcrafted Weights	455	0.0
+MCTS	455	0.5
+Aai	456	2.0
+Handcrafted Weights	456	0.0
+MCTS	456	0.5
+Aai	457	0.5
+Handcrafted Weights	457	0.0
+MCTS	457	0.5
+Aai	458	1.0
+Handcrafted Weights	458	0.5
+MCTS	458	0.5
+Aai	459	2.0
+Handcrafted Weights	459	0.0
+MCTS	459	0.5
+Aai	460	0.5
+Handcrafted Weights	460	0.5
+MCTS	460	0.5
+Aai	461	0.0
+Handcrafted Weights	461	0.0
+MCTS	461	0.5
+Aai	462	2.0
+Handcrafted Weights	462	0.0
+MCTS	462	0.5
+Aai	463	1.0
+Handcrafted Weights	463	0.5
+MCTS	463	0.5
+Aai	464	2.0
+Handcrafted Weights	464	0.0
+MCTS	464	0.5
+Aai	465	0.0
+Handcrafted Weights	465	0.0
+MCTS	465	0.5
+Aai	466	0.5
+Handcrafted Weights	466	0.0
+MCTS	466	0.5
+Aai	467	2.0
+Handcrafted Weights	467	0.0
+MCTS	467	1.0
+Aai	468	1.0
+Handcrafted Weights	468	0.0
+MCTS	468	0.5
+Aai	469	0.0
+Handcrafted Weights	469	0.5
+MCTS	469	0.5
+Aai	470	0.0
+Handcrafted Weights	470	0.5
+MCTS	470	0.5
+Aai	471	0.5
+Handcrafted Weights	471	0.0
+MCTS	471	2.0
+Aai	472	0.0
+Handcrafted Weights	472	0.0
+MCTS	472	0.5
+Aai	473	1.0
+Handcrafted Weights	473	0.5
+MCTS	473	0.5
+Aai	474	0.5
+Handcrafted Weights	474	0.0
+MCTS	474	0.5
+Aai	475	0.0
+Handcrafted Weights	475	0.5
+MCTS	475	2.0
+Aai	476	2.0
+Handcrafted Weights	476	0.0
+MCTS	476	0.5
+Aai	477	0.5
+Handcrafted Weights	477	0.5
+MCTS	477	0.5
+Aai	478	1.0
+Handcrafted Weights	478	0.0
+MCTS	478	0.5
+Aai	479	1.0
+Handcrafted Weights	479	0.5
+MCTS	479	0.5
+Aai	480	0.0
+Handcrafted Weights	480	0.0
+MCTS	480	0.5
+Aai	481	0.5
+Handcrafted Weights	481	1.5
+MCTS	481	0.5
+Aai	482	0.0
+Handcrafted Weights	482	1.5
+MCTS	482	0.5
+Aai	483	1.0
+Handcrafted Weights	483	0.5
+MCTS	483	0.5
+Aai	484	1.0
+Handcrafted Weights	484	0.0
+MCTS	484	2.0
+Aai	485	1.0
+Handcrafted Weights	485	0.0
+MCTS	485	0.5
+Aai	486	0.5
+Handcrafted Weights	486	0.0
+MCTS	486	0.5
+Aai	487	2.0
+Handcrafted Weights	487	0.5
+MCTS	487	1.5
+Aai	488	1.0
+Handcrafted Weights	488	0.0
+MCTS	488	0.5
+Aai	489	0.0
+Handcrafted Weights	489	0.0
+MCTS	489	3.0
+Aai	490	3.0
+Handcrafted Weights	490	0.5
+MCTS	490	0.5
+Aai	491	0.5
+Handcrafted Weights	491	0.0
+MCTS	491	0.5
+Aai	492	0.0
+Handcrafted Weights	492	0.0
+MCTS	492	0.5
+Aai	493	0.0
+Handcrafted Weights	493	1.0
+MCTS	493	0.5
+Aai	494	0.0
+Handcrafted Weights	494	0.0
+MCTS	494	0.5
+Aai	495	2.0
+Handcrafted Weights	495	0.0
+MCTS	495	0.0
+Aai	496	2.0
+Handcrafted Weights	496	0.0
+MCTS	496	0.5
+Aai	497	0.0
+Handcrafted Weights	497	0.5
+MCTS	497	0.5
+Aai	498	0.5
+Handcrafted Weights	498	0.0
+MCTS	498	0.5
+Aai	499	0.5
+Handcrafted Weights	499	0.5
+MCTS	499	0.5
+Aai	500	0.5
+Handcrafted Weights	500	0.5
+MCTS	500	0.5
+Aai	501	1.0
+Handcrafted Weights	501	0.0
+MCTS	501	0.5
+Aai	502	0.0
+Handcrafted Weights	502	0.5
+MCTS	502	0.5
+Aai	503	1.0
+Handcrafted Weights	503	1.0
+MCTS	503	0.5
+Aai	504	1.0
+Handcrafted Weights	504	0.0
+MCTS	504	0.0
+Aai	505	0.5
+Handcrafted Weights	505	0.0
+MCTS	505	0.5
+Aai	506	2.0
+Handcrafted Weights	506	0.0
+MCTS	506	0.0
+Aai	507	0.5
+Handcrafted Weights	507	0.0
+MCTS	507	2.0
+Aai	508	0.0
+Handcrafted Weights	508	0.5
+MCTS	508	0.5
+Aai	509	1.0
+Handcrafted Weights	509	0.0
+MCTS	509	0.5
+Aai	510	2.0
+Handcrafted Weights	510	0.5
+MCTS	510	0.5
+Aai	511	2.0
+Handcrafted Weights	511	0.0
+MCTS	511	0.5
+Aai	512	0.5
+Handcrafted Weights	512	0.5
+MCTS	512	0.5
+Aai	513	0.0
+Handcrafted Weights	513	1.5
+MCTS	513	0.5
+Aai	514	3.0
+Handcrafted Weights	514	0.0
+MCTS	514	0.5
+Aai	515	0.5
+Handcrafted Weights	515	1.0
+MCTS	515	0.5
+Aai	516	0.0
+Handcrafted Weights	516	2.0
+MCTS	516	2.0
+Aai	517	1.0
+Handcrafted Weights	517	0.0
+MCTS	517	0.5
+Aai	518	0.5
+Handcrafted Weights	518	0.0
+MCTS	518	0.0
+Aai	519	3.0
+Handcrafted Weights	519	0.5
+MCTS	519	1.0
+Aai	520	2.0
+Handcrafted Weights	520	0.0
+MCTS	520	0.5
+Aai	521	1.0
+Handcrafted Weights	521	0.0
+MCTS	521	0.5
+Aai	522	0.0
+Handcrafted Weights	522	0.5
+MCTS	522	0.5
+Aai	523	2.0
+Handcrafted Weights	523	0.5
+MCTS	523	2.0
+Aai	524	2.0
+Handcrafted Weights	524	0.5
+MCTS	524	0.5
+Aai	525	3.0
+Handcrafted Weights	525	0.0
+MCTS	525	0.5
+Aai	526	2.0
+Handcrafted Weights	526	0.0
+MCTS	526	2.0
+Aai	527	0.0
+Handcrafted Weights	527	0.0
+MCTS	527	0.5
+Aai	528	3.0
+Handcrafted Weights	528	0.0
+MCTS	528	0.5
+Aai	529	1.0
+Handcrafted Weights	529	0.5
+MCTS	529	0.5
+Aai	530	0.5
+Handcrafted Weights	530	0.0
+MCTS	530	0.5
+Aai	531	1.0
+Handcrafted Weights	531	0.5
+MCTS	531	2.0
+Aai	532	0.0
+Handcrafted Weights	532	0.0
+MCTS	532	0.5
+Aai	533	0.0
+Handcrafted Weights	533	0.5
+MCTS	533	0.5
+Aai	534	0.0
+Handcrafted Weights	534	0.5
+MCTS	534	0.5
+Aai	535	0.0
+Handcrafted Weights	535	0.5
+MCTS	535	0.5
+Aai	536	2.0
+Handcrafted Weights	536	1.0
+MCTS	536	2.0
+Aai	537	1.0
+Handcrafted Weights	537	0.0
+MCTS	537	0.5
+Aai	538	0.5
+Handcrafted Weights	538	0.0
+MCTS	538	0.5
+Aai	539	0.5
+Handcrafted Weights	539	0.0
+MCTS	539	0.5
+Aai	540	0.0
+Handcrafted Weights	540	0.5
+MCTS	540	2.0
+Aai	541	2.0
+Handcrafted Weights	541	1.0
+MCTS	541	0.5
+Aai	542	0.0
+Handcrafted Weights	542	1.0
+MCTS	542	0.5
+Aai	543	2.0
+Handcrafted Weights	543	0.5
+MCTS	543	2.0
+Aai	544	1.0
+Handcrafted Weights	544	0.0
+MCTS	544	0.5
+Aai	545	0.0
+Handcrafted Weights	545	0.0
+MCTS	545	0.0
+Aai	546	0.0
+Handcrafted Weights	546	0.0
+MCTS	546	0.5
+Aai	547	3.0
+Handcrafted Weights	547	0.0
+MCTS	547	0.5
+Aai	548	0.5
+Handcrafted Weights	548	0.5
+MCTS	548	0.5
+Aai	549	0.0
+Handcrafted Weights	549	0.5
+MCTS	549	0.5
+Aai	550	1.0
+Handcrafted Weights	550	0.5
+MCTS	550	0.5
+Aai	551	1.0
+Handcrafted Weights	551	0.5
+MCTS	551	0.5
+Aai	552	2.0
+Handcrafted Weights	552	0.0
+MCTS	552	0.0
+Aai	553	0.5
+Handcrafted Weights	553	0.0
+MCTS	553	0.5
+Aai	554	3.0
+Handcrafted Weights	554	0.0
+MCTS	554	0.5
+Aai	555	2.0
+Handcrafted Weights	555	0.5
+MCTS	555	0.5
+Aai	556	0.5
+Handcrafted Weights	556	0.0
+MCTS	556	0.5
+Aai	557	0.0
+Handcrafted Weights	557	0.0
+MCTS	557	0.0
+Aai	558	3.0
+Handcrafted Weights	558	1.0
+MCTS	558	0.5
+Aai	559	2.0
+Handcrafted Weights	559	0.0
+MCTS	559	2.0
+Aai	560	0.5
+Handcrafted Weights	560	0.5
+MCTS	560	0.0
+Aai	561	0.5
+Handcrafted Weights	561	0.0
+MCTS	561	0.0
+Aai	562	0.0
+Handcrafted Weights	562	0.0
+MCTS	562	0.5
+Aai	563	3.0
+Handcrafted Weights	563	1.5
+MCTS	563	0.5
+Aai	564	0.0
+Handcrafted Weights	564	0.0
+MCTS	564	0.5
+Aai	565	2.0
+Handcrafted Weights	565	0.0
+MCTS	565	0.5
+Aai	566	3.0
+Handcrafted Weights	566	0.0
+MCTS	566	0.5
+Aai	567	0.5
+Handcrafted Weights	567	1.0
+MCTS	567	0.5
+Aai	568	0.5
+Handcrafted Weights	568	0.0
+MCTS	568	2.0
+Aai	569	0.5
+Handcrafted Weights	569	0.0
+MCTS	569	0.0
+Aai	570	0.0
+Handcrafted Weights	570	0.5
+MCTS	570	0.5
+Aai	571	0.0
+Handcrafted Weights	571	0.0
+MCTS	571	0.5
+Aai	572	0.5
+Handcrafted Weights	572	0.5
+MCTS	572	0.5
+Aai	573	0.5
+Handcrafted Weights	573	0.5
+MCTS	573	0.5
+Aai	574	2.0
+Handcrafted Weights	574	0.0
+MCTS	574	0.5
+Aai	575	0.5
+Handcrafted Weights	575	0.0
+MCTS	575	0.5
+Aai	576	0.5
+Handcrafted Weights	576	0.0
+MCTS	576	0.5
+Aai	577	0.5
+Handcrafted Weights	577	0.5
+MCTS	577	0.0
+Aai	578	0.0
+Handcrafted Weights	578	0.5
+MCTS	578	0.5
+Aai	579	1.0
+Handcrafted Weights	579	0.0
+MCTS	579	0.5
+Aai	580	2.0
+Handcrafted Weights	580	0.0
+MCTS	580	0.5
+Aai	581	1.0
+Handcrafted Weights	581	1.0
+MCTS	581	0.5
+Aai	582	2.0
+Handcrafted Weights	582	0.5
+MCTS	582	0.5
+Aai	583	2.0
+Handcrafted Weights	583	0.0
+MCTS	583	0.5
+Aai	584	2.0
+Handcrafted Weights	584	0.0
+MCTS	584	0.5
+Aai	585	0.0
+Handcrafted Weights	585	1.0
+MCTS	585	0.5
+Aai	586	0.5
+Handcrafted Weights	586	0.0
+MCTS	586	0.5
+Aai	587	3.0
+Handcrafted Weights	587	0.5
+MCTS	587	2.0
+Aai	588	0.5
+Handcrafted Weights	588	1.5
+MCTS	588	0.5
+Aai	589	0.0
+Handcrafted Weights	589	0.0
+MCTS	589	0.5
+Aai	590	1.0
+Handcrafted Weights	590	0.0
+MCTS	590	0.5
+Aai	591	0.0
+Handcrafted Weights	591	0.0
+MCTS	591	0.5
+Aai	592	0.5
+Handcrafted Weights	592	0.5
+MCTS	592	0.5
+Aai	593	0.5
+Handcrafted Weights	593	0.0
+MCTS	593	0.0
+Aai	594	0.5
+Handcrafted Weights	594	0.5
+MCTS	594	0.5
+Aai	595	0.0
+Handcrafted Weights	595	0.0
+MCTS	595	2.0
+Aai	596	2.0
+Handcrafted Weights	596	0.0
+MCTS	596	0.5
+Aai	597	2.0
+Handcrafted Weights	597	0.5
+MCTS	597	0.5
+Aai	598	0.0
+Handcrafted Weights	598	0.5
+MCTS	598	0.5
+Aai	599	0.0
+Handcrafted Weights	599	0.0
+MCTS	599	0.5
+Aai	600	2.0
+Handcrafted Weights	600	0.0
+MCTS	600	2.0
+Aai	601	0.0
+Handcrafted Weights	601	0.0
+MCTS	601	0.5
+Aai	602	1.0
+Handcrafted Weights	602	0.0
+MCTS	602	2.0
+Aai	603	0.0
+Handcrafted Weights	603	0.0
+MCTS	603	0.5
+Aai	604	0.0
+Handcrafted Weights	604	1.5
+MCTS	604	0.5
+Aai	605	1.0
+Handcrafted Weights	605	0.5
+MCTS	605	0.5
+Aai	606	1.0
+Handcrafted Weights	606	0.0
+MCTS	606	2.0
