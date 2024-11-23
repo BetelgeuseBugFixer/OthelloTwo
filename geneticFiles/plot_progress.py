@@ -76,16 +76,17 @@ def main(against_all_file, against_best_file):
     against_all_data = load_data(against_all_file)
     against_best_data = load_data(against_best_file)
 
-    plot_file_separately(against_all_data, "Benchmark With all Agents","plots/allBenchmark.png")
+    plot_file_separately(against_all_data, "Benchmark With all Agents", "plots/allBenchmark.png")
 
     plot_each_category(against_best_data, "Against Best Agents", "plots/best_agents")
     plot_average(against_best_data, "Average Against Best Agents", "plots/average_best_agents.png")
-    plot_average(against_best_data, "Smoothed Average Against Best Agents", "plots/smoothed_average_best_agents.png", smooth=True, window=51, poly=3)
+    plot_average(against_best_data, "Smoothed Average Against Best Agents",
+                 "plots/smoothed_average_best_agents.png", smooth=True, window=51, poly=3)
 
 
 if __name__ == "__main__":
-    against_all_file = "benchMarkAgainstAll.tsv"
-    against_best_file = "benchMarkAgainstBest.tsv"
+    against_all_file = "benchmarkAgainstAll.tsv"
+    against_best_file = "benchmarkAgainstBest.tsv"
     if len(sys.argv) > 2:
         against_all_file = sys.argv[0]
         against_best_file = sys.argv[2]
