@@ -24,7 +24,7 @@ public class GeneticAlgorithm {
 	static int generationsPerBenchmark = 1;
 	static int gamesPlayedPerMatchUp = 2;
 	static int numOfThreads = Runtime.getRuntime().availableProcessors();
-	static int populationSize = 2;
+	static int populationSize = 5;
 	static int singleParentPercentage = 50;
 	static int mutationSV = 5;
 	static int crossoverPercentage = 15;
@@ -94,7 +94,6 @@ public class GeneticAlgorithm {
 		for (int i = 0; i < populationSize; i++) {
 			aiAgents[i] = new AiAgent(weightSize);
 		}
-
 		train(aiAgents, 0, generations);
 
 	}
@@ -108,7 +107,7 @@ public class GeneticAlgorithm {
 
 	public void train(AiAgent[] currentAgents, int startGen, int generationsToTrain) throws IOException, InterruptedException {
 		NormalDistribution distribution = new NormalDistribution(0, mutationSV);
-
+		Random random=new Random();
 		BenchmarkAiAgent[] benchmarks = {new ServerPlayer(80, new Aai01(), "Aai"),
 				new ServerPlayer(80, new Agent(), "NicoAi")
 				, new HandCraftedWeights(),
@@ -129,36 +128,34 @@ public class GeneticAlgorithm {
 
 			updateBest(currentAgents[currentAgents.length - 1], generation);
 
-			currentAgents = getNextGeneration(currentAgents, distribution);
+			currentAgents = getNextGeneration(currentAgents, distribution,random);
 
 			FileWriter generationWriter = new FileWriter(generationFile);
 			generationWriter.write(generation + "\n");
 			generationWriter.flush();
 			generationWriter.close();
 			bar.countUp();
-
 		}
 	}
 
-	public AiAgent[] getNextGeneration(AiAgent[] previousGenration, NormalDistribution distribution) {
+	public AiAgent[] getNextGeneration(AiAgent[] previousGenration, NormalDistribution distribution, Random random) {
 		AiAgent[] nextGeneration = new AiAgent[populationSize];
 		int[] rankArray = getProportionalRankArray();
-		Random random = new Random();
-
-		for (int i = 0; i < populationSize; i++) {
+		//conserve first
+		nextGeneration[0]=previousGenration[previousGenration.length-1].copyWeightsToNewAgent();
+		for (int i = 1; i < populationSize; i++) {
 			boolean isSingleParent = singleParentPercentage < random.nextInt(100);
 			if (isSingleParent) {
 				AiAgent parent = previousGenration[rankArray[random.nextInt(rankArray.length)]];
-				nextGeneration[i] = AiAgent.mutate(parent, distribution);
+				nextGeneration[i] = AiAgent.mutate(parent, distribution,random);
 			} else {
 				AiAgent mother = previousGenration[rankArray[random.nextInt(rankArray.length)]];
 				AiAgent father = previousGenration[rankArray[random.nextInt(rankArray.length)]];
 
-				nextGeneration[i] = AiAgent.recombine(mother, father, crossoverPercentage, distribution);
+				nextGeneration[i] = AiAgent.recombine(mother, father, crossoverPercentage, distribution,random);
 			}
 
 		}
-
 		return nextGeneration;
 	}
 
@@ -199,7 +196,6 @@ public class GeneticAlgorithm {
 		if (generation > 0) {
 			bestAgent = getBestAgent();
 			int bestGameDifference = Games.playBestMatchUp(bestAgent, contender, gamesPlayedPerMatchUp);
-
 			if (bestAgent.points.get() + bestGameDifference < contender.points.get()) {
 				System.out.println("\rnew best found in generation " + generation);
 				bestAgent = contender;
