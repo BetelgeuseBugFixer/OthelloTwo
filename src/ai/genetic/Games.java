@@ -33,7 +33,7 @@ public class Games {
         int[] gameResults = {0, 0};
         for (int i = 0; i < gamesPlayedPerMatchUp; i++) {
             gameResults[0] += playSingleGame(best, contender);
-            gameResults[1] += playSingleGame(contender, best);
+            gameResults[1] -= playSingleGame(contender, best);
         }
         int endResult = 0;
         for (int result : gameResults) {
