@@ -78,11 +78,11 @@ public class AaronFish implements szte.mi.Player {
 
         if (root.getNextNodes(playerOne).length == 1) {
             int move = root.getNextNodes(playerOne)[0].getPreviousMove();
+            this.boardTree.move(move, this.playerOne);
             return Othello.getMoveFromInt(move);
         }
         int bestMove = -1;
         if (playerOne) {
-            //check if there is only one move
             for (OthelloNode node : root.getNextNodes(true)) {
                 if (node == null) {
                     break;
@@ -238,10 +238,10 @@ public class AaronFish implements szte.mi.Player {
     public static class changingDepth implements DepthGoalCalculator {
         @Override
         public int getGoalDepth(long remainingTime, int remainingEmptySpaces) {
-            if (remainingEmptySpaces < 14) {
+            if (remainingEmptySpaces < 12) {
                 return 25;
             } else {
-                return 5;
+                return 4;
             }
         }
     }
