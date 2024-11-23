@@ -56,8 +56,8 @@
     </orderEntry>
     <orderEntry type="library" name="apache.commons.math3" level="project" />
     <orderEntry type="library" name="javafx-swt" level="project" />
+    <orderEntry type="library" name="Python 3.9 interpreter library" level="application" />
     <orderEntry type="library" name="OthelloGUI" level="project" />
     <orderEntry type="library" name="othello-1.0.0" level="project" />
-    <orderEntry type="library" name="Python 3.9 interpreter library" level="application" />
   </component>
 </module>

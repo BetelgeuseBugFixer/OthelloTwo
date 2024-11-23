@@ -1,11 +1,14 @@
 package ai.genetic;
 
+import AIaaron.Aai01;
 import ai.BetterGrader;
-import ai.genetic.aai.AaiWrapper;
 import ai.genetic.mcst.MCTWPlayer;
+import ai.genetic.server.ServerPlayer;
+import games.othello.Agents.Agent;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import progressbar.Progressbar;
 import progressbar.Timer;
+
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -18,10 +21,10 @@ public class GeneticAlgorithm {
 	static final File bestFile = new File("geneticFiles/best.txt");
 	static final File allBenchmark = new File("geneticFiles/benchmarkAgainstAll.tsv");
 	static final File bestBenchmark = new File("geneticFiles/benchmarkAgainstBest.tsv");
-	static int generationsPerBenchmark = 5;
+	static int generationsPerBenchmark = 1;
 	static int gamesPlayedPerMatchUp = 2;
 	static int numOfThreads = Runtime.getRuntime().availableProcessors();
-	static int populationSize = 100;
+	static int populationSize = 2;
 	static int singleParentPercentage = 50;
 	static int mutationSV = 5;
 	static int crossoverPercentage = 15;
@@ -106,12 +109,14 @@ public class GeneticAlgorithm {
 	public void train(AiAgent[] currentAgents, int startGen, int generationsToTrain) throws IOException, InterruptedException {
 		NormalDistribution distribution = new NormalDistribution(0, mutationSV);
 
-		BenchmarkAiAgent[] benchmarks = {new AaiWrapper(80), new HandCraftedWeights(), new MCTWPlayer(20)};
+		BenchmarkAiAgent[] benchmarks = {new ServerPlayer(80, new Aai01(), "Aai"),
+				new ServerPlayer(80, new Agent(), "NicoAi")
+				, new HandCraftedWeights(),
+				new MCTWPlayer(20)};
 
 		int generation = startGen;
 		Progressbar bar = new Progressbar("generations", generationsToTrain);
 		for (int i = 0; i < generationsToTrain; i++, generation++) {
-
 			if (generation % generationsPerBenchmark == 0) {
 				this.simulateAllGames(benchmarks, currentAgents);
 				writeBenchMark(benchmarks, generation, allBenchmark);
@@ -184,7 +189,10 @@ public class GeneticAlgorithm {
 	}
 
 	public void updateBest(AiAgent contender, int generation) throws IOException, InterruptedException {
-		BenchmarkAiAgent[] benchmarks = {new AaiWrapper(600), new HandCraftedWeights(), new MCTWPlayer(130)};
+		BenchmarkAiAgent[] benchmarks = {new ServerPlayer(600, new Aai01(), "Aai"),
+				new ServerPlayer(80, new Agent(), "NicoAi")
+				, new HandCraftedWeights(),
+				new MCTWPlayer(130)};
 		AiAgent bestAgent = contender;
 		contender.resetPoints();
 		playAgainstBenchmarks(benchmarks, contender);
@@ -205,7 +213,9 @@ public class GeneticAlgorithm {
 
 	public void playAgainstBenchmarks(BenchmarkAiAgent[] benchmarks, AiAgent agent) throws InterruptedException {
 		ExecutorService executorService = Executors.newFixedThreadPool(numOfThreads);
-
+		// redirect output
+		PrintStream original = System.out;
+		System.setOut(new PrintStream(new NullOutputStream()));
 		for (BenchmarkAiAgent benchmark : benchmarks) {
 			executorService.submit(() -> benchmark.playAgainstNormalAgent(agent, gamesPlayedPerMatchUp));
 		}
@@ -213,6 +223,7 @@ public class GeneticAlgorithm {
 		if (!executorService.awaitTermination(100, TimeUnit.SECONDS)) {
 			System.out.println("is still running");
 		}
+		System.setOut(original);
 	}
 
 	public void writeBest(AiAgent newBest) throws IOException {
@@ -294,6 +305,9 @@ public class GeneticAlgorithm {
 	}
 
 	public void simulateAllGames(BenchmarkAiAgent[] benchmarks, AiAgent[] aiAgents) throws InterruptedException {
+		// redirect output
+		PrintStream original = System.out;
+		System.setOut(new PrintStream(new NullOutputStream()));
 		ExecutorService executorService = Executors.newFixedThreadPool(numOfThreads);
 
 		for (BenchmarkAiAgent benchmark : benchmarks) {
@@ -303,8 +317,10 @@ public class GeneticAlgorithm {
 		simulateAgents(aiAgents, executorService);
 		executorService.shutdown();
 		if (!executorService.awaitTermination(300, TimeUnit.SECONDS)) {
+			System.setOut(original);
 			System.out.println("is still running");
 		}
+		System.setOut(original);
 	}
 
 	private void simulateAgents(AiAgent[] aiAgents, ExecutorService executorService) {
@@ -396,5 +412,10 @@ public class GeneticAlgorithm {
 		return agents;
 	}
 
-
+	static class NullOutputStream extends java.io.OutputStream {
+		@Override
+		public void write(int b) {
+			// Do nothing
+		}
+	}
 }
