@@ -1,8 +1,16 @@
-Aai	0	2.0
+Aai	0	2.1
 NicoAi	0	2.0
-Handcrafted Weights	0	3.0
-MCTS	0	2.0
-Aai	1	2.25
-NicoAi	1	2.0
-Handcrafted Weights	1	3.0
-MCTS	1	1.25
+Handcrafted Weights	0	2.65
+MCTS	0	1.85
+Aai	1	1.95
+NicoAi	1	2.1
+Handcrafted Weights	1	2.725
+MCTS	1	1.9
+Aai	2	1.8666666666666667
+NicoAi	2	1.95
+Handcrafted Weights	2	2.816666666666667
+MCTS	2	1.9833333333333334
+Aai	3	1.9
+NicoAi	3	1.85
+Handcrafted Weights	3	2.8125
+MCTS	3	1.925

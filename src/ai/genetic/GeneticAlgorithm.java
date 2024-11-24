@@ -24,13 +24,13 @@ public class GeneticAlgorithm {
 	static int generationsPerBenchmark = 1;
 	static int gamesPlayedPerMatchUp = 2;
 	static int numOfThreads = Runtime.getRuntime().availableProcessors();
-	static int populationSize = 5;
+	static int populationSize = 10;
 	static int singleParentPercentage = 50;
 	static int mutationSV = 5;
 	static int crossoverPercentage = 15;
-	public final File weightsInGenerations = new File("src/ai/genetic/weights.tsv");
+	public final File weightsInGenerations = new File("geneticFiles/weights.tsv");
 
-	public final File generationFile = new File("src/ai/genetic/generation.tsv");
+	public final File generationFile = new File("geneticFiles/generation.tsv");
 
 	public static void main(String[] args) throws InterruptedException, IOException {
 
@@ -190,9 +190,11 @@ public class GeneticAlgorithm {
 				new ServerPlayer(80, new Agent(), "NicoAi")
 				, new HandCraftedWeights(),
 				new MCTWPlayer(130)};
-		AiAgent bestAgent = contender;
+
 		contender.resetPoints();
 		playAgainstBenchmarks(benchmarks, contender);
+		//update best
+		AiAgent bestAgent;
 		if (generation > 0) {
 			bestAgent = getBestAgent();
 			int bestGameDifference = Games.playBestMatchUp(bestAgent, contender, gamesPlayedPerMatchUp);
@@ -200,7 +202,8 @@ public class GeneticAlgorithm {
 				System.out.println("\rnew best found in generation " + generation);
 				bestAgent = contender;
 			}
-
+		}else {
+			bestAgent = contender;
 		}
 		writeBest(bestAgent);
 		writeWeights(bestAgent, generation);
