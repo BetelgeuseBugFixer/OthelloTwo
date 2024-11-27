@@ -215,7 +215,7 @@ public class GeneticAlgorithm {
 				AiAgent mother = previousGenration[rankArray[random.nextInt(rankArray.length)]];
 				AiAgent father = previousGenration[rankArray[random.nextInt(rankArray.length)]];
 
-				nextGeneration[i] = AiAgent.recombine(mother, father, crossoverPercentage, distribution, random);
+				nextGeneration[i] = AiAgent.recombine(mother, father, crossoverPercentage,geneReactivationPercentage,geneDeletionPercentage, distribution, random);
 			}
 
 		}
