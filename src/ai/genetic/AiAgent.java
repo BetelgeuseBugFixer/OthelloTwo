@@ -7,20 +7,25 @@ import org.apache.commons.math3.distribution.NormalDistribution;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static ai.genetic.GeneticAlgorithm.percentageCheck;
+
 public class AiAgent implements Comparable<AiAgent> {
 	int[] weights;
 	AtomicInteger points;
 
-	public AiAgent(int weightSize) {
+	public AiAgent(int weightSize, int deletionPercentage, Random random) {
 		this.points = new AtomicInteger();
 
-		Random rnd = new Random();
 		this.weights = new int[weightSize];
 		// init move change to be in between 20 and 50
-		weights[0] = rnd.nextInt(30) + 20;
+		weights[0] = random.nextInt(30) + 20;
 		for (int i = 1; i < weightSize; i++) {
-			int newWeight = rnd.nextInt(200);
-			weights[i] = newWeight - 100;
+			if (percentageCheck(random, deletionPercentage)) {
+				weights[i] = 0;
+			} else {
+				int newWeight = random.nextInt(200);
+				weights[i] = newWeight - 100;
+			}
 		}
 	}
 
@@ -29,19 +34,33 @@ public class AiAgent implements Comparable<AiAgent> {
 		this.points = new AtomicInteger();
 	}
 
-	public static AiAgent mutate(AiAgent agent, NormalDistribution distribution, Random rnd) {
+	public static AiAgent mutate(AiAgent agent, int deletionPercentage, int reactivationPercentage, NormalDistribution distribution, Random random) {
 		int[] newWeights = new int[agent.weights.length];
 		for (int i = 0; i < newWeights.length; i++) {
-			newWeights[i] = agent.weights[i] + (int) (distribution.sample());
+			newWeights[i] = mutateSingleWeight(agent.weights[i], reactivationPercentage, deletionPercentage, random, distribution);
 		}
 		// adjust move change to be in between 20 and 50
-		if (newWeights[0] > 50 || newWeights[0] < 30) {
-			newWeights[0] = rnd.nextInt(30) + 20;
-		}
+		adjustMoveChange(newWeights,random);
 		return new AiAgent(newWeights);
 	}
 
-	public static AiAgent recombine(AiAgent mother, AiAgent father, int crossoverPercentage, NormalDistribution distribution,Random rnd) {
+	private static int mutateSingleWeight(int oldValue, int reactivationPercentage, int deletionPercentage, Random random, NormalDistribution distribution) {
+		int newValue = 0;
+		if (oldValue == 0) {
+			if (percentageCheck(random, reactivationPercentage)) {
+				// reactivate Gene
+				newValue = random.nextInt(200) - 100;
+			}
+		} else {
+			if (!percentageCheck(random, deletionPercentage)) {
+				// weight is set to 0 if the condition is not met
+				newValue = oldValue + (int) (distribution.sample());
+			}
+		}
+		return newValue;
+	}
+
+	public static AiAgent recombine(AiAgent mother, AiAgent father, int crossoverPercentage, int reactivationPercentage, int deletionPercentage, NormalDistribution distribution, Random random) {
 		int[] childWeights = new int[mother.weights.length];
 		int[] chromosomEndpoints = {1, ((mother.weights.length - 1) / 2) + 1, mother.weights.length};
 		int[] chromosomeSumsMother = getAbsolutSplitArraySum(chromosomEndpoints, mother.weights);
@@ -56,29 +75,32 @@ public class AiAgent implements Comparable<AiAgent> {
 
 			int inheritSum = chromosomeSumsMother[currentChromosom];
 			int notInheritSum = chromosomeSumsFather[currentChromosom];
-			if (rnd.nextBoolean()) {
+			if (random.nextBoolean()) {
 				getsToInherent = father.weights;
 				notInherited = mother.weights;
 				notInheritSum = chromosomeSumsMother[currentChromosom];
 				inheritSum = chromosomeSumsFather[currentChromosom];
 			}
 			while (gene < chromosomEnd) {
-				if (rnd.nextInt(100) < crossoverPercentage) {
+				if (percentageCheck(random, crossoverPercentage)) {
 					childWeights[gene] = getRecombinedScaledWeight(notInherited[gene], getsToInherent[gene], notInheritSum, inheritSum);
 				} else {
 					childWeights[gene] = getsToInherent[gene];
 				}
 				// mutate
-				childWeights[gene] += (int) (distribution.sample());
+				childWeights[gene] = mutateSingleWeight(childWeights[gene], reactivationPercentage, deletionPercentage, random, distribution);
 				gene++;
 			}
 
 		}
 		// adjust move change to be in between 20 and 50
-		if (childWeights[0] > 50 || childWeights[0] < 30) {
-			childWeights[0] = rnd.nextInt(30) + 20;
-		}
+		adjustMoveChange(childWeights,random);
 		return new AiAgent(childWeights);
+	}
+	private static void adjustMoveChange(int[] weights,Random random){
+		if (weights[0] > 50 || weights[0] < 30) {
+			weights[0] = random.nextInt(30) + 20;
+		}
 	}
 
 	public static int getRecombinedScaledWeight(int weightToScale, int weightToBeReplaced, int sumOfToScale, int sumOfToBeReplaced) {
@@ -104,9 +126,9 @@ public class AiAgent implements Comparable<AiAgent> {
 	}
 
 	public AiAgent copyWeightsToNewAgent() {
-		int[] newWeights=new int[this.weights.length];
-		System.arraycopy(this.weights,0,newWeights,0,this.weights.length);
-        return new AiAgent(newWeights);
+		int[] newWeights = new int[this.weights.length];
+		System.arraycopy(this.weights, 0, newWeights, 0, this.weights.length);
+		return new AiAgent(newWeights);
 	}
 
 	public void resetPoints() {
@@ -122,10 +144,10 @@ public class AiAgent implements Comparable<AiAgent> {
 	}
 
 	public AaronFish initAi(int order) {
-		Random rnd = new Random();
+		Random random = new Random();
 
 		AaronFish aaronFish = new AaronFish();
-		aaronFish.init(order, 8, rnd);
+		aaronFish.init(order, 8, random);
 		aaronFish.setDepthGoalCalculatorToRandom();
 
 		BetterGrader grader = new BetterGrader();

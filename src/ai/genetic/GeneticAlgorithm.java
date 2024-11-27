@@ -24,13 +24,14 @@ public class GeneticAlgorithm {
 	static final File bestSnapshotDir = new File("geneticFiles/snapshots/best");
 	static final File populationSnapshotDir = new File("geneticFiles/snapshots/population");
 	static final int generationsPerSnapshot = 1;
-
 	static final int generationsPerBenchmark = 1;
 	static final int gamesPlayedPerMatchUp = 2;
 	static final int numOfThreads = Runtime.getRuntime().availableProcessors();
 	static final int singleParentPercentage = 50;
 	static final int mutationSV = 5;
 	static final int crossoverPercentage = 15;
+	static final int geneDeletionPercentage = 20;
+	static final int geneReactivationPercentage = 20;
 	static final int earlyStop = 15;
 	static int populationSize = 5;
 	static int generationsWithoutNewBest = 0;
@@ -40,15 +41,16 @@ public class GeneticAlgorithm {
 
 
 	public static void main(String[] args) throws InterruptedException, IOException {
+		Random random = new Random();
 		GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm();
 		if (args.length == 1) {
-			geneticAlgorithm.start(Integer.parseInt(args[0]));
+			geneticAlgorithm.start(Integer.parseInt(args[0]), random);
 		} else {
 			int generationsToTrain = Integer.parseInt(args[1]);
 			if (args[0].equalsIgnoreCase("c")) {
-				geneticAlgorithm.continueTraining(generationsToTrain);
+				geneticAlgorithm.continueTraining(generationsToTrain, random);
 			} else {
-				geneticAlgorithm.start(generationsToTrain);
+				geneticAlgorithm.start(generationsToTrain, random);
 			}
 		}
 	}
@@ -132,7 +134,11 @@ public class GeneticAlgorithm {
 		writer.close();
 	}
 
-	public void start(int generations) throws InterruptedException, IOException {
+	static boolean percentageCheck(Random random, int percentage) {
+		return random.nextInt(100) < percentage;
+	}
+
+	public void start(int generations, Random random) throws InterruptedException, IOException {
 		File[] files = {weightFile, bestFile, weightsInGenerations, allBenchmark, bestBenchmark, generationFile};
 		makeFilesEmptyOrCreate(files);
 		createOrEmptyDir(bestSnapshotDir);
@@ -141,22 +147,21 @@ public class GeneticAlgorithm {
 		int weightSize = getWeightsSize();
 		AiAgent[] aiAgents = new AiAgent[populationSize];
 		for (int i = 0; i < populationSize; i++) {
-			aiAgents[i] = new AiAgent(weightSize);
+			aiAgents[i] = new AiAgent(weightSize, geneDeletionPercentage, random);
 		}
-		train(aiAgents, 0, generations);
+		train(aiAgents, 0, generations, random);
 
 	}
 
-	public void continueTraining(int generationsToTrain) throws IOException, InterruptedException {
+	public void continueTraining(int generationsToTrain, Random random) throws IOException, InterruptedException {
 		AiAgent[] agents = readAiAgents();
 		populationSize = agents.length;
 		int current = readNumberFromFile(generationFile) + 1;
-		train(agents, current, generationsToTrain);
+		train(agents, current, generationsToTrain, random);
 	}
 
-	public void train(AiAgent[] currentAgents, int startGen, int generationsToTrain) throws IOException, InterruptedException {
+	public void train(AiAgent[] currentAgents, int startGen, int generationsToTrain, Random random) throws IOException, InterruptedException {
 		NormalDistribution distribution = new NormalDistribution(0, mutationSV);
-		Random random = new Random();
 		BenchmarkAiAgent[] benchmarks = {new ServerPlayer(80, new Aai01(), "Aai"),
 				new ServerPlayer(80, new Agent(), "NicoAi")
 				, new HandCraftedWeights(),
@@ -203,10 +208,9 @@ public class GeneticAlgorithm {
 		// conserve first
 		nextGeneration[0] = previousGenration[previousGenration.length - 1].copyWeightsToNewAgent();
 		for (int i = 1; i < populationSize; i++) {
-			boolean isSingleParent = singleParentPercentage < random.nextInt(100);
-			if (isSingleParent) {
+			if (percentageCheck(random,singleParentPercentage)) {
 				AiAgent parent = previousGenration[rankArray[random.nextInt(rankArray.length)]];
-				nextGeneration[i] = AiAgent.mutate(parent, distribution, random);
+				nextGeneration[i] = AiAgent.mutate(parent, geneDeletionPercentage, geneReactivationPercentage, distribution, random);
 			} else {
 				AiAgent mother = previousGenration[rankArray[random.nextInt(rankArray.length)]];
 				AiAgent father = previousGenration[rankArray[random.nextInt(rankArray.length)]];
