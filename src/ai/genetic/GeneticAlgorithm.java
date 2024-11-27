@@ -23,21 +23,23 @@ public class GeneticAlgorithm {
 	static final File bestBenchmark = new File("geneticFiles/benchmarkAgainstBest.tsv");
 	static final File bestSnapshotDir = new File("geneticFiles/snapshots/best");
 	static final File populationSnapshotDir = new File("geneticFiles/snapshots/population");
-	static int generationsPerSnapshot = 1;
+	static final int generationsPerSnapshot = 1;
 
-	static int generationsPerBenchmark = 1;
-	static int gamesPlayedPerMatchUp = 2;
-	static int numOfThreads = Runtime.getRuntime().availableProcessors();
+	static final int generationsPerBenchmark = 1;
+	static final int gamesPlayedPerMatchUp = 2;
+	static final int numOfThreads = Runtime.getRuntime().availableProcessors();
+	static final int singleParentPercentage = 50;
+	static final int mutationSV = 5;
+	static final int crossoverPercentage = 15;
+	static final int earlyStop = 15;
 	static int populationSize = 5;
-	static int singleParentPercentage = 50;
-	static int mutationSV = 5;
-	static int crossoverPercentage = 15;
+	static int generationsWithoutNewBest = 0;
 	public final File weightsInGenerations = new File("geneticFiles/weights.tsv");
 
 	public final File generationFile = new File("geneticFiles/generation.tsv");
 
-	public static void main(String[] args) throws InterruptedException, IOException {
 
+	public static void main(String[] args) throws InterruptedException, IOException {
 		GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm();
 		if (args.length == 1) {
 			geneticAlgorithm.start(Integer.parseInt(args[0]));
@@ -162,7 +164,7 @@ public class GeneticAlgorithm {
 
 		int generation = startGen;
 		Progressbar bar = new Progressbar("generations", generationsToTrain);
-		for (int i = 0; i < generationsToTrain; i++, generation++) {
+		for (int i = 0; i < generationsToTrain && generationsWithoutNewBest < earlyStop; i++, generation++) {
 			if (generation % generationsPerBenchmark == 0) {
 				this.simulateAllGames(benchmarks, currentAgents);
 				writeBenchMark(benchmarks, generation, allBenchmark);
@@ -191,7 +193,7 @@ public class GeneticAlgorithm {
 		File bestSnapshotFile = new File(bestSnapshotDir, "best_gen_" + generation + ".tsv");
 		File populationSnapshotFile = new File(populationSnapshotDir, "population_gen_" + generation + ".tsv");
 
-		writeBest(agents[agents.length-1],bestSnapshotFile);
+		writeBest(agents[agents.length - 1], bestSnapshotFile);
 		writePopulationFile(agents, populationSnapshotFile);
 	}
 
@@ -251,6 +253,9 @@ public class GeneticAlgorithm {
 			if (bestAgent.points.get() + bestGameDifference < contender.points.get()) {
 				System.out.println("\rnew best found in generation " + generation);
 				bestAgent = contender;
+				generationsWithoutNewBest = 0;
+			} else {
+				generationsWithoutNewBest += 1;
 			}
 		} else {
 			bestAgent = contender;
