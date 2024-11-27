@@ -278,7 +278,7 @@ public class GeneticAlgorithm {
 			executorService.submit(() -> benchmark.playAgainstNormalAgent(agent, gamesPlayedPerMatchUp));
 		}
 		executorService.shutdown();
-		if (!executorService.awaitTermination(100, TimeUnit.SECONDS)) {
+		if (!executorService.awaitTermination(200, TimeUnit.SECONDS)) {
 			System.out.println("is still running");
 		}
 		System.setOut(original);
@@ -378,7 +378,7 @@ public class GeneticAlgorithm {
 
 		simulateAgents(aiAgents, executorService);
 		executorService.shutdown();
-		if (!executorService.awaitTermination(300, TimeUnit.SECONDS)) {
+		if (!executorService.awaitTermination(400, TimeUnit.SECONDS)) {
 			System.setOut(original);
 			System.out.println("is still running");
 		}
@@ -400,7 +400,7 @@ public class GeneticAlgorithm {
 		ExecutorService executorService = Executors.newFixedThreadPool(numOfThreads);
 		simulateAgents(aiAgents, executorService);
 		executorService.shutdown();
-		if (!executorService.awaitTermination(300, TimeUnit.SECONDS)) {
+		if (!executorService.awaitTermination(500, TimeUnit.SECONDS)) {
 			System.out.println("is still running");
 		}
 	}

@@ -121,7 +121,6 @@ public class AiAgent implements Comparable<AiAgent> {
 			}
 			sums[endPointIndex] += Math.abs(toSum[i]);
 		}
-
 		return sums;
 	}
 
