@@ -278,8 +278,9 @@ public class GeneticAlgorithm {
 			executorService.submit(() -> benchmark.playAgainstNormalAgent(agent, gamesPlayedPerMatchUp));
 		}
 		executorService.shutdown();
-		if (!executorService.awaitTermination(200, TimeUnit.SECONDS)) {
-			System.out.println("is still running");
+		if (!executorService.awaitTermination(400, TimeUnit.SECONDS)) {
+			System.out.println("is still running when playing against best");
+			throw new RuntimeException("Simulating matches took to long");
 		}
 		System.setOut(original);
 	}
@@ -339,6 +340,7 @@ public class GeneticAlgorithm {
 		executorService.shutdown();
 		if (!executorService.awaitTermination(300, TimeUnit.SECONDS)) {
 			System.out.println("is still running");
+			throw new RuntimeException("simulating matches took to long");
 		}
 
 	}
@@ -378,9 +380,10 @@ public class GeneticAlgorithm {
 
 		simulateAgents(aiAgents, executorService);
 		executorService.shutdown();
-		if (!executorService.awaitTermination(400, TimeUnit.SECONDS)) {
+		if (!executorService.awaitTermination(1_000, TimeUnit.SECONDS)) {
 			System.setOut(original);
-			System.out.println("is still running");
+			System.out.println("is still running when playing normal agents");
+			throw new RuntimeException("simulating matches took to long, more then 1000 seconds");
 		}
 		System.setOut(original);
 	}
@@ -402,6 +405,7 @@ public class GeneticAlgorithm {
 		executorService.shutdown();
 		if (!executorService.awaitTermination(500, TimeUnit.SECONDS)) {
 			System.out.println("is still running");
+			throw new RuntimeException("simulating matches took to long");
 		}
 	}
 
@@ -415,6 +419,7 @@ public class GeneticAlgorithm {
 		executorService.shutdown();
 		if (!executorService.awaitTermination(300, TimeUnit.SECONDS)) {
 			System.out.println("is still running");
+			throw new RuntimeException("simulating matches took to long");
 		}
 	}
 
