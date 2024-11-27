@@ -21,10 +21,14 @@ public class GeneticAlgorithm {
 	static final File bestFile = new File("geneticFiles/best.txt");
 	static final File allBenchmark = new File("geneticFiles/benchmarkAgainstAll.tsv");
 	static final File bestBenchmark = new File("geneticFiles/benchmarkAgainstBest.tsv");
+	static final File bestSnapshotDir = new File("geneticFiles/snapshots/best");
+	static final File populationSnapshotDir = new File("geneticFiles/snapshots/population");
+	static int generationsPerSnapshot = 1;
+
 	static int generationsPerBenchmark = 1;
 	static int gamesPlayedPerMatchUp = 2;
 	static int numOfThreads = Runtime.getRuntime().availableProcessors();
-	static int populationSize = 10;
+	static int populationSize = 5;
 	static int singleParentPercentage = 50;
 	static int mutationSV = 5;
 	static int crossoverPercentage = 15;
@@ -56,6 +60,37 @@ public class GeneticAlgorithm {
 		return grader.weights.length;
 	}
 
+	public static void createOrEmptyDir(File dir) throws IOException {
+		if (!dir.exists()) {
+			// Create the directory if it doesn't exist
+			if (!dir.mkdirs()) {
+				throw new IOException("Failed to create directory: " + dir.getAbsolutePath());
+			}
+		} else if (dir.isDirectory()) {
+			// If the directory exists, empty its contents
+			emptyDir(dir);
+		} else {
+			throw new IOException("Path exists but is not a directory: " + dir.getAbsolutePath());
+		}
+	}
+
+	private static void emptyDir(File dir) throws IOException {
+		File[] files = dir.listFiles(); // List all files and subdirectories
+		if (files == null) {
+			throw new IOException("Failed to read contents of directory: " + dir.getAbsolutePath());
+		}
+		for (File file : files) {
+			if (file.isDirectory()) {
+				// Recursively delete subdirectories
+				emptyDir(file);
+			}
+			// Delete files and empty subdirectories
+			if (!file.delete()) {
+				throw new IOException("Failed to delete: " + file.getAbsolutePath());
+			}
+		}
+	}
+
 	public static void makeFilesEmptyOrCreate(File[] files) throws IOException {
 		for (File file : files) {
 			if (file.exists()) {
@@ -85,9 +120,21 @@ public class GeneticAlgorithm {
 		}
 	}
 
+	public static void writePopulationFile(AiAgent[] agents, File outputFile) throws IOException {
+		BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile));
+		for (AiAgent sortedAiAgent : agents) {
+			writer.write(sortedAiAgent.toString());
+			writer.newLine();
+		}
+		writer.flush();
+		writer.close();
+	}
+
 	public void start(int generations) throws InterruptedException, IOException {
 		File[] files = {weightFile, bestFile, weightsInGenerations, allBenchmark, bestBenchmark, generationFile};
 		makeFilesEmptyOrCreate(files);
+		createOrEmptyDir(bestSnapshotDir);
+		createOrEmptyDir(populationSnapshotDir);
 		// initialize population randomly
 		int weightSize = getWeightsSize();
 		AiAgent[] aiAgents = new AiAgent[populationSize];
@@ -107,7 +154,7 @@ public class GeneticAlgorithm {
 
 	public void train(AiAgent[] currentAgents, int startGen, int generationsToTrain) throws IOException, InterruptedException {
 		NormalDistribution distribution = new NormalDistribution(0, mutationSV);
-		Random random=new Random();
+		Random random = new Random();
 		BenchmarkAiAgent[] benchmarks = {new ServerPlayer(80, new Aai01(), "Aai"),
 				new ServerPlayer(80, new Agent(), "NicoAi")
 				, new HandCraftedWeights(),
@@ -125,10 +172,12 @@ public class GeneticAlgorithm {
 
 			Arrays.sort(currentAgents);
 			safeCurrentAgents(currentAgents);
-
 			updateBest(currentAgents[currentAgents.length - 1], generation);
+			if (generation % generationsPerSnapshot == 0) {
+				writeSnapshotFiles(currentAgents, generation);
+			}
 
-			currentAgents = getNextGeneration(currentAgents, distribution,random);
+			currentAgents = getNextGeneration(currentAgents, distribution, random);
 
 			FileWriter generationWriter = new FileWriter(generationFile);
 			generationWriter.write(generation + "\n");
@@ -138,21 +187,29 @@ public class GeneticAlgorithm {
 		}
 	}
 
+	public void writeSnapshotFiles(AiAgent[] agents, int generation) throws IOException {
+		File bestSnapshotFile = new File(bestSnapshotDir, "best_gen_" + generation + ".tsv");
+		File populationSnapshotFile = new File(populationSnapshotDir, "population_gen_" + generation + ".tsv");
+
+		writeBest(agents[agents.length-1],bestSnapshotFile);
+		writePopulationFile(agents, populationSnapshotFile);
+	}
+
 	public AiAgent[] getNextGeneration(AiAgent[] previousGenration, NormalDistribution distribution, Random random) {
 		AiAgent[] nextGeneration = new AiAgent[populationSize];
 		int[] rankArray = getProportionalRankArray();
-		//conserve first
-		nextGeneration[0]=previousGenration[previousGenration.length-1].copyWeightsToNewAgent();
+		// conserve first
+		nextGeneration[0] = previousGenration[previousGenration.length - 1].copyWeightsToNewAgent();
 		for (int i = 1; i < populationSize; i++) {
 			boolean isSingleParent = singleParentPercentage < random.nextInt(100);
 			if (isSingleParent) {
 				AiAgent parent = previousGenration[rankArray[random.nextInt(rankArray.length)]];
-				nextGeneration[i] = AiAgent.mutate(parent, distribution,random);
+				nextGeneration[i] = AiAgent.mutate(parent, distribution, random);
 			} else {
 				AiAgent mother = previousGenration[rankArray[random.nextInt(rankArray.length)]];
 				AiAgent father = previousGenration[rankArray[random.nextInt(rankArray.length)]];
 
-				nextGeneration[i] = AiAgent.recombine(mother, father, crossoverPercentage, distribution,random);
+				nextGeneration[i] = AiAgent.recombine(mother, father, crossoverPercentage, distribution, random);
 			}
 
 		}
@@ -169,20 +226,13 @@ public class GeneticAlgorithm {
 				ranks[currentIndex] = rank - 1;
 				currentIndex++;
 			}
-
 		}
 
 		return ranks;
 	}
 
 	public void safeCurrentAgents(AiAgent[] sortedAiAgents) throws IOException {
-		BufferedWriter writer = new BufferedWriter(new FileWriter(weightFile));
-		for (AiAgent sortedAiAgent : sortedAiAgents) {
-			writer.write(sortedAiAgent.toString());
-			writer.newLine();
-		}
-		writer.flush();
-		writer.close();
+		writePopulationFile(sortedAiAgents, weightFile);
 	}
 
 	public void updateBest(AiAgent contender, int generation) throws IOException, InterruptedException {
@@ -193,7 +243,7 @@ public class GeneticAlgorithm {
 
 		contender.resetPoints();
 		playAgainstBenchmarks(benchmarks, contender);
-		//update best
+		// update best
 		AiAgent bestAgent;
 		if (generation > 0) {
 			bestAgent = getBestAgent();
@@ -202,7 +252,7 @@ public class GeneticAlgorithm {
 				System.out.println("\rnew best found in generation " + generation);
 				bestAgent = contender;
 			}
-		}else {
+		} else {
 			bestAgent = contender;
 		}
 		writeBest(bestAgent);
@@ -226,10 +276,14 @@ public class GeneticAlgorithm {
 	}
 
 	public void writeBest(AiAgent newBest) throws IOException {
-		FileWriter writer = (new FileWriter(bestFile));
-		writer.write(newBest.toString());
+		writeBest(newBest, bestFile);
+	}
+
+	public void writeBest(AiAgent best, File file) throws IOException {
+		FileWriter writer = (new FileWriter(file));
+		writer.write(best.toString());
 		writer.write("\n");
-		writer.write(newBest.points.toString());
+		writer.write(best.points.toString());
 		writer.write("\n");
 
 		writer.flush();

@@ -1,10 +1,11 @@
+import os
 import sys
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from scipy.signal import savgol_filter
 import seaborn as sns
+from scipy.signal import savgol_filter
 
 
 def load_data(file_path):
@@ -51,13 +52,13 @@ def add_to_df(origin_factors, best_weights_factors, labels):
     for i, label in enumerate(labels):
         data.append(["handcrafted", label, origin_factors[i]])
         data.append(["genetic", label, best_weights_factors[i]])
-    #remove move change entries
+    # remove move change entries
     data.pop(0)
     data.pop(0)
     return pd.DataFrame(data=data, columns=["agent", "weight", "weight factor"])
 
 
-def plot_weights_changes_for_best(best_weights_file, original_weights_file, name_file):
+def plot_weights_changes_for_best(best_weights_file, original_weights_file, name_file, out_file):
     origin_factors = get_origin_factor(original_weights_file)
     best_weights_factors = get_best_weights(best_weights_file)
     labels = get_weight_names(name_file)
@@ -68,9 +69,9 @@ def plot_weights_changes_for_best(best_weights_file, original_weights_file, name
 
     # Create a bar plot
     plt.figure(figsize=(15, 7.5))
-    ax=sns.barplot(data=df, x="weight", y="weight factor", hue="agent", palette="muted")
+    ax = sns.barplot(data=df, x="weight", y="weight factor", hue="agent", palette="muted")
     plt.xticks(rotation=90)  # Rotate 45 degrees and align to the right
-    ax.grid(True, which='major', axis='x', linestyle='--', linewidth=0.5, color='gray')  # Y-axis gridlines
+    ax.grid(True, which='major', axis='x', linestyle='--', linewidth=0.5, color='gray')
     plt.gcf().subplots_adjust(bottom=0.3)  # Increase space at the bottom
 
     # Add labels and title
@@ -79,14 +80,14 @@ def plot_weights_changes_for_best(best_weights_file, original_weights_file, name
     plt.title("Comparison of Handcrafted and Genetic Weight Factors", fontsize=14)
     plt.legend(title="Agent", fontsize=10)
 
-
-    plt.show()
+    plt.savefig(out_file)
 
 
 def get_weight_names(name_file):
     with open(name_file) as file:
         names = file.read().split("\n")
-        return [names[0]] + ["s" + name.replace("Index","") for name in names[1:] if name] + ["e" + name.replace("Index","") for name in names[1:] if name]
+        return [names[0]] + ["s" + name.replace("Index", "") for name in names[1:] if name] + [
+            "e" + name.replace("Index", "") for name in names[1:] if name]
 
 
 def get_origin_factor(original_weights_file):
@@ -110,7 +111,7 @@ def normalize_weights(weights):
     return [first_weight] + weights
 
 
-def plot_average(data, title, output_file, smooth=False, window=51, poly=3):
+def plot_average(data, title, output_file, window=51, poly=3):
     """
     Plot the average values across all categories, with optional smoothing.
     """
@@ -118,48 +119,79 @@ def plot_average(data, title, output_file, smooth=False, window=51, poly=3):
 
     plt.figure(figsize=(16, 6))
 
-    if smooth:
+    try:
         # Apply Savitzky-Golay filter for smoothing
         smooth_points = savgol_filter(avg_data["Average Points"], window_length=window, polyorder=poly)
         plt.plot(avg_data["Generation"], smooth_points, label="Smoothed Average Points", color="blue", alpha=0.8)
-    else:
-        plt.plot(avg_data["Generation"], avg_data["Average Points"], label="Average", color="blue")
-
-    plt.title(title)
-    plt.xlabel("Generation")
-    plt.ylabel("Average Points")
-    plt.grid(True)
-    plt.legend()
-    plt.savefig(output_file)
-    plt.close()
+        plt.title(title)
+        plt.xlabel("Generation")
+        plt.ylabel("Average Points")
+        plt.grid(True)
+        plt.legend()
+        plt.savefig(output_file)
+    except ValueError:
+        pass
 
 
-def plot_population_distribution(population_file,name_file,out_file):
-    labels=get_weight_names(name_file)
+def read_population_file_to_array(population_file):
+    data = []
+    with open(population_file) as file:
+        for line in file.readlines():
+            if line:
+                data.append([int(weight) for weight in line.split("\t")])
+    return np.array(data)
 
-def main(against_all_file, against_best_file, original_weights, best_weights, weight_names):
+
+def plot_population_distribution(population_file, name_file, out_file):
+    labels = get_weight_names(name_file)
+    population_array = read_population_file_to_array(population_file)
+    plt.figure(figsize=(20, 10))
+    plt.boxplot(population_array, labels=labels)
+    plt.xticks(rotation=90)
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+    plt.grid(axis='x', linestyle='--')
+    plt.subplots_adjust(bottom=0.21)
+    plt.title("Boxplot of Individual Weights")
+    plt.xlabel("Weights")
+    plt.ylabel("Values")
+    plt.savefig(out_file, bbox_inches='tight')
+
+
+def main(against_all_file, against_best_file, original_weights, best_snapshot_dir, population_snapshot_dir,
+         weight_names):
+    # prepare directories
+    snapshot_plot_dir = "plots/snapshot/"
+    if not os.path.exists(snapshot_plot_dir):
+        os.makedirs(snapshot_plot_dir)
     # Load data from both files
     against_all_data = load_data(against_all_file)
     against_best_data = load_data(against_best_file)
-
     plot_file_separately(against_all_data, "Benchmark With all Agents", "plots/allBenchmark.png")
 
     plot_each_category(against_best_data, "Against Best Agents", "plots/best_agents")
     plot_average(against_best_data, "Average Against Best Agents", "plots/average_best_agents.png")
     plot_average(against_best_data, "Smoothed Average Against Best Agents",
-                 "plots/smoothed_average_best_agents.png", smooth=True, window=51, poly=3)
-    plot_weights_changes_for_best(best_weights, original_weights, weight_names)
+                 "plots/smoothed_average_best_agents.png", window=51, poly=3)
+    for filename in os.listdir(best_snapshot_dir):
+        file_path = os.path.join(best_snapshot_dir, filename)
+        outfile = os.path.join(snapshot_plot_dir, os.path.splitext(filename)[0] + '.png')
+        plot_weights_changes_for_best(file_path, original_weights, weight_names, outfile)
+
+    for filename in os.listdir(population_snapshot_dir):
+        file_path = os.path.join(population_snapshot_dir, filename)
+        outfile = os.path.join(snapshot_plot_dir, os.path.splitext(filename)[0] + '.png')
+        plot_population_distribution(file_path, weight_names, outfile)
 
 
 if __name__ == "__main__":
     against_all_file = "benchmarkAgainstAll.tsv"
     against_best_file = "benchmarkAgainstBest.tsv"
     original_weights = "original_weights.txt"
-    best_weights = "best.txt"
     weight_names = "weight_order.txt"
-    population="weights.tsv"
+    best_snapshot_dir = "snapshots/best"
+    population_snapshot_dir = "snapshots/population"
     if len(sys.argv) > 2:
         against_all_file = sys.argv[0]
         against_best_file = sys.argv[2]
-    #plot_weights_changes_for_best(best_weights, original_weights, weight_names)
-    # main(against_all_file, against_best_file, original_weights, best_weights, weight_names)
+    main(against_all_file, against_best_file, original_weights, best_snapshot_dir, population_snapshot_dir,
+         weight_names)
