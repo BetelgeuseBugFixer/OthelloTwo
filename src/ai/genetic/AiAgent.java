@@ -67,7 +67,7 @@ public class AiAgent implements Comparable<AiAgent> {
 		int[] chromosomeSumsFather = getAbsolutSplitArraySum(chromosomEndpoints, father.weights);
 
 		int gene = 0;
-		for (int currentChromosom = 0; currentChromosom < chromosomEndpoints.length; currentChromosom++) {
+		for (int currentChromosom = 0; currentChromosom < chromosomEndpoints.length;currentChromosom++) {
 			int chromosomEnd = chromosomEndpoints[currentChromosom];
 
 			int[] getsToInherent = mother.weights;

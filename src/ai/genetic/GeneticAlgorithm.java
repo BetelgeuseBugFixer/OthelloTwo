@@ -23,17 +23,17 @@ public class GeneticAlgorithm {
 	static final File bestBenchmark = new File("geneticFiles/benchmarkAgainstBest.tsv");
 	static final File bestSnapshotDir = new File("geneticFiles/snapshots/best");
 	static final File populationSnapshotDir = new File("geneticFiles/snapshots/population");
-	static final int generationsPerSnapshot = 1;
-	static final int generationsPerBenchmark = 1;
+	static final int generationsPerSnapshot = 2;
+	static final int generationsPerBenchmark = 2;
 	static final int gamesPlayedPerMatchUp = 2;
 	static final int numOfThreads = Runtime.getRuntime().availableProcessors();
 	static final int singleParentPercentage = 50;
 	static final int mutationSV = 5;
 	static final int crossoverPercentage = 15;
-	static final int geneDeletionPercentage = 20;
-	static final int geneReactivationPercentage = 20;
+	static final int geneDeletionPercentage = 2;
+	static final int geneReactivationPercentage = 2;
 	static final int earlyStop = 15;
-	static int populationSize = 5;
+	static int populationSize = 200;
 	static int generationsWithoutNewBest = 0;
 	public final File weightsInGenerations = new File("geneticFiles/weights.tsv");
 
@@ -162,10 +162,10 @@ public class GeneticAlgorithm {
 
 	public void train(AiAgent[] currentAgents, int startGen, int generationsToTrain, Random random) throws IOException, InterruptedException {
 		NormalDistribution distribution = new NormalDistribution(0, mutationSV);
-		BenchmarkAiAgent[] benchmarks = {new ServerPlayer(80, new Aai01(), "Aai"),
-				new ServerPlayer(80, new Agent(), "NicoAi")
+		BenchmarkAiAgent[] benchmarks = {new ServerPlayer(90, new Aai01(), "Aai"),
+				new ServerPlayer(90, new Agent(), "NicoAi")
 				, new HandCraftedWeights(),
-				new MCTWPlayer(20)};
+				new MCTWPlayer(25)};
 
 		int generation = startGen;
 		Progressbar bar = new Progressbar("generations", generationsToTrain);
@@ -242,10 +242,10 @@ public class GeneticAlgorithm {
 	}
 
 	public void updateBest(AiAgent contender, int generation) throws IOException, InterruptedException {
-		BenchmarkAiAgent[] benchmarks = {new ServerPlayer(600, new Aai01(), "Aai"),
-				new ServerPlayer(80, new Agent(), "NicoAi")
+		BenchmarkAiAgent[] benchmarks = {new ServerPlayer(800, new Aai01(), "Aai"),
+				new ServerPlayer(90, new Agent(), "NicoAi")
 				, new HandCraftedWeights(),
-				new MCTWPlayer(130)};
+				new MCTWPlayer(170)};
 
 		contender.resetPoints();
 		playAgainstBenchmarks(benchmarks, contender);
