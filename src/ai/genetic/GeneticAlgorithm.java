@@ -33,7 +33,7 @@ public class GeneticAlgorithm {
 	static final int geneDeletionPercentage = 2;
 	static final int geneReactivationPercentage = 2;
 	static final int earlyStop = 15;
-	static int populationSize = 200;
+	static int populationSize = 150;
 	static int generationsWithoutNewBest = 0;
 	public final File weightsInGenerations = new File("geneticFiles/weights.tsv");
 
