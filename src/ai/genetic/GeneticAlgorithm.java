@@ -23,16 +23,17 @@ public class GeneticAlgorithm {
 	static final File bestBenchmark = new File("geneticFiles/benchmarkAgainstBest.tsv");
 	static final File bestSnapshotDir = new File("geneticFiles/snapshots/best");
 	static final File populationSnapshotDir = new File("geneticFiles/snapshots/population");
-	static final int generationsPerSnapshot = 2;
-	static final int generationsPerBenchmark = 2;
+	static final int generationsPerSnapshot = 20;
+	static final int generationsPerBenchmark = 5;
 	static final int gamesPlayedPerMatchUp = 2;
 	static final int numOfThreads = Runtime.getRuntime().availableProcessors();
 	static final int singleParentPercentage = 50;
-	static final int mutationSV = 5;
+	static final int mutationSV = 10;
 	static final int crossoverPercentage = 15;
 	static final int geneDeletionPercentage = 2;
-	static final int geneReactivationPercentage = 2;
-	static final int earlyStop = 15;
+	static final int geneReactivationPercentage = 8;
+	static final int chromosomeCopyPercentage = 5;
+	static final int earlyStop = 20;
 	static int populationSize = 150;
 	static int generationsWithoutNewBest = 0;
 	public final File weightsInGenerations = new File("geneticFiles/weights.tsv");
@@ -208,14 +209,14 @@ public class GeneticAlgorithm {
 		// conserve first
 		nextGeneration[0] = previousGenration[previousGenration.length - 1].copyWeightsToNewAgent();
 		for (int i = 1; i < populationSize; i++) {
-			if (percentageCheck(random,singleParentPercentage)) {
+			if (percentageCheck(random, singleParentPercentage)) {
 				AiAgent parent = previousGenration[rankArray[random.nextInt(rankArray.length)]];
-				nextGeneration[i] = AiAgent.mutate(parent, geneDeletionPercentage, geneReactivationPercentage, distribution, random);
+				nextGeneration[i] = AiAgent.mutate(parent, geneDeletionPercentage, geneReactivationPercentage, chromosomeCopyPercentage, distribution, random);
 			} else {
 				AiAgent mother = previousGenration[rankArray[random.nextInt(rankArray.length)]];
 				AiAgent father = previousGenration[rankArray[random.nextInt(rankArray.length)]];
 
-				nextGeneration[i] = AiAgent.recombine(mother, father, crossoverPercentage,geneReactivationPercentage,geneDeletionPercentage, distribution, random);
+				nextGeneration[i] = AiAgent.recombine(mother, father, crossoverPercentage, geneReactivationPercentage, geneDeletionPercentage, chromosomeCopyPercentage, distribution, random);
 			}
 
 		}
@@ -380,7 +381,7 @@ public class GeneticAlgorithm {
 
 		simulateAgents(aiAgents, executorService);
 		executorService.shutdown();
-		if (!executorService.awaitTermination(1_000, TimeUnit.SECONDS)) {
+		if (!executorService.awaitTermination(1_500, TimeUnit.SECONDS)) {
 			System.setOut(original);
 			System.out.println("is still running when playing normal agents");
 			throw new RuntimeException("simulating matches took to long, more then 1000 seconds");
@@ -403,7 +404,7 @@ public class GeneticAlgorithm {
 		ExecutorService executorService = Executors.newFixedThreadPool(numOfThreads);
 		simulateAgents(aiAgents, executorService);
 		executorService.shutdown();
-		if (!executorService.awaitTermination(500, TimeUnit.SECONDS)) {
+		if (!executorService.awaitTermination(1_000, TimeUnit.SECONDS)) {
 			System.out.println("is still running");
 			throw new RuntimeException("simulating matches took to long");
 		}
