@@ -81,6 +81,7 @@ def plot_weights_changes_for_best(best_weights_file, original_weights_file, name
     plt.legend(title="Agent", fontsize=10)
 
     plt.savefig(out_file)
+    plt.close()
 
 
 def get_weight_names(name_file):
@@ -131,6 +132,7 @@ def plot_average(data, title, output_file, window=51, poly=3):
         plt.savefig(output_file)
     except ValueError:
         pass
+    plt.close()
 
 
 def read_population_file_to_array(population_file):
@@ -155,9 +157,11 @@ def plot_population_distribution(population_file, name_file, out_file):
     plt.xlabel("Weights")
     plt.ylabel("Values")
     plt.savefig(out_file, bbox_inches='tight')
+    plt.close()
 
 
 def main(against_all_file, against_best_file, original_weights, best_snapshot_dir, population_snapshot_dir,
+         current_best,
          weight_names):
     # prepare directories
     snapshot_plot_dir = "plots/snapshot/"
@@ -170,8 +174,7 @@ def main(against_all_file, against_best_file, original_weights, best_snapshot_di
 
     plot_each_category(against_best_data, "Against Best Agents", "plots/best_agents")
     plot_average(against_best_data, "Average Against Best Agents", "plots/average_best_agents.png")
-    plot_average(against_best_data, "Smoothed Average Against Best Agents",
-                 "plots/smoothed_average_best_agents.png", window=51, poly=3)
+    plot_weights_changes_for_best(current_best, original_weights, weight_names, "plots/current_best.png")
     for filename in os.listdir(best_snapshot_dir):
         file_path = os.path.join(best_snapshot_dir, filename)
         outfile = os.path.join(snapshot_plot_dir, os.path.splitext(filename)[0] + '.png')
@@ -190,8 +193,9 @@ if __name__ == "__main__":
     weight_names = "weight_order.txt"
     best_snapshot_dir = "snapshots/best"
     population_snapshot_dir = "snapshots/population"
+    current_best = "best.txt"
     if len(sys.argv) > 2:
         against_all_file = sys.argv[0]
         against_best_file = sys.argv[2]
     main(against_all_file, against_best_file, original_weights, best_snapshot_dir, population_snapshot_dir,
-         weight_names)
+         current_best, weight_names)

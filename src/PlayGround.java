@@ -193,33 +193,21 @@ public class PlayGround {
     }
 
     public static void main(String[] args) {
-        int[] weightsOne={5,10,2};
-        int[] weightsTwo={8,5,4};
+        long test=35219000786944L;
+        System.out.println(mirrorVertical(test));
 
-        int sumOne=5+10+2;
-        int sumTwo=8+5+4;
-
-        double beginPercent=8.0/sumTwo;
-        double resultingWeight=(8*(10+2))/(sumTwo-8.0);
-        System.out.println(resultingWeight);
-        System.out.println(beginPercent);
-        System.out.println(resultingWeight/(resultingWeight+10+2.0));
-        weightsOne[0]=(int)resultingWeight;
-
-        System.out.println("-------");
-        double otherWeight=(4*(8+5.0))/(sumTwo-4);
-        System.out.println(4.0/sumTwo);
-        System.out.println("-------");
-
-        weightsOne[2]=(int) otherWeight;
-        int sum=0;
-        for (int i = 0; i < weightsOne.length; i++) {
-            sum+=weightsOne[i];
-        }
-        for (int i = 0; i < weightsOne.length; i++) {
-            System.out.println((weightsTwo[i]*1.0/sumOne)+"->"+(weightsOne[i]/(sum*1.0)));
-        }
-
+    }
+    static long mirrorHorizontal(long bitboard) {
+        bitboard = ((bitboard >>> 1) & 0x5555555555555555L) | ((bitboard & 0x5555555555555555L) << 1);
+        bitboard = ((bitboard >>> 2) & 0x3333333333333333L) | ((bitboard & 0x3333333333333333L) << 2);
+        bitboard = ((bitboard >>> 4) & 0x0F0F0F0F0F0F0F0FL) | ((bitboard & 0x0F0F0F0F0F0F0F0FL) << 4);
+        return bitboard;
+    }
+    static long mirrorVertical(long bitboard) {
+        bitboard = ((bitboard >>> 8) & 0x00FF00FF00FF00FFL) | ((bitboard & 0x00FF00FF00FF00FFL) << 8);
+        bitboard = ((bitboard >>> 16) & 0x0000FFFF0000FFFFL) | ((bitboard & 0x0000FFFF0000FFFFL) << 16);
+        bitboard = ((bitboard >>> 32) & 0x00000000FFFFFFFFL) | ((bitboard & 0x00000000FFFFFFFFL) << 32);
+        return bitboard;
     }
 
     public static long rightShift(long x) {
