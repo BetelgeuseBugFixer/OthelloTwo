@@ -28,7 +28,6 @@ public class GeneticAlgorithm {
 	static final int gamesPlayedPerMatchUp = 2;
 	static final int numOfThreads = Runtime.getRuntime().availableProcessors();
 	static final int singleParentPercentage = 50;
-	static final int mutationSV = 10;
 	static final int crossoverPercentage = 15;
 	static final int geneDeletionPercentage = 2;
 	static final int geneReactivationPercentage = 8;
@@ -36,6 +35,10 @@ public class GeneticAlgorithm {
 	static final int earlyStop = 20;
 	static int populationSize = 150;
 	static int generationsWithoutNewBest = 0;
+	static int chromosomeTargetSum = 20_000;
+	static final int mutationSV = 100;
+	static final int moveSV=2;
+	static double mutationDecayPerGeneration=0.002;
 	public final File weightsInGenerations = new File("geneticFiles/weights.tsv");
 
 	public final File generationFile = new File("geneticFiles/generation.tsv");
@@ -148,7 +151,7 @@ public class GeneticAlgorithm {
 		int weightSize = getWeightsSize();
 		AiAgent[] aiAgents = new AiAgent[populationSize];
 		for (int i = 0; i < populationSize; i++) {
-			aiAgents[i] = new AiAgent(weightSize, geneDeletionPercentage, random);
+			aiAgents[i] = new AiAgent(weightSize, geneDeletionPercentage, chromosomeTargetSum, random);
 		}
 		train(aiAgents, 0, generations, random);
 
@@ -162,7 +165,8 @@ public class GeneticAlgorithm {
 	}
 
 	public void train(AiAgent[] currentAgents, int startGen, int generationsToTrain, Random random) throws IOException, InterruptedException {
-		NormalDistribution distribution = new NormalDistribution(0, mutationSV);
+		NormalDistribution weightMutationDistribution = new NormalDistribution(0, mutationSV);
+		NormalDistribution moveMutationDistribution = new NormalDistribution(0, moveSV);
 		BenchmarkAiAgent[] benchmarks = {new ServerPlayer(90, new Aai01(), "Aai"),
 				new ServerPlayer(90, new Agent(), "NicoAi")
 				, new HandCraftedWeights(),
@@ -184,8 +188,8 @@ public class GeneticAlgorithm {
 			if (generation % generationsPerSnapshot == 0) {
 				writeSnapshotFiles(currentAgents, generation);
 			}
-
-			currentAgents = getNextGeneration(currentAgents, distribution, random);
+			double mutationFactor=1-(generation*mutationDecayPerGeneration);
+			currentAgents = getNextGeneration(currentAgents,mutationFactor,moveMutationDistribution ,weightMutationDistribution, random);
 
 			FileWriter generationWriter = new FileWriter(generationFile);
 			generationWriter.write(generation + "\n");
@@ -203,7 +207,7 @@ public class GeneticAlgorithm {
 		writePopulationFile(agents, populationSnapshotFile);
 	}
 
-	public AiAgent[] getNextGeneration(AiAgent[] previousGenration, NormalDistribution distribution, Random random) {
+	public AiAgent[] getNextGeneration(AiAgent[] previousGenration,double mutationFactor, NormalDistribution distribution,NormalDistribution moveChangeDistribution, Random random) {
 		AiAgent[] nextGeneration = new AiAgent[populationSize];
 		int[] rankArray = getProportionalRankArray();
 		// conserve first
@@ -211,12 +215,12 @@ public class GeneticAlgorithm {
 		for (int i = 1; i < populationSize; i++) {
 			if (percentageCheck(random, singleParentPercentage)) {
 				AiAgent parent = previousGenration[rankArray[random.nextInt(rankArray.length)]];
-				nextGeneration[i] = AiAgent.mutate(parent, geneDeletionPercentage, geneReactivationPercentage, chromosomeCopyPercentage, distribution, random);
+				nextGeneration[i] = AiAgent.mutate(parent, geneDeletionPercentage, geneReactivationPercentage, chromosomeCopyPercentage, mutationFactor ,distribution,moveChangeDistribution, random);
 			} else {
 				AiAgent mother = previousGenration[rankArray[random.nextInt(rankArray.length)]];
 				AiAgent father = previousGenration[rankArray[random.nextInt(rankArray.length)]];
 
-				nextGeneration[i] = AiAgent.recombine(mother, father, crossoverPercentage, geneReactivationPercentage, geneDeletionPercentage, chromosomeCopyPercentage, distribution, random);
+				nextGeneration[i] = AiAgent.recombine(mother, father, crossoverPercentage, geneReactivationPercentage, geneDeletionPercentage, chromosomeCopyPercentage, mutationFactor, distribution,moveChangeDistribution, random);
 			}
 
 		}
