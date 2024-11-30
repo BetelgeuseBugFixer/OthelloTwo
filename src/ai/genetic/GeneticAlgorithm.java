@@ -29,8 +29,8 @@ public class GeneticAlgorithm {
     static final int numOfThreads = Runtime.getRuntime().availableProcessors();
     static final int singleParentPercentage = 50;
     static final int crossoverPercentage = 15;
-    static final int geneDeletionPercentage = 2;
-    static final int geneReactivationPercentage = 8;
+    static final int geneDeletionPercentage = 3;
+    static final int geneReactivationPercentage = 7;
     static final int chromosomeCopyPercentage = 5;
     static final int earlyStop = 20;
     static int populationSize = 150;
