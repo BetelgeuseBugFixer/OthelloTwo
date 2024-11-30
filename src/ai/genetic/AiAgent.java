@@ -35,15 +35,14 @@ public class AiAgent implements Comparable<AiAgent> {
 		this.points = new AtomicInteger();
 	}
 
-	public static AiAgent mutate(AiAgent agent, int deletionPercentage, int reactivationPercentage, int chromosomeCopyPercentage, double sigma, NormalDistribution distribution, NormalDistribution moveChangeDistribution, Random random) {
+	public static AiAgent mutate(AiAgent agent, int deletionPercentage, int reactivationPercentage, int chromosomeCopyPercentage, double sigma,int targetSum, NormalDistribution distribution, NormalDistribution moveChangeDistribution, Random random) {
 		int[] newWeights = new int[agent.weights.length];
 		newWeights[0] = mutateSingleWeight(agent.weights[0], 0, 0, 1, random, moveChangeDistribution);
 		for (int i = 1; i < newWeights.length; i++) {
 			newWeights[i] = mutateSingleWeight(agent.weights[i], reactivationPercentage, deletionPercentage, sigma, random, distribution);
 		}
-		// adjust move change to be in between 20 and 50
-		adjustMoveChange(newWeights, random);
 		copyChromosome(newWeights, chromosomeCopyPercentage, random);
+		normalize(newWeights,targetSum , random);
 		return new AiAgent(newWeights);
 	}
 
@@ -61,19 +60,19 @@ public class AiAgent implements Comparable<AiAgent> {
 	}
 
 	public static void normalize(int[] weights, int targetSum, Random random) {
-		int[] chromosomEndpoints = {1, ((weights.length - 1) / 2) + 1, weights.length};
+		int[] chromosomeEndpoints = {1, ((weights.length - 1) / 2) + 1, weights.length};
 		adjustMoveChange(weights, random);
-		normalizeWeights(weights, chromosomEndpoints[0], chromosomEndpoints[1], targetSum);
-		normalizeWeights(weights, chromosomEndpoints[1], weights.length, targetSum);
+		normalizeWeights(weights, chromosomeEndpoints[0], chromosomeEndpoints[1], targetSum);
+		normalizeWeights(weights, chromosomeEndpoints[1], weights.length, targetSum);
 	}
 
 	public static void normalizeWeights(int[] weights, int start, int end, int targetSum) {
 		int rangeSum = 0;
-		for (int i = start; i <= end; i++) {
+		for (int i = start; i < end; i++) {
 			rangeSum += Math.abs(weights[i]);
 		}
 		double scaleFactor = (double) targetSum / rangeSum;
-		for (int i = start; i <= end; i++) {
+		for (int i = start; i < end; i++) {
 			weights[i] = (int) Math.round(weights[i] * scaleFactor);
 		}
 	}
@@ -84,7 +83,7 @@ public class AiAgent implements Comparable<AiAgent> {
 		if (oldValue == 0) {
 			if (percentageCheck(random, reactivationPercentage)) {
 				// reactivate Gene
-				newValue = random.nextInt(200) - 100;
+				newValue = random.nextInt(3000) - 1500;
 			}
 		} else {
 			if (!percentageCheck(random, deletionPercentage)) {
@@ -95,15 +94,15 @@ public class AiAgent implements Comparable<AiAgent> {
 		return newValue;
 	}
 
-	public static AiAgent recombine(AiAgent mother, AiAgent father, int crossoverPercentage, int reactivationPercentage, int deletionPercentage, int chromosomeCopyPercentage, double sigma, NormalDistribution distribution, NormalDistribution moveChangeDistribution, Random random) {
+	public static AiAgent recombine(AiAgent mother, AiAgent father, int crossoverPercentage, int reactivationPercentage, int deletionPercentage, int chromosomeCopyPercentage, double sigma,int targetSum, NormalDistribution distribution, NormalDistribution moveChangeDistribution, Random random) {
 		int[] childWeights = new int[mother.weights.length];
-		int[] chromosomEndpoints = {1, ((mother.weights.length - 1) / 2) + 1, mother.weights.length};
-		int[] chromosomeSumsMother = getAbsolutSplitArraySum(chromosomEndpoints, mother.weights);
-		int[] chromosomeSumsFather = getAbsolutSplitArraySum(chromosomEndpoints, father.weights);
+		int[] chromosomeEndpoints = {1, ((mother.weights.length - 1) / 2) + 1, mother.weights.length};
+		int[] chromosomeSumsMother = getAbsolutSplitArraySum(chromosomeEndpoints, mother.weights);
+		int[] chromosomeSumsFather = getAbsolutSplitArraySum(chromosomeEndpoints, father.weights);
 
 		int gene = 0;
-		for (int currentChromosom = 0; currentChromosom < chromosomEndpoints.length; currentChromosom++) {
-			int chromosomEnd = chromosomEndpoints[currentChromosom];
+		for (int currentChromosom = 0; currentChromosom < chromosomeEndpoints.length; currentChromosom++) {
+			int chromosomeEnd = chromosomeEndpoints[currentChromosom];
 
 			int[] getsToInherent = mother.weights;
 			int[] notInherited = father.weights;
@@ -116,7 +115,7 @@ public class AiAgent implements Comparable<AiAgent> {
 				notInheritSum = chromosomeSumsMother[currentChromosom];
 				inheritSum = chromosomeSumsFather[currentChromosom];
 			}
-			while (gene < chromosomEnd) {
+			while (gene < chromosomeEnd) {
 				if (percentageCheck(random, crossoverPercentage)) {
 					childWeights[gene] = notInherited[gene];
 				} else {
@@ -131,10 +130,9 @@ public class AiAgent implements Comparable<AiAgent> {
 				gene++;
 			}
 
-		}
-		// adjust move change to be in between 20 and 50
-		adjustMoveChange(childWeights, random);
+		};
 		copyChromosome(childWeights, chromosomeCopyPercentage, random);
+		normalize(childWeights, targetSum, random);
 		return new AiAgent(childWeights);
 	}
 
