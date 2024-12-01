@@ -112,7 +112,7 @@ def normalize_weights(weights):
     return [first_weight] + weights
 
 
-def plot_average(data, title, output_file, window=51, poly=3):
+def plot_average(data, title, output_file, window=15, poly=3):
     """
     Plot the average values across all categories, with optional smoothing.
     """
