@@ -1,8 +1,12 @@
 package othelloTrees;
 
+import Game.Othello;
 import ai.BoardGrader;
 
+import java.util.HashMap;
+
 public class HashTree implements OthelloTree{
+	HashMap<Othello,hashNode>[]states=new HashMap[60];
 	@Override
 	public void setRoot(OthelloNode node) {
 
@@ -18,51 +22,17 @@ public class HashTree implements OthelloTree{
 
 	}
 
-	static class hashNode extends OthelloNode{
+	 class hashNode extends OthelloNode{
 
-		@Override
-		public LastHopeNode getWinChances(boolean nextPlayer) {
-			return null;
-		}
+		 @Override
+		 public othello.Othello getBoard() {
+			 return null;
+		 }
 
-		@Override
-		public OthelloNode getNextNode(int move, boolean playerOne) {
-			return null;
-		}
+		 @Override
+		 protected void calculateChildren(boolean playerOne) {
 
-		@Override
-		public boolean getIsTerminalNode(boolean playerOne) {
-			return false;
-		}
+		 }
 
-		@Override
-		public int getScoreWithoutCalcCheck(BoardGrader grader, boolean playerOne) {
-			return 0;
-		}
-
-		@Override
-		public OthelloNode[] getNextNodes(boolean playerOne) {
-			return new OthelloNode[0];
-		}
-
-		@Override
-		public boolean getIsFullyCalculated() {
-			return false;
-		}
-
-		@Override
-		public void setToFullyCalculated() {
-
-		}
-
-		@Override
-		public void setScore(int score) {
-
-		}
-
-		@Override
-		public int getScoreWithoutCalcCheck() {
-			return 0;
-		}
-	}
+	 }
 }
