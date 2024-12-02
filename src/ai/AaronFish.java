@@ -90,7 +90,7 @@ public class AaronFish implements szte.mi.Player {
 				int score = minValue(node, depth - 1, alpha, beta);
 				if (score > alpha) {
 					alpha = score;
-					bestMove = node.getMoveAt(i);
+					bestMove = root.getMoveAt(i);
 					if (score == Integer.MAX_VALUE) {
 						break;
 					}
