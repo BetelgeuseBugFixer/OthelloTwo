@@ -33,6 +33,10 @@ public class ArrayTree implements OthelloTree {
 			this.board = new Othello();
 		}
 
+		static ArrayNode getNodeFromBoard(Othello board){
+			return new ArrayNode(board);
+		}
+
 		public ArrayNode(Othello board) {
 			this.board = board;
 		}
@@ -44,8 +48,8 @@ public class ArrayTree implements OthelloTree {
 
 		@Override
 		protected void calculateChildren(boolean playerOne) {
-			Othello.MoveAndresultingBoardList nextMovesAndBoards = this.board.getPossibleMovesLists(playerOne);
-			this.children = nextMovesAndBoards.boards().stream().map(ArrayNode::new).collect(Collectors.toList());
+			Othello.MoveAndResultingBoardList nextMovesAndBoards = this.board.getPossibleMovesLists(ArrayNode::getNodeFromBoard,playerOne);
+			this.children = nextMovesAndBoards.nodes();
 			this.nextMoves = nextMovesAndBoards.moves();
 		}
 	}

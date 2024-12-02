@@ -78,14 +78,14 @@ public class AaronFish implements szte.mi.Player {
 		int beta = Integer.MAX_VALUE;
 		OthelloNode root = this.boardTree.getRoot();
 
-		if (root.getNextNodes(playerOne).size() == 1) {
+		if (root.getNextNodes(playerOne).length == 1) {
 			int move = root.getMoveAt(0);
 			this.boardTree.move(move, this.playerOne);
 			return Othello.getMoveFromInt(move);
 		}
 		int bestMove = -1;
 		if (playerOne) {
-			for (int i = 0; i < root.getNextNodes(true).size(); i++) {
+			for (int i = 0; i < root.getNextNodes(true).length; i++) {
 				OthelloNode node = root.getChildAt(i);
 				int score = minValue(node, depth - 1, alpha, beta);
 				if (score > alpha) {
@@ -100,7 +100,7 @@ public class AaronFish implements szte.mi.Player {
 				bestMove = getMoveWithHighestWinProbability();
 			}
 		} else {
-			for (int i = 0; i < root.getNextNodes(false).size(); i++) {
+			for (int i = 0; i < root.getNextNodes(false).length; i++) {
 				OthelloNode node=root.getChildAt(i);
 				int score = maxValue(node, depth - 1, alpha, beta);
 				if (score < beta) {
@@ -126,9 +126,6 @@ public class AaronFish implements szte.mi.Player {
 
 		int bestScore = Integer.MIN_VALUE;
 		for (OthelloNode nextNode : node.getNextNodes(true)) {
-			if (nextNode == null) {
-				break;
-			}
 			int score = minValue(nextNode, depth - 1, alpha, beta);
 			if (score > bestScore) {
 				bestScore = score;
@@ -154,9 +151,6 @@ public class AaronFish implements szte.mi.Player {
 
 		int bestScore = Integer.MAX_VALUE;
 		for (OthelloNode nextNode : node.getNextNodes(false)) {
-			if (nextNode == null) {
-				break;
-			}
 			int score = maxValue(nextNode, depth - 1, alpha, beta);
 			if (score < bestScore) {
 				bestScore = score;
@@ -177,13 +171,14 @@ public class AaronFish implements szte.mi.Player {
 
 	public int getMoveWithHighestWinProbability() {
 		// OthelloNode root = this.boardTree.getRoot();
-		OthelloNode[] children = this.boardTree.getRoot().getNextNodes(this.playerOne).toArray(new OthelloNode[0]);
+		OthelloNode[] children = this.boardTree.getRoot().getNextNodes(this.playerOne);
 
 		int bestMove = this.boardTree.getRoot().getMoveAt(0);
 		OthelloTree.LastHopeNode bestScore = children[0].getWinChances(!this.playerOne);
 		if (playerOne) {
 			for (int i = 1; i < children.length; i++) {
-				OthelloTree.LastHopeNode current = children[i].getWinChances(!this.playerOne);
+				OthelloNode currentChild=children[i];
+				OthelloTree.LastHopeNode current = currentChild.getWinChances(!this.playerOne);
 				if (current.isGreater(bestScore)) {
 					bestMove = this.boardTree.getRoot().getMoveAt(i);
 					bestScore = current;
@@ -192,7 +187,8 @@ public class AaronFish implements szte.mi.Player {
 			}
 		} else {
 			for (int i = 1; i < children.length; i++) {
-				OthelloTree.LastHopeNode current = children[i].getWinChances(!this.playerOne);
+				OthelloNode currentChild=children[i];
+				OthelloTree.LastHopeNode current = currentChild.getWinChances(!this.playerOne);
 				if (!bestScore.isGreater(current)) {
 					bestMove = this.boardTree.getRoot().getMoveAt(i);
 					bestScore = current;

@@ -4,6 +4,7 @@ import ai.BoardGrader;
 import othello.Othello;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
@@ -16,8 +17,8 @@ public interface OthelloTree {
 	public void move(int move, boolean playerOne);
 
 	abstract class OthelloNode {
-		protected List<OthelloNode> children;
-		protected ArrayList<Integer> nextMoves;
+		protected OthelloNode[] children;
+		protected int[] nextMoves;
 		private boolean isTerminal;
 		private boolean checkedIfTerminal = false;
 		private boolean fullyCalculated;
@@ -30,9 +31,6 @@ public interface OthelloTree {
 		public LastHopeNode getWinChances(boolean nextPlayer) {
 			LastHopeNode lhn = new LastHopeNode();
 			for (OthelloNode nextNode : this.getNextNodes(nextPlayer)) {
-				if (nextNode == null) {
-					break;
-				}
 				if (nextNode.getIsFullyCalculated()) {
 					if (nextNode.getScoreWithoutCalcCheck() == Integer.MAX_VALUE) {
 						lhn.wins += 1;
@@ -49,11 +47,11 @@ public interface OthelloTree {
 		}
 
 		public int getMoveAt(int i) {
-			return this.nextMoves.get(i);
+			return this.nextMoves[i];
 		}
 
 		public OthelloNode getChildAt(int i) {
-			return this.children.get(i);
+			return this.children[i];
 		}
 
 		public abstract Othello getBoard();
@@ -62,12 +60,12 @@ public interface OthelloTree {
 			this.getNextNodes(playerOne);
 			// non-optimal solution since data structure is optimized for other functions
 			// does not matter, since it only called once per call with small data structure
-			for (int i = 0; i < nextMoves.size(); i++) {
-				if (move == nextMoves.get(i)) {
-					return children.get(i);
+			for (int i = 0; i < nextMoves.length; i++) {
+				if (move == nextMoves[i]) {
+					return children[i];
 				}
 			}
-			throw new RuntimeException("could not match " + move + " to any of the children in " + nextMoves);
+			throw new RuntimeException("could not match " + move + " to any of the children in " + Arrays.toString(nextMoves));
 		}
 
 		public boolean getIsTerminalNode(boolean playerOne) {
@@ -85,12 +83,12 @@ public interface OthelloTree {
 		private boolean hasToPass(boolean playerOne) {
 			// make sure next nodes are calculated
 			getNextNodes(playerOne);
-			return this.nextMoves.get(0) == -1;
+			return this.nextMoves[0] == -1;
 		}
 
 		// only to be called after hasToPass returned true
 		private boolean nextHasToPass(boolean nextIsPlayerOne) {
-			return this.children.get(0).hasToPass(nextIsPlayerOne);
+			return this.children[0].hasToPass(nextIsPlayerOne);
 		}
 
 		public int getScoreWithoutCalcCheck(BoardGrader grader, boolean playerOne) {
@@ -114,27 +112,27 @@ public interface OthelloTree {
 			return this.score;
 		}
 
-		public ArrayList<OthelloNode> getNextNodes(boolean playerOne) {
+		public OthelloNode[] getNextNodes(boolean playerOne) {
 			if (this.children == null) {
 				this.calculateChildren(playerOne);
 			}
-			return (ArrayList<OthelloNode>) this.children;
+			return this.children;
 		}
 
 		protected abstract void calculateChildren(boolean playerOne);
 
 		private void sortChildren() {
-
-			List<Pair> pairs = new ArrayList<>();
-			for (int i = 0; i < children.size(); i++) {
-				pairs.add(new Pair(children.get(i), nextMoves.get(i)));
+			// Create an array of pairs
+			Pair[] pairs = new Pair[children.length];
+			for (int i = 0; i < children.length; i++) {
+				pairs[i] = new Pair(children[i], nextMoves[i]);
 			}
-
-			pairs.sort(Comparator.comparingInt(pair -> getHeuristicScore(pair.node())));
-
-			for (int i = 0; i < pairs.size(); i++) {
-				children.set(i, pairs.get(i).node());
-				nextMoves.set(i, pairs.get(i).move());
+			// Sort the array of pairs based on heuristic scores
+			Arrays.sort(pairs, Comparator.comparingInt(pair -> getHeuristicScore(pair.node())));
+			// Unpack the sorted pairs back into children and nextMoves arrays
+			for (int i = 0; i < pairs.length; i++) {
+				children[i] = pairs[i].node();
+				nextMoves[i] = pairs[i].move();
 			}
 		}
 

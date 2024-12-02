@@ -1,10 +1,10 @@
 package othello;
 
-import othelloTrees.ArrayTree;
+import othelloTrees.OthelloTree;
 import szte.mi.Move;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.function.Function;
 
 public class Othello {
 	static final long leftBorderBitMask = 0b1111111011111110111111101111111011111110111111101111111011111110L;
@@ -120,9 +120,9 @@ public class Othello {
 		return Long.bitCount(~(this.blackPlayerDiscs | whitePLayerDiscs));
 	}
 
-	public MoveAndresultingBoardList getPossibleMovesLists(boolean playerOne) {
-		ArrayList<Integer> moves = new ArrayList<>();
-		ArrayList<Othello> boards = new ArrayList<>();
+	public MoveAndResultingBoardList getPossibleMovesLists(Function<Othello, OthelloTree.OthelloNode> createNode, boolean playerOne) {
+		int[] moves = new int[34];
+		OthelloTree.OthelloNode[] boards = new OthelloTree.OthelloNode[34];
 		int index = 0;
 		// iterate over every field
 		for (int i = 0; i < 64; i++) {
@@ -137,19 +137,26 @@ public class Othello {
 					newWhiteDiscs |= 1L << i;
 				}
 				Othello newBoard = new Othello(newBlackDiscs, newWhiteDiscs);
-				moves.add(i);
-				boards.add(newBoard);
+				moves[index]=i;
+				boards[index]=createNode.apply(newBoard);
 				index++;
 			}
 
 		}
 
-		if (moves.isEmpty()) {
+		if (index==0) {
 			Othello newBoard = new Othello(blackPlayerDiscs, whitePLayerDiscs);
-			moves.add(-1);
-			boards.add(newBoard);
+			moves[0]=-1;
+			boards[0]= createNode.apply(newBoard);
+			index=1;
 		}
-		return new MoveAndresultingBoardList(moves, boards);
+		// Trim the arrays to their actual size
+		int[] trimmedMoves = new int[index];
+		OthelloTree.OthelloNode[] trimmedBoards = new OthelloTree.OthelloNode[index];
+		System.arraycopy(moves, 0, trimmedMoves, 0, index);
+		System.arraycopy(boards, 0, trimmedBoards, 0, index);
+
+		return new MoveAndResultingBoardList(trimmedMoves, trimmedBoards);
 	}
 
 
@@ -345,7 +352,7 @@ public class Othello {
 		return boardIsFull() || (getLegalMovesAsLong(true) == 0 && getLegalMovesAsLong(false) == 0);
 	}
 
-	public record MoveAndresultingBoardList(ArrayList<Integer> moves, ArrayList<Othello> boards) {
+	public record MoveAndResultingBoardList(int[] moves, OthelloTree.OthelloNode[] nodes) {
 	}
 
 	public static class MoveWithResult {
