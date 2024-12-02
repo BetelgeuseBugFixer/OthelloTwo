@@ -23,7 +23,7 @@ public class ArrayTree implements OthelloTree {
 
 	@Override
 	public void move(int move, boolean playerOne) {
-		this.root = (ArrayNode) root.getNextNode(move);
+		this.root = (ArrayNode) root.getNextNode(move,playerOne);
 	}
 
 	public static class ArrayNode extends OthelloNode {

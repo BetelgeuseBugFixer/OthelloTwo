@@ -24,7 +24,8 @@ public interface OthelloTree {
 		private boolean isGraded;
 		private int score;
 
-		public OthelloNode(){}
+		public OthelloNode() {
+		}
 
 		public LastHopeNode getWinChances(boolean nextPlayer) {
 			LastHopeNode lhn = new LastHopeNode();
@@ -57,7 +58,8 @@ public interface OthelloTree {
 
 		public abstract Othello getBoard();
 
-		protected OthelloNode getNextNode(int move) {
+		protected OthelloNode getNextNode(int move, boolean playerOne) {
+			this.getNextNodes(playerOne);
 			// non-optimal solution since data structure is optimized for other functions
 			// does not matter, since it only called once per call with small data structure
 			for (int i = 0; i < nextMoves.size(); i++) {
@@ -135,8 +137,6 @@ public interface OthelloTree {
 				nextMoves.set(i, pairs.get(i).move());
 			}
 		}
-		record Pair(OthelloNode node, Integer move) {}
-
 
 		public boolean getIsFullyCalculated() {
 			return this.fullyCalculated;
@@ -147,7 +147,7 @@ public interface OthelloTree {
 		}
 
 		public void setScore(int score) {
-			this.score=score;
+			this.score = score;
 			sortChildren();
 		}
 
@@ -157,6 +157,9 @@ public interface OthelloTree {
 
 		private int getHeuristicScore(OthelloNode node) {
 			return node.isGraded ? node.score : Integer.MIN_VALUE + 1;
+		}
+
+		record Pair(OthelloNode node, Integer move) {
 		}
 
 	}
