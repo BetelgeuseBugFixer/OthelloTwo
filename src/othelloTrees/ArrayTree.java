@@ -2,7 +2,7 @@ package othelloTrees;
 
 import othello.Othello;
 
-import java.util.stream.Collectors;
+import java.util.Arrays;
 
 public class ArrayTree implements OthelloTree {
 	ArrayNode root;
@@ -48,9 +48,18 @@ public class ArrayTree implements OthelloTree {
 
 		@Override
 		protected void calculateChildren(boolean playerOne) {
-			Othello.MoveAndResultingBoardList nextMovesAndBoards = this.board.getPossibleMovesLists(ArrayNode::getNodeFromBoard,playerOne);
-			this.children = nextMovesAndBoards.nodes();
+			Othello.MoveAndResultingBoardList<ArrayNode> nextMovesAndBoards = this.board.getPossibleMovesAndStates(ArrayNode::getNodeFromBoard,playerOne);
 			this.nextMoves = nextMovesAndBoards.moves();
+			Object[] objects=nextMovesAndBoards.states();
+			this.children=new ArrayNode[nextMoves.length];
+			for (int i = 0; i < nextMoves.length; i++) {
+				this.children[i]= (OthelloNode) objects[i];
+			}
+		}
+
+		@Override
+		public boolean noFurtherCalculationNeeded(int currentCallId) {
+			return getIsFullyCalculated();
 		}
 	}
 }

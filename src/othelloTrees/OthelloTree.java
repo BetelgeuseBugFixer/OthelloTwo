@@ -3,10 +3,8 @@ package othelloTrees;
 import ai.BoardGrader;
 import othello.Othello;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.List;
 
 public interface OthelloTree {
 
@@ -19,6 +17,7 @@ public interface OthelloTree {
 	abstract class OthelloNode {
 		protected OthelloNode[] children;
 		protected int[] nextMoves;
+		int lastCallId;
 		private boolean isTerminal;
 		private boolean checkedIfTerminal = false;
 		private boolean fullyCalculated;
@@ -71,11 +70,7 @@ public interface OthelloTree {
 		public boolean getIsTerminalNode(boolean playerOne) {
 			if (!this.checkedIfTerminal) {
 				checkedIfTerminal = true;
-				if (this.getBoard().boardIsFull()) {
-					this.isTerminal = true;
-				} else {
-					this.isTerminal = this.hasToPass(playerOne) && nextHasToPass(!playerOne);
-				}
+				this.isTerminal=this.getBoard().isOver();
 			}
 			return isTerminal;
 		}
@@ -144,7 +139,8 @@ public interface OthelloTree {
 			this.fullyCalculated = true;
 		}
 
-		public void setScore(int score) {
+		public void setScore(int score, int currentCallId) {
+			this.lastCallId = currentCallId;
 			this.score = score;
 			sortChildren();
 		}
@@ -155,6 +151,10 @@ public interface OthelloTree {
 
 		private int getHeuristicScore(OthelloNode node) {
 			return node.isGraded ? node.score : Integer.MIN_VALUE + 1;
+		}
+
+		public boolean noFurtherCalculationNeeded(int currentCallId) {
+			return this.fullyCalculated || lastCallId == currentCallId;
 		}
 
 		record Pair(OthelloNode node, Integer move) {

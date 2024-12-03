@@ -3,6 +3,7 @@ package ai;
 import ai.genetic.mcst.MonteCarloBoardGrader;
 import othello.Othello;
 import othelloTrees.ArrayTree;
+import othelloTrees.HashTree;
 import othelloTrees.OthelloTree;
 import othelloTrees.OthelloTree.OthelloNode;
 import szte.mi.Move;
@@ -10,6 +11,7 @@ import szte.mi.Move;
 import java.util.Random;
 
 public class AaronFish implements szte.mi.Player {
+	int currentCallId;
 	BoardGrader boardGrader;
 	boolean playerOne;
 	Othello board;
@@ -20,6 +22,7 @@ public class AaronFish implements szte.mi.Player {
 	public AaronFish() {
 		this.depthGoalCalculator = new changingDepth();
 		this.boardGrader = new BetterGrader();
+		this.currentCallId = 0;
 	}
 
 	public void setBoardGrader(BoardGrader boardGrader) {
@@ -28,6 +31,7 @@ public class AaronFish implements szte.mi.Player {
 
 	@Override
 	public void init(int order, long t, Random rnd) {
+		this.currentCallId = 0;
 		this.board = new Othello();
 		this.boardTree = new ArrayTree();
 		if (order == 0) {
@@ -64,6 +68,7 @@ public class AaronFish implements szte.mi.Player {
 
 	@Override
 	public Move nextMove(Move prevMove, long tOpponent, long t) {
+		currentCallId += 1;
 		this.currentMove += 2;
 		if (currentMove != 1) {
 			this.boardTree.move(Othello.getIntFromMove(prevMove), !this.playerOne);
@@ -101,7 +106,7 @@ public class AaronFish implements szte.mi.Player {
 			}
 		} else {
 			for (int i = 0; i < root.getNextNodes(false).length; i++) {
-				OthelloNode node=root.getChildAt(i);
+				OthelloNode node = root.getChildAt(i);
 				int score = maxValue(node, depth - 1, alpha, beta);
 				if (score < beta) {
 					beta = score;
@@ -120,7 +125,7 @@ public class AaronFish implements szte.mi.Player {
 	}
 
 	public int maxValue(OthelloTree.OthelloNode node, int depth, int alpha, int beta) {
-		if (node.getIsTerminalNode(true) || depth == 0 || node.getIsFullyCalculated()) {
+		if (node.getIsTerminalNode(true) || depth == 0 || node.noFurtherCalculationNeeded(this.currentCallId)) {
 			return node.getScoreWithoutCalcCheck(this.boardGrader, true);
 		}
 
@@ -139,13 +144,13 @@ public class AaronFish implements szte.mi.Player {
 		}
 		if (bestScore == Integer.MIN_VALUE || bestScore == Integer.MAX_VALUE || bestScore == 0) {
 			node.setToFullyCalculated();
-			node.setScore(bestScore);
+			node.setScore(bestScore, currentCallId);
 		}
 		return bestScore;
 	}
 
 	public int minValue(OthelloTree.OthelloNode node, int depth, int alpha, int beta) {
-		if (node.getIsTerminalNode(false) || depth == 0 || node.getIsFullyCalculated()) {
+		if (node.getIsTerminalNode(false) || depth == 0 || node.noFurtherCalculationNeeded(this.currentCallId)) {
 			return node.getScoreWithoutCalcCheck(this.boardGrader, false);
 		}
 
@@ -164,7 +169,7 @@ public class AaronFish implements szte.mi.Player {
 		}
 		if (bestScore == Integer.MIN_VALUE || bestScore == Integer.MAX_VALUE || bestScore == 0) {
 			node.setToFullyCalculated();
-			node.setScore(bestScore);
+			node.setScore(bestScore, currentCallId);
 		}
 		return bestScore;
 	}
@@ -177,7 +182,7 @@ public class AaronFish implements szte.mi.Player {
 		OthelloTree.LastHopeNode bestScore = children[0].getWinChances(!this.playerOne);
 		if (playerOne) {
 			for (int i = 1; i < children.length; i++) {
-				OthelloNode currentChild=children[i];
+				OthelloNode currentChild = children[i];
 				OthelloTree.LastHopeNode current = currentChild.getWinChances(!this.playerOne);
 				if (current.isGreater(bestScore)) {
 					bestMove = this.boardTree.getRoot().getMoveAt(i);
@@ -187,7 +192,7 @@ public class AaronFish implements szte.mi.Player {
 			}
 		} else {
 			for (int i = 1; i < children.length; i++) {
-				OthelloNode currentChild=children[i];
+				OthelloNode currentChild = children[i];
 				OthelloTree.LastHopeNode current = currentChild.getWinChances(!this.playerOne);
 				if (!bestScore.isGreater(current)) {
 					bestMove = this.boardTree.getRoot().getMoveAt(i);
