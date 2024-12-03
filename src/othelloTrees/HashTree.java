@@ -2,14 +2,12 @@ package othelloTrees;
 
 import othello.Othello;
 
-import java.util.Arrays;
 import java.util.HashMap;
 
 public class HashTree implements OthelloTree {
-	private final HashMap<OthelloState, HashTreeNode>[] transpositionTable;
+	private final HashMap<OthelloState, HashNode>[] transpositionTable;
 	int stonesSet;
-	private HashTreeNode root;
-
+	private HashNode root;
 
 
 	public HashTree() {
@@ -18,7 +16,7 @@ public class HashTree implements OthelloTree {
 		for (int i = 0; i < transpositionTable.length; i++) {
 			this.transpositionTable[i] = new HashMap<>();
 		}
-		this.root = new HashTreeNode(new Othello(), 0);
+		this.root = new HashNode(new Othello(), 0);
 	}
 
 	@Override
@@ -28,7 +26,7 @@ public class HashTree implements OthelloTree {
 
 	@Override
 	public void setRoot(OthelloNode node) {
-		this.root = (HashTreeNode) node;
+		this.root = (HashNode) node;
 	}
 
 	@Override
@@ -37,15 +35,15 @@ public class HashTree implements OthelloTree {
 			transpositionTable[stonesSet] = null;
 			stonesSet++;
 		}
-		this.root = (HashTreeNode) root.getNextNode(move, playerOne);
+		this.root = (HashNode) root.getNextNode(move, playerOne);
 	}
 
-	class HashTreeNode extends OthelloNode {
+	class HashNode extends OthelloNode {
 		private final Othello board;
 		int stonesSet;
 
 
-		public HashTreeNode(Othello board, int stonesSet) {
+		public HashNode(Othello board, int stonesSet) {
 			this.board = board;
 			this.stonesSet = stonesSet;
 		}
@@ -63,22 +61,25 @@ public class HashTree implements OthelloTree {
 			this.nextMoves = nextMovesAndBoards.moves();
 
 			int n = nextMoves.length;
-			this.children = new HashTreeNode[n];
+			this.children = new HashNode[n];
 			Object[] states = nextMovesAndBoards.states();
 			if (nextMoves[0] == -1) {
-				this.children[0] = transpositionTable[this.stonesSet].computeIfAbsent((OthelloState) states[0], x -> new HashTreeNode(x.getBoard(), this.stonesSet));
+				this.children[0] = transpositionTable[this.stonesSet].computeIfAbsent((OthelloState) states[0], x -> new HashNode(x.getBoard(), this.stonesSet));
 				return;
 			}
 			// Add children to transposition table
 			int newStones = this.stonesSet + 1;
 			for (int i = 0; i < n; i++) {
 				OthelloState childState = (OthelloState) states[i];
-				HashTreeNode child = transpositionTable[newStones].get((OthelloState) states[i]);
+				//this.children[i] = transpositionTable[newStones].computeIfAbsent(childState, x -> new HashTreeNode(x.getBoard(), newStones));
+				HashNode child = transpositionTable[newStones].get((OthelloState) states[i]);
 				if (child == null) {
-					child = new HashTreeNode(childState.getBoard(), newStones);
+					child = new HashNode(childState.getBoard(), newStones);
 					transpositionTable[newStones].put(childState, child);
 				}
+
 				this.children[i] = child;
+
 			}
 		}
 	}
