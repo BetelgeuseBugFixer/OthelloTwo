@@ -6,7 +6,7 @@ import java.util.HashMap;
 
 public class HashTree implements OthelloTree {
 	private final HashMap<OthelloState, HashNode>[] transpositionTable;
-	int stonesSet;
+	private int stonesSet;
 	private HashNode root;
 
 
@@ -71,7 +71,6 @@ public class HashTree implements OthelloTree {
 			int newStones = this.stonesSet + 1;
 			for (int i = 0; i < n; i++) {
 				OthelloState childState = (OthelloState) states[i];
-				//this.children[i] = transpositionTable[newStones].computeIfAbsent(childState, x -> new HashTreeNode(x.getBoard(), newStones));
 				HashNode child = transpositionTable[newStones].get((OthelloState) states[i]);
 				if (child == null) {
 					child = new HashNode(childState.getBoard(), newStones);
@@ -81,6 +80,44 @@ public class HashTree implements OthelloTree {
 				this.children[i] = child;
 
 			}
+		}
+	}
+
+	static class OthelloState {
+		private final Othello board;
+		private final boolean playerOne;
+
+
+		public OthelloState(Othello board, boolean playerOne) {
+			this.board = board;
+			this.playerOne = playerOne;
+		}
+
+		public Othello getBoard() {
+			return board;
+		}
+
+		public boolean isPlayerOne() {
+			return playerOne;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			// fuck checking here we want speed and just cast
+			OthelloState that = (OthelloState) o;
+			return playerOne == that.playerOne && board.equals(that.board);
+		}
+
+		@Override
+		public int hashCode() {
+			//if (!alreadyHashed) {
+				// Combine the two long values and the playerOne flag into a single hash.
+				int hash = Long.hashCode(board.blackPlayerDiscs);
+				hash = 31 * hash + Long.hashCode(board.whitePLayerDiscs);
+				//this.hash = 31 * this.hash + (playerOne ? 1 : 0);
+				//alreadyHashed = true;
+			//}
+			return hash;
 		}
 	}
 }

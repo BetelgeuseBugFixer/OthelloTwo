@@ -61,6 +61,20 @@ public class Othello {
 		return (legal & (1L << index)) != 0;
 	}
 
+	public static long mirrorHorizontal(long bitboard) {
+		bitboard = ((bitboard >>> 1) & 0x5555555555555555L) | ((bitboard & 0x5555555555555555L) << 1);
+		bitboard = ((bitboard >>> 2) & 0x3333333333333333L) | ((bitboard & 0x3333333333333333L) << 2);
+		bitboard = ((bitboard >>> 4) & 0x0F0F0F0F0F0F0F0FL) | ((bitboard & 0x0F0F0F0F0F0F0F0FL) << 4);
+		return bitboard;
+	}
+
+	public static long mirrorVertical(long bitboard) {
+		bitboard = ((bitboard >>> 8) & 0x00FF00FF00FF00FFL) | ((bitboard & 0x00FF00FF00FF00FFL) << 8);
+		bitboard = ((bitboard >>> 16) & 0x0000FFFF0000FFFFL) | ((bitboard & 0x0000FFFF0000FFFFL) << 16);
+		bitboard = ((bitboard >>> 32) & 0x00000000FFFFFFFFL) | ((bitboard & 0x00000000FFFFFFFFL) << 32);
+		return bitboard;
+	}
+
 	public void makeMove(int move, boolean playerOne) {
 		if (move == -1) {
 			return;
@@ -160,7 +174,6 @@ public class Othello {
 
 		return new MoveAndResultingBoardList(trimmedMoves, trimmedBoards);
 	}
-
 
 	public long getDiscsToFlip(int i, boolean playerOne) {
 		// check if field is occupied
@@ -363,6 +376,29 @@ public class Othello {
 
 	public boolean equals(Othello other) {
 		return this.blackPlayerDiscs == other.blackPlayerDiscs && this.whitePLayerDiscs == other.whitePLayerDiscs;
+	}
+
+	public Othello mirrorVertical() {
+		long mirroredBlackPlayerDisc = mirrorHorizontal(this.blackPlayerDiscs);
+		long mirroredWhitePlayerDiscs = mirrorHorizontal(this.whitePLayerDiscs);
+		return new Othello(mirroredBlackPlayerDisc, mirroredWhitePlayerDiscs);
+	}
+
+	public Othello mirrorHorizontal() {
+		long mirroredBlackPlayerDisc = mirrorVertical(this.blackPlayerDiscs);
+		long mirroredWhitePlayerDiscs = mirrorVertical(this.whitePLayerDiscs);
+		return new Othello(mirroredBlackPlayerDisc, mirroredWhitePlayerDiscs);
+	}
+
+	public boolean isGreater(Othello other) {
+		// Compare black discs first
+		if (this.blackPlayerDiscs > other.blackPlayerDiscs) {
+			return true;
+		} else if (this.blackPlayerDiscs < other.blackPlayerDiscs) {
+			return false;
+		}
+		// compare white discs
+		return this.whitePLayerDiscs >= other.whitePLayerDiscs;
 	}
 
 	public record MoveAndResultingBoardList<T>(int[] moves, T[] states) {

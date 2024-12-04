@@ -4,6 +4,7 @@ import ai.genetic.mcst.MonteCarloBoardGrader;
 import othello.Othello;
 import othelloTrees.ArrayTree;
 import othelloTrees.HashTree;
+import othelloTrees.MirroredHashTree;
 import othelloTrees.OthelloTree;
 import othelloTrees.OthelloTree.OthelloNode;
 import szte.mi.Move;
@@ -33,7 +34,7 @@ public class AaronFish implements szte.mi.Player {
 	public void init(int order, long t, Random rnd) {
 		this.currentCallId = 0;
 		this.board = new Othello();
-		this.boardTree = new HashTree();
+		this.boardTree = new MirroredHashTree();
 		if (order == 0) {
 			this.playerOne = true;
 			currentMove = -1;
