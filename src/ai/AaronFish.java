@@ -34,7 +34,7 @@ public class AaronFish implements szte.mi.Player {
 	public void init(int order, long t, Random rnd) {
 		this.currentCallId = 0;
 		this.board = new Othello();
-		this.boardTree = new MirroredHashTree();
+		this.boardTree = new ArrayTree();
 		if (order == 0) {
 			this.playerOne = true;
 			currentMove = -1;

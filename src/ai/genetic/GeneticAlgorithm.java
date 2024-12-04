@@ -36,10 +36,10 @@ public class GeneticAlgorithm {
     static int populationSize = 150;
     static int generationsWithoutNewBest = 0;
     static int chromosomeTargetSum = 20_000;
-    static final int mutationSV = 100;
+    static final int mutationSV = 150;
     static final int moveSV = 2;
-    static double mutationDecayPerGeneration = 0.002;
-    static double minLearningRate = 0.15;
+    static double mutationDecayPerGeneration = 0.001;
+    static double minLearningRate = 0.20;
     public final File weightsInGenerations = new File("geneticFiles/weights.tsv");
 
     public final File generationFile = new File("geneticFiles/generation.tsv");
