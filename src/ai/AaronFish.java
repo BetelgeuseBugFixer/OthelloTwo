@@ -2,8 +2,6 @@ package ai;
 
 import ai.genetic.mcst.MonteCarloBoardGrader;
 import othello.Othello;
-import othelloTrees.ArrayTree;
-import othelloTrees.HashTree;
 import othelloTrees.MirroredHashTree;
 import othelloTrees.OthelloTree;
 import othelloTrees.OthelloTree.OthelloNode;
@@ -15,7 +13,6 @@ public class AaronFish implements szte.mi.Player {
 	int currentCallId;
 	BoardGrader boardGrader;
 	boolean playerOne;
-	Othello board;
 	OthelloTree boardTree;
 	int currentMove;
 	DepthGoalCalculator depthGoalCalculator;
@@ -26,6 +23,10 @@ public class AaronFish implements szte.mi.Player {
 		this.currentCallId = 0;
 	}
 
+	public void setRoot(OthelloNode newRoot) {
+		this.boardTree.setRoot(newRoot);
+	}
+
 	public void setBoardGrader(BoardGrader boardGrader) {
 		this.boardGrader = boardGrader;
 	}
@@ -33,7 +34,6 @@ public class AaronFish implements szte.mi.Player {
 	@Override
 	public void init(int order, long t, Random rnd) {
 		this.currentCallId = 0;
-		this.board = new Othello();
 		this.boardTree = new MirroredHashTree();
 		if (order == 0) {
 			this.playerOne = true;
@@ -42,6 +42,15 @@ public class AaronFish implements szte.mi.Player {
 			this.playerOne = false;
 			currentMove = 0;
 		}
+	}
+
+	public void initWithRoot(OthelloNode root, boolean playerOne,DepthGoalCalculator depthGoalCalculator) {
+		this.currentCallId = 0;
+		this.boardTree = new MirroredHashTree();
+		this.boardTree.setRoot(root);
+		this.playerOne = playerOne;
+		this.currentMove = -1;
+		this.setDepthGoalCalculator(depthGoalCalculator);
 	}
 
 	public void setToMonteCarloGrader() {
@@ -209,8 +218,18 @@ public class AaronFish implements szte.mi.Player {
 	}
 
 	public static class ConstantDepth implements DepthGoalCalculator {
+		int depth;
+
+		public ConstantDepth() {
+			int depth = 2;
+		}
+
+		public ConstantDepth(int depth) {
+			this.depth = depth;
+		}
+
 		public int getGoalDepth(long remainingTime, int remainingEmptySpaces) {
-			return 2;
+			return depth;
 		}
 	}
 

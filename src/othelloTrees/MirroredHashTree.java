@@ -51,6 +51,7 @@ public class MirroredHashTree implements OthelloTree {
 	@Override
 	public void setRoot(OthelloNode node) {
 		this.root = (MirrorNode) node;
+		this.moveMirror = new NoMirror();
 	}
 
 	@Override
@@ -132,6 +133,10 @@ public class MirroredHashTree implements OthelloTree {
 		@Override
 		public int getMoveAt(int index) {
 			return moveMirror.mirrorMove(this.nextMoves[index]);
+		}
+
+		public int getMoveNoMirror(int index) {
+			return this.nextMoves[index];
 		}
 
 		@Override
