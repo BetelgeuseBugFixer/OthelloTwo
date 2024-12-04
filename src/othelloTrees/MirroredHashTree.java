@@ -10,6 +10,7 @@ public class MirroredHashTree implements OthelloTree {
 	private int stonesSet;
 	private MirrorNode root;
 
+
 	public MirroredHashTree() {
 		this.stonesSet = 0;
 		this.transpositionTable = new HashMap[61];
@@ -57,8 +58,8 @@ public class MirroredHashTree implements OthelloTree {
 		if (move != -1) {
 			transpositionTable[stonesSet] = null;
 			stonesSet++;
+			move = this.moveMirror.mirrorMove(move);
 		}
-		move = this.moveMirror.mirrorMove(move);
 		MirrorNode nextRoot = (MirrorNode) root.getNextNode(move, playerOne);
 		this.moveMirror = findNewMirror(root, nextRoot, move, moveMirror, playerOne);
 		this.root = nextRoot;
@@ -202,7 +203,7 @@ public class MirroredHashTree implements OthelloTree {
 
 		@Override
 		public Mirror addHorizontalMirror() {
-			return addDiagonalMirror();
+			return new DiagonalMirror();
 		}
 
 		@Override
