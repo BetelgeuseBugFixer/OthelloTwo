@@ -3,6 +3,7 @@ package othelloTrees;
 import ai.AaronFish;
 import games.wthor.Header;
 import othello.Othello;
+import progressbar.Timer;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -30,15 +31,19 @@ public class OpeningLibraryCreator {
 			}""";
 
 	public static void main(String[] args) throws IOException {
+		Timer timer = new Timer();
+		timer.startTimer();
 		BufferedWriter writer = new BufferedWriter(new FileWriter("src/othelloTrees/OpeningLibraryMap.java"));
 		writer.write(HEADER);
 		writer.write("\n");
 		MirroredHashTree tree = new MirroredHashTree();
 		int goalDepth = 4;
-		int ratingDepth = 5;
+		int ratingDepth = 6;
 		goDeeper((MirroredHashTree.MirrorNode) tree.getRoot(), 0, goalDepth, ratingDepth, true, writer);
 		writer.write(TAIL);
 		writer.close();
+		timer.stopTimer();
+		System.out.println(timer.getCurrentTimeInSeconds());
 	}
 
 	private static int goDeeper(MirroredHashTree.MirrorNode current, int currentDepth, int targetDepth, int ratingDepth, boolean playerOne, BufferedWriter writer) throws IOException {
