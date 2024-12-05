@@ -30,12 +30,12 @@ public class OpeningLibraryCreator {
 			}""";
 
 	public static void main(String[] args) throws IOException {
-		BufferedWriter writer = new BufferedWriter(new FileWriter("src/othelloTrees/OpeningLibraryMap.txt"));
+		BufferedWriter writer = new BufferedWriter(new FileWriter("src/othelloTrees/OpeningLibraryMap.java"));
 		writer.write(HEADER);
 		writer.write("\n");
 		MirroredHashTree tree = new MirroredHashTree();
-		int goalDepth = 5;
-		int ratingDepth = 6;
+		int goalDepth = 4;
+		int ratingDepth = 5;
 		goDeeper((MirroredHashTree.MirrorNode) tree.getRoot(), 0, goalDepth, ratingDepth, true, writer);
 		writer.write(TAIL);
 		writer.close();
