@@ -14,6 +14,8 @@ public interface OthelloTree {
 
 	public void move(int move, boolean playerOne);
 
+	void setRoot(Othello openingBoard);
+
 	abstract class OthelloNode {
 		protected OthelloNode[] children;
 		protected int[] nextMoves;

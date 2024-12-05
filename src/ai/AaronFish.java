@@ -2,7 +2,9 @@ package ai;
 
 import ai.genetic.mcst.MonteCarloBoardGrader;
 import othello.Othello;
+import othelloTrees.HashTree;
 import othelloTrees.MirroredHashTree;
+import othelloTrees.OpeningLibraryWrapper;
 import othelloTrees.OthelloTree;
 import othelloTrees.OthelloTree.OthelloNode;
 import szte.mi.Move;
@@ -16,6 +18,8 @@ public class AaronFish implements szte.mi.Player {
 	OthelloTree boardTree;
 	int currentMove;
 	DepthGoalCalculator depthGoalCalculator;
+	boolean inOpeningLibrary;
+	Othello openingBoard;
 
 	public AaronFish() {
 		this.depthGoalCalculator = new changingDepth();
@@ -34,7 +38,7 @@ public class AaronFish implements szte.mi.Player {
 	@Override
 	public void init(int order, long t, Random rnd) {
 		this.currentCallId = 0;
-		this.boardTree = new MirroredHashTree();
+		openingBoard=new Othello();
 		if (order == 0) {
 			this.playerOne = true;
 			currentMove = -1;
@@ -42,10 +46,12 @@ public class AaronFish implements szte.mi.Player {
 			this.playerOne = false;
 			currentMove = 0;
 		}
+		inOpeningLibrary = true;
 	}
 
-	public void initWithRoot(OthelloNode root, boolean playerOne,DepthGoalCalculator depthGoalCalculator) {
-		this.currentCallId = 0;
+	public void initWithRoot(OthelloNode root, boolean playerOne, DepthGoalCalculator depthGoalCalculator) {
+		//NOTE: currentCall may never be init with 0
+		this.currentCallId = 1;
 		this.boardTree = new MirroredHashTree();
 		this.boardTree.setRoot(root);
 		this.playerOne = playerOne;
@@ -78,11 +84,24 @@ public class AaronFish implements szte.mi.Player {
 
 	@Override
 	public Move nextMove(Move prevMove, long tOpponent, long t) {
-		currentCallId += 1;
 		this.currentMove += 2;
-		if (currentMove != 1) {
-			this.boardTree.move(Othello.getIntFromMove(prevMove), !this.playerOne);
+		if (inOpeningLibrary) {
+			if (currentMove != 1) {
+				this.openingBoard.makeMove(prevMove, !this.playerOne);
+			}
+			Integer move = OpeningLibraryWrapper.getMoveFromOpeningLibrary(this.openingBoard, playerOne);
+			if (move != null) {
+				openingBoard.makeMove(move, playerOne);
+				return Othello.getMoveFromInt(move);
+			}
+			inOpeningLibrary = false;
+			this.boardTree=new HashTree(openingBoard);
+		} else {
+			if (currentMove != 1) {
+				this.boardTree.move(Othello.getIntFromMove(prevMove), !this.playerOne);
+			}
 		}
+		currentCallId += 1;
 		int remainingSpaces = this.boardTree.getRoot().getBoard().getRemainingSpaces();
 		int goalDepth = depthGoalCalculator.getGoalDepth(t, remainingSpaces);
 		return calculateNextMove(goalDepth);
@@ -132,6 +151,42 @@ public class AaronFish implements szte.mi.Player {
 		}
 		this.boardTree.move(bestMove, this.playerOne);
 		return Othello.getMoveFromInt(bestMove);
+	}
+
+	public int gradeNodeAndReturnBestMove(int depth) {
+		int alpha = Integer.MIN_VALUE;
+		int beta = Integer.MAX_VALUE;
+		OthelloNode root = this.boardTree.getRoot();
+
+		int bestMove = -1;
+		if (playerOne) {
+			for (int i = 0; i < root.getNextNodes(true).length; i++) {
+				OthelloNode node = root.getChildAt(i);
+				int score = minValue(node, depth - 1, alpha, beta);
+				if (score > alpha) {
+					alpha = score;
+					bestMove = root.getMoveAt(i);
+					if (score == Integer.MAX_VALUE) {
+						break;
+					}
+				}
+			}
+			root.setScore(alpha, currentCallId);
+		} else {
+			for (int i = 0; i < root.getNextNodes(false).length; i++) {
+				OthelloNode node = root.getChildAt(i);
+				int score = maxValue(node, depth - 1, alpha, beta);
+				if (score < beta) {
+					beta = score;
+					bestMove = root.getMoveAt(i);
+					if (score == Integer.MIN_VALUE) {
+						break;
+					}
+				}
+			}
+			root.setScore(beta, this.currentCallId);
+		}
+		return bestMove;
 	}
 
 	public int maxValue(OthelloTree.OthelloNode node, int depth, int alpha, int beta) {

@@ -19,6 +19,15 @@ public class HashTree implements OthelloTree {
 		this.root = new HashNode(new Othello(), 0);
 	}
 
+	public HashTree(Othello othello){
+		this.stonesSet = 0;
+		this.transpositionTable = new HashMap[othello.getRemainingSpaces()];
+		for (int i = 0; i < transpositionTable.length; i++) {
+			this.transpositionTable[i] = new HashMap<>();
+		}
+		this.root = new HashNode(othello, 0);
+	}
+
 	@Override
 	public OthelloNode getRoot() {
 		return root;
@@ -36,6 +45,11 @@ public class HashTree implements OthelloTree {
 			stonesSet++;
 		}
 		this.root = (HashNode) root.getNextNode(move, playerOne);
+	}
+
+	@Override
+	public void setRoot(Othello openingBoard) {
+		this.root=new HashNode(openingBoard,openingBoard.getRemainingSpaces());
 	}
 
 	class HashNode extends OthelloNode {

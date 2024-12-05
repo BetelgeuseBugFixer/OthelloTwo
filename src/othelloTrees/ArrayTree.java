@@ -2,13 +2,15 @@ package othelloTrees;
 
 import othello.Othello;
 
-import java.util.Arrays;
-
 public class ArrayTree implements OthelloTree {
 	ArrayNode root;
 
 	public ArrayTree() {
 		this.root = new ArrayNode();
+	}
+
+	public ArrayTree(Othello othello){
+		this.root=new ArrayNode(othello);
 	}
 
 	@Override
@@ -23,7 +25,12 @@ public class ArrayTree implements OthelloTree {
 
 	@Override
 	public void move(int move, boolean playerOne) {
-		this.root = (ArrayNode) root.getNextNode(move,playerOne);
+		this.root = (ArrayNode) root.getNextNode(move, playerOne);
+	}
+
+	@Override
+	public void setRoot(Othello openingBoard) {
+		this.root = new ArrayNode(openingBoard);
 	}
 
 	public static class ArrayNode extends OthelloNode {
@@ -33,12 +40,12 @@ public class ArrayTree implements OthelloTree {
 			this.board = new Othello();
 		}
 
-		static ArrayNode getNodeFromBoard(Othello board){
-			return new ArrayNode(board);
-		}
-
 		public ArrayNode(Othello board) {
 			this.board = board;
+		}
+
+		static ArrayNode getNodeFromBoard(Othello board) {
+			return new ArrayNode(board);
 		}
 
 		@Override
@@ -48,12 +55,12 @@ public class ArrayTree implements OthelloTree {
 
 		@Override
 		protected void calculateChildren(boolean playerOne) {
-			Othello.MoveAndResultingBoardList<ArrayNode> nextMovesAndBoards = this.board.getPossibleMovesAndStates(ArrayNode::getNodeFromBoard,playerOne);
+			Othello.MoveAndResultingBoardList<ArrayNode> nextMovesAndBoards = this.board.getPossibleMovesAndStates(ArrayNode::getNodeFromBoard, playerOne);
 			this.nextMoves = nextMovesAndBoards.moves();
-			Object[] objects=nextMovesAndBoards.states();
-			this.children=new ArrayNode[nextMoves.length];
+			Object[] objects = nextMovesAndBoards.states();
+			this.children = new ArrayNode[nextMoves.length];
 			for (int i = 0; i < nextMoves.length; i++) {
-				this.children[i]= (OthelloNode) objects[i];
+				this.children[i] = (OthelloNode) objects[i];
 			}
 		}
 

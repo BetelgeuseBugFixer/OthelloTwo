@@ -21,6 +21,15 @@ public class MirroredHashTree implements OthelloTree {
 		this.moveMirror = new NoMirror();
 	}
 
+	public MirroredHashTree(Othello othello){
+		this.stonesSet = 0;
+		this.transpositionTable = new HashMap[othello.getRemainingSpaces()];
+		for (int i = 0; i < transpositionTable.length; i++) {
+			this.transpositionTable[i] = new HashMap<>();
+		}
+		this.root = new MirrorNode(othello, 0);
+	}
+
 	private static Mirror findNewMirror(MirrorNode root, MirrorNode nextRoot, int move, Mirror moveMirror, boolean playerOne) {
 		Othello current = new Othello(root.getBoard().blackPlayerDiscs, root.getBoard().whitePLayerDiscs);
 		current.makeMove(move, playerOne);
@@ -66,6 +75,11 @@ public class MirroredHashTree implements OthelloTree {
 		this.root = nextRoot;
 	}
 
+	@Override
+	public void setRoot(Othello openingBoard) {
+		this.root=new MirrorNode(openingBoard,openingBoard.getRemainingSpaces());
+	}
+
 	public static interface Mirror {
 		public int mirrorMove(int moveToMirror);
 
@@ -76,7 +90,7 @@ public class MirroredHashTree implements OthelloTree {
 		public Mirror addDiagonalMirror();
 	}
 
-	static class MirroredOthelloState {
+	static  class MirroredOthelloState {
 		Othello representativeBoard;
 
 		boolean playerOne;
@@ -170,7 +184,7 @@ public class MirroredHashTree implements OthelloTree {
 		}
 	}
 
-	public class NoMirror implements Mirror {
+	public static class NoMirror implements Mirror {
 
 		@Override
 		public int mirrorMove(int moveToMirror) {
@@ -193,7 +207,7 @@ public class MirroredHashTree implements OthelloTree {
 		}
 	}
 
-	public class VerticalMirror implements Mirror {
+	public static class VerticalMirror implements Mirror {
 		@Override
 		public int mirrorMove(int moveToMirror) {
 			int row = moveToMirror / 8;
@@ -217,7 +231,7 @@ public class MirroredHashTree implements OthelloTree {
 		}
 	}
 
-	public class HorizontalMirror implements Mirror {
+	public static class HorizontalMirror implements Mirror {
 		@Override
 		public int mirrorMove(int moveToMirror) {
 			int row = moveToMirror / 8;
@@ -241,7 +255,7 @@ public class MirroredHashTree implements OthelloTree {
 		}
 	}
 
-	public class DiagonalMirror implements Mirror {
+	public static class DiagonalMirror implements Mirror {
 		@Override
 		public int mirrorMove(int moveToMirror) {
 			int row = moveToMirror / 8;

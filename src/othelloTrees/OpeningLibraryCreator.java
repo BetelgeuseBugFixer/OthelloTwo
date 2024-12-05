@@ -1,21 +1,43 @@
 package othelloTrees;
 
 import ai.AaronFish;
+import games.wthor.Header;
 import othello.Othello;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Random;
 
 public class OpeningLibraryCreator {
+	static int nodesGraded = 0;
+	final static String HEADER= """
+			package othelloTrees;
+
+			import othello.Othello;
+
+			import java.util.Collections;
+			import java.util.HashMap;
+			import java.util.Map;
+
+			public class OpeningLibraryMap {
+			\tprotected static final Map<HashTree.OthelloState, Integer> openingLibrary;
+
+			\tstatic {
+			\t\tHashMap<HashTree.OthelloState, Integer> stateHashtable = new HashMap<>();""";
+	final static String TAIL= """
+			\t\topeningLibrary = Collections.unmodifiableMap(stateHashtable);
+			\t}
+			}""";
 
 	public static void main(String[] args) throws IOException {
-		BufferedWriter writer = new BufferedWriter(new FileWriter("src/othelloTrees/Lib.txt"));
+		BufferedWriter writer = new BufferedWriter(new FileWriter("src/othelloTrees/OpeningLibraryMap.txt"));
+		writer.write(HEADER);
+		writer.write("\n");
 		MirroredHashTree tree = new MirroredHashTree();
-		int goalDepth = 2;
-		int ratingDepth = 2;
+		int goalDepth = 5;
+		int ratingDepth = 6;
 		goDeeper((MirroredHashTree.MirrorNode) tree.getRoot(), 0, goalDepth, ratingDepth, true, writer);
+		writer.write(TAIL);
 		writer.close();
 	}
 
@@ -24,7 +46,7 @@ public class OpeningLibraryCreator {
 			// grade board
 			AaronFish grader = new AaronFish();
 			grader.initWithRoot(current, playerOne, new AaronFish.ConstantDepth(ratingDepth));
-			int move = Othello.getIntFromMove(grader.nextMove(null, 0, 0));
+			int move = grader.gradeNodeAndReturnBestMove(ratingDepth);
 			int score = current.getScoreWithoutCalcCheck();
 			writeToFile(writer, current.getBoard(), playerOne, move, score);
 			return score;
@@ -38,10 +60,9 @@ public class OpeningLibraryCreator {
 				int score = goDeeper(nextNode, currentDepth + 1, targetDepth, ratingDepth, false, writer);
 				if (score > bestScore) {
 					bestScore = score;
-					bestMove = nextNode.getMoveNoMirror(i);
+					bestMove = current.getMoveNoMirror(i);
 				}
 			}
-
 		} else {
 			bestScore = Integer.MAX_VALUE;
 			for (int i = 0; i < current.getNextNodes(false).length; i++) {
@@ -49,7 +70,7 @@ public class OpeningLibraryCreator {
 				int score = goDeeper(nextNode, currentDepth + 1, targetDepth, ratingDepth, true, writer);
 				if (score < bestScore) {
 					bestScore = score;
-					bestMove = nextNode.getMoveNoMirror(i);
+					bestMove = current.getMoveNoMirror(i);
 				}
 			}
 		}
@@ -58,6 +79,14 @@ public class OpeningLibraryCreator {
 	}
 
 	private static void writeToFile(BufferedWriter writer, Othello board, boolean playerOne, int move, int score) throws IOException {
-		writer.write(board.blackPlayerDiscs + "," + board.whitePLayerDiscs + " " + playerOne + "->" + move + " " + score+"\n");
+		nodesGraded++;
+		System.out.print("\rNodes Graded: " + nodesGraded);
+		//here we make sure, that the first Node is also in the represent board, like all the other boards
+		if (board.equals(new Othello())) {
+			board = board.mirrorVertical();
+			move=new MirroredHashTree.VerticalMirror().mirrorMove(move);
+		}
+		writer.write("\t\tstateHashtable.put(new HashTree.OthelloState(new Othello(" + board.blackPlayerDiscs + "L, " + board.whitePLayerDiscs + "L), " + playerOne + "), " + move + ");\n");
+		// writer.write(board.blackPlayerDiscs + "," + board.whitePLayerDiscs + " " + playerOne + "->" + move + " " + score+"\n");
 	}
 }
