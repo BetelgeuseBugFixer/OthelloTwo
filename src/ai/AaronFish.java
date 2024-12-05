@@ -2,7 +2,6 @@ package ai;
 
 import ai.genetic.mcst.MonteCarloBoardGrader;
 import othello.Othello;
-import othelloTrees.HashTree;
 import othelloTrees.MirroredHashTree;
 import othelloTrees.OpeningLibraryWrapper;
 import othelloTrees.OthelloTree;
@@ -20,11 +19,14 @@ public class AaronFish implements szte.mi.Player {
 	DepthGoalCalculator depthGoalCalculator;
 	boolean inOpeningLibrary;
 	Othello openingBoard;
+	boolean playedWithSameBoardTree;
 
 	public AaronFish() {
 		this.depthGoalCalculator = new changingDepth();
 		this.boardGrader = new BetterGrader();
 		this.currentCallId = 0;
+		this.boardTree = new MirroredHashTree();
+		this.playedWithSameBoardTree=false;
 	}
 
 	public void setRoot(OthelloNode newRoot) {
@@ -38,7 +40,7 @@ public class AaronFish implements szte.mi.Player {
 	@Override
 	public void init(int order, long t, Random rnd) {
 		this.currentCallId = 0;
-		openingBoard=new Othello();
+		openingBoard = new Othello();
 		if (order == 0) {
 			this.playerOne = true;
 			currentMove = -1;
@@ -50,7 +52,7 @@ public class AaronFish implements szte.mi.Player {
 	}
 
 	public void initWithRoot(OthelloNode root, boolean playerOne, DepthGoalCalculator depthGoalCalculator) {
-		//NOTE: currentCall may never be init with 0
+		// NOTE: currentCall may never be init with 0
 		this.currentCallId = 1;
 		this.boardTree = new MirroredHashTree();
 		this.boardTree.setRoot(root);
@@ -95,15 +97,16 @@ public class AaronFish implements szte.mi.Player {
 				return Othello.getMoveFromInt(move);
 			}
 			inOpeningLibrary = false;
-			this.boardTree=new MirroredHashTree(openingBoard);
+			// this.boardTree = new MirroredHashTree(openingBoard);
+			this.boardTree.setRoot(openingBoard);
 		} else {
 			if (currentMove != 1) {
 				this.boardTree.move(Othello.getIntFromMove(prevMove), !this.playerOne);
 			}
 		}
-		currentCallId += 1;
 		int remainingSpaces = this.boardTree.getRoot().getBoard().getRemainingSpaces();
 		int goalDepth = depthGoalCalculator.getGoalDepth(t, remainingSpaces);
+		this.currentCallId = currentMove + goalDepth-1;
 		return calculateNextMove(goalDepth);
 	}
 
@@ -171,7 +174,7 @@ public class AaronFish implements szte.mi.Player {
 					}
 				}
 			}
-			root.setScore(alpha, currentCallId);
+			root.setScore(alpha, currentCallId, true);
 		} else {
 			for (int i = 0; i < root.getNextNodes(false).length; i++) {
 				OthelloNode node = root.getChildAt(i);
@@ -184,7 +187,7 @@ public class AaronFish implements szte.mi.Player {
 					}
 				}
 			}
-			root.setScore(beta, this.currentCallId);
+			root.setScore(beta, this.currentCallId, false);
 		}
 		return bestMove;
 	}
@@ -209,8 +212,8 @@ public class AaronFish implements szte.mi.Player {
 		}
 		if (bestScore == Integer.MIN_VALUE || bestScore == Integer.MAX_VALUE || bestScore == 0) {
 			node.setToFullyCalculated();
-			node.setScore(bestScore, currentCallId);
 		}
+		node.setScore(bestScore, currentCallId, true);
 		return bestScore;
 	}
 
@@ -234,8 +237,8 @@ public class AaronFish implements szte.mi.Player {
 		}
 		if (bestScore == Integer.MIN_VALUE || bestScore == Integer.MAX_VALUE || bestScore == 0) {
 			node.setToFullyCalculated();
-			node.setScore(bestScore, currentCallId);
 		}
+		node.setScore(bestScore, currentCallId, false);
 		return bestScore;
 	}
 
@@ -302,12 +305,15 @@ public class AaronFish implements szte.mi.Player {
 	}
 
 	public static class changingDepth implements DepthGoalCalculator {
-		@Override
 		public int getGoalDepth(long remainingTime, int remainingEmptySpaces) {
 			if (remainingEmptySpaces < 13) {
 				return 25;
-			} else {
+			} else if (remainingEmptySpaces < 25) {
+				return 6;
+			} else if (remainingEmptySpaces < 45) {
 				return 5;
+			} else {
+				return 6;
 			}
 		}
 	}

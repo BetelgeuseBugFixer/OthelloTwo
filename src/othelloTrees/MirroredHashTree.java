@@ -65,20 +65,21 @@ public class MirroredHashTree implements OthelloTree {
 	}
 
 	@Override
+	public void setRoot(Othello openingBoard) {
+		this.root = new MirrorNode(openingBoard, 64 - openingBoard.getRemainingSpaces() -4);
+		this.moveMirror=new NoMirror();
+	}
+
+	@Override
 	public void move(int move, boolean playerOne) {
 		if (move != -1) {
-			transpositionTable[stonesSet] = null;
+			//transpositionTable[stonesSet] = null;
 			stonesSet++;
 			move = this.moveMirror.mirrorMove(move);
 		}
 		MirrorNode nextRoot = (MirrorNode) root.getNextNode(move, playerOne);
 		this.moveMirror = findNewMirror(root, nextRoot, move, moveMirror, playerOne);
 		this.root = nextRoot;
-	}
-
-	@Override
-	public void setRoot(Othello openingBoard) {
-		this.root=new MirrorNode(openingBoard,openingBoard.getRemainingSpaces());
 	}
 
 	public static interface Mirror {
@@ -91,7 +92,7 @@ public class MirroredHashTree implements OthelloTree {
 		public Mirror addDiagonalMirror();
 	}
 
-	static  class MirroredOthelloState {
+	static class MirroredOthelloState {
 		Othello representativeBoard;
 
 		boolean playerOne;
@@ -133,55 +134,6 @@ public class MirroredHashTree implements OthelloTree {
 			int hash = Long.hashCode(representativeBoard.blackPlayerDiscs);
 			hash = 31 * hash + Long.hashCode(representativeBoard.whitePLayerDiscs);
 			return hash;
-		}
-	}
-
-	class MirrorNode extends OthelloNode {
-		private final Othello board;
-		int stonesSet;
-
-		public MirrorNode(Othello board, int stonesSet) {
-			this.board = board;
-			this.stonesSet = stonesSet;
-		}
-
-		@Override
-		public int getMoveAt(int index) {
-			return moveMirror.mirrorMove(this.nextMoves[index]);
-		}
-
-		public int getMoveNoMirror(int index) {
-			return this.nextMoves[index];
-		}
-
-		@Override
-		public Othello getBoard() {
-			return board;
-		}
-
-		@Override
-		protected void calculateChildren(boolean playerOne) {
-			Othello.MoveAndResultingBoardList<MirroredOthelloState> nextMovesAndBoards = this.board.getPossibleMovesAndStates(x -> new MirroredOthelloState(x, playerOne), playerOne);
-			this.nextMoves = nextMovesAndBoards.moves();
-			int n = nextMoves.length;
-			this.children = new MirrorNode[n];
-			Object[] states = nextMovesAndBoards.states();
-			// if we pass the number of stones stay the same
-			if (nextMoves[0] == -1) {
-				this.children[0] = transpositionTable[this.stonesSet].computeIfAbsent((MirroredOthelloState) states[0], x -> new MirrorNode(x.getBoard(), this.stonesSet));
-				return;
-			}
-			// Add children to transposition table
-			int newStones = this.stonesSet + 1;
-			for (int i = 0; i < n; i++) {
-				MirroredOthelloState childState = (MirroredOthelloState) states[i];
-				MirrorNode child = transpositionTable[newStones].get((MirroredOthelloState) states[i]);
-				if (child == null) {
-					child = new MirrorNode(childState.getBoard(), newStones);
-					transpositionTable[newStones].put(childState, child);
-				}
-				this.children[i] = child;
-			}
 		}
 	}
 
@@ -277,6 +229,59 @@ public class MirroredHashTree implements OthelloTree {
 		@Override
 		public Mirror addDiagonalMirror() {
 			return new NoMirror();
+		}
+	}
+
+	class MirrorNode extends OthelloNode {
+		private final Othello board;
+		int stonesSet;
+
+		public MirrorNode(Othello board, int stonesSet) {
+			this.board = board;
+			this.stonesSet = stonesSet;
+		}
+
+		@Override
+		public int getMoveAt(int index) {
+			int move = this.nextMoves[index];
+			if (move != -1) {
+				move = moveMirror.mirrorMove(move);
+			}
+			return move;
+		}
+
+		public int getMoveNoMirror(int index) {
+			return this.nextMoves[index];
+		}
+
+		@Override
+		public Othello getBoard() {
+			return board;
+		}
+
+		@Override
+		protected void calculateChildren(boolean playerOne) {
+			Othello.MoveAndResultingBoardList<MirroredOthelloState> nextMovesAndBoards = this.board.getPossibleMovesAndStates(x -> new MirroredOthelloState(x, playerOne), playerOne);
+			this.nextMoves = nextMovesAndBoards.moves();
+			int n = nextMoves.length;
+			this.children = new MirrorNode[n];
+			Object[] states = nextMovesAndBoards.states();
+			// if we pass the number of stones stay the same
+			if (nextMoves[0] == -1) {
+				this.children[0] = transpositionTable[this.stonesSet].computeIfAbsent((MirroredOthelloState) states[0], x -> new MirrorNode(x.getBoard(), this.stonesSet));
+				return;
+			}
+			// Add children to transposition table
+			int newStones = this.stonesSet + 1;
+			for (int i = 0; i < n; i++) {
+				MirroredOthelloState childState = (MirroredOthelloState) states[i];
+				MirrorNode child = transpositionTable[newStones].get((MirroredOthelloState) states[i]);
+				if (child == null) {
+					child = new MirrorNode(childState.getBoard(), newStones);
+					transpositionTable[newStones].put(childState, child);
+				}
+				this.children[i] = child;
+			}
 		}
 	}
 

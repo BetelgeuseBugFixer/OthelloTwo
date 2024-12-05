@@ -36,9 +36,9 @@ public class BetterGrader implements BoardGrader {
 	// handcrafted
 	public int[] handcrafted = {20, 10, -20, 30, 40, 30, 30, 20, -20, 10, 15, 10, -5, -50, 20, -10, 60, 1, 20, 70, -20, 10, -5, 30, 40, 30, 30, 20, -20, 10, 15, 10, -5, -50, 20, -10, 50, 2, 30, 90, -60};
 	//combination
-	public int[] combination = {34, 76, -133, 192, 116, 98, 20, 294, -28, 50, 0, -8, -164, -896, -30, -439, 1124, 23, 0, 162, 0, 0, 0, 2701, 2157, 1522, 202, 973, -271, -777, -507, 382, -1454, -6604, -998, 0, 0, 0, -150, -125, 1179};
+	public int[] combination = {34, 76, -133, 192, 116, 98, 40, 294, -28, 50, 0, -8, -164, -896, -30, -439, 1124, 23, 0, 162, 0, 0, 0, 2701, 2157, 1522, 202, 973, -271, -777, -507, 382, -1454, -6604, -998, 0, 0, 0, -150, -125, 1179};
 
-	public int[] weights=combination;
+	public int[] weights=first;
 	int moveChange = 0;
 	int sPossibleMovesIndex = 1;
 	int sFrontierDiscsIndex = 2;

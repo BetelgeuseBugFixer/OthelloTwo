@@ -118,14 +118,18 @@ public interface OthelloTree {
 
 		protected abstract void calculateChildren(boolean playerOne);
 
-		private void sortChildren() {
+		private void sortChildren(boolean playerOne) {
 			// Create an array of pairs
 			Pair[] pairs = new Pair[children.length];
 			for (int i = 0; i < children.length; i++) {
 				pairs[i] = new Pair(children[i], nextMoves[i]);
 			}
 			// Sort the array of pairs based on heuristic scores
-			Arrays.sort(pairs, Comparator.comparingInt(pair -> getHeuristicScore(pair.node())));
+			Arrays.sort(pairs, (pair1, pair2) -> {
+				int score1 = getHeuristicScore(pair1.node());
+				int score2 = getHeuristicScore(pair2.node());
+				return playerOne ? Integer.compare(score2, score1) : Integer.compare(score1, score2);
+			});
 			// Unpack the sorted pairs back into children and nextMoves arrays
 			for (int i = 0; i < pairs.length; i++) {
 				children[i] = pairs[i].node();
@@ -141,10 +145,10 @@ public interface OthelloTree {
 			this.fullyCalculated = true;
 		}
 
-		public void setScore(int score, int currentCallId) {
+		public void setScore(int score, int currentCallId,boolean playerOne) {
 			this.lastCallId = currentCallId;
 			this.score = score;
-			sortChildren();
+			sortChildren(playerOne);
 		}
 
 		public int getScoreWithoutCalcCheck() {
@@ -156,7 +160,7 @@ public interface OthelloTree {
 		}
 
 		public boolean noFurtherCalculationNeeded(int currentCallId) {
-			return this.fullyCalculated || lastCallId == currentCallId;
+			return this.fullyCalculated || lastCallId >= currentCallId;
 		}
 
 		record Pair(OthelloNode node, Integer move) {

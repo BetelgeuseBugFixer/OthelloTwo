@@ -13,7 +13,7 @@ def read_given_weights_file(given_weights_file):
 
 
 class GeneticFileHelper:
-    def __init__(self, order_file="weight_order.txt", weights_file="run2/best.txt",
+    def __init__(self, order_file="weight_order.txt", weights_file="best.txt",
                  original_weights_file="original_weights.txt"):
         self.order_file = order_file
         self.weights_file = weights_file
