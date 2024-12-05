@@ -21,13 +21,14 @@ public class MirroredHashTree implements OthelloTree {
 		this.moveMirror = new NoMirror();
 	}
 
-	public MirroredHashTree(Othello othello){
+	public MirroredHashTree(Othello othello) {
 		this.stonesSet = 0;
-		this.transpositionTable = new HashMap[othello.getRemainingSpaces()+1];
+		this.transpositionTable = new HashMap[othello.getRemainingSpaces() + 1];
 		for (int i = 0; i < transpositionTable.length; i++) {
 			this.transpositionTable[i] = new HashMap<>();
 		}
 		this.root = new MirrorNode(othello, 0);
+		this.moveMirror = new NoMirror();
 	}
 
 	private static Mirror findNewMirror(MirrorNode root, MirrorNode nextRoot, int move, Mirror moveMirror, boolean playerOne) {

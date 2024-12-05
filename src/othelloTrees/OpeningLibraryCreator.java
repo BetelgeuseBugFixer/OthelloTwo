@@ -38,7 +38,7 @@ public class OpeningLibraryCreator {
 		writer.write("\n");
 		MirroredHashTree tree = new MirroredHashTree();
 		int goalDepth = 5;
-		int ratingDepth = 6;
+		int ratingDepth = 7;
 		goDeeper((MirroredHashTree.MirrorNode) tree.getRoot(), 0, goalDepth, ratingDepth, true, writer);
 		writer.write(TAIL);
 		writer.close();

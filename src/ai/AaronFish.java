@@ -95,7 +95,7 @@ public class AaronFish implements szte.mi.Player {
 				return Othello.getMoveFromInt(move);
 			}
 			inOpeningLibrary = false;
-			this.boardTree=new HashTree(openingBoard);
+			this.boardTree=new MirroredHashTree(openingBoard);
 		} else {
 			if (currentMove != 1) {
 				this.boardTree.move(Othello.getIntFromMove(prevMove), !this.playerOne);
