@@ -21,7 +21,7 @@ public class HashTree implements OthelloTree {
 
 	public HashTree(Othello othello){
 		this.stonesSet = 0;
-		this.transpositionTable = new HashMap[othello.getRemainingSpaces()];
+		this.transpositionTable = new HashMap[othello.getRemainingSpaces()+1];
 		for (int i = 0; i < transpositionTable.length; i++) {
 			this.transpositionTable[i] = new HashMap<>();
 		}

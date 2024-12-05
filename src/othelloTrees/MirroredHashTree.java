@@ -23,7 +23,7 @@ public class MirroredHashTree implements OthelloTree {
 
 	public MirroredHashTree(Othello othello){
 		this.stonesSet = 0;
-		this.transpositionTable = new HashMap[othello.getRemainingSpaces()];
+		this.transpositionTable = new HashMap[othello.getRemainingSpaces()+1];
 		for (int i = 0; i < transpositionTable.length; i++) {
 			this.transpositionTable[i] = new HashMap<>();
 		}
