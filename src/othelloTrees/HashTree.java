@@ -97,7 +97,7 @@ public class HashTree implements OthelloTree {
 		}
 	}
 
-	static class OthelloState {
+	public static class OthelloState {
 		private final Othello board;
 		private final boolean playerOne;
 

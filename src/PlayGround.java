@@ -1,13 +1,17 @@
 import ai.AaronFish;
+import ai.genetic.mcst.MonteCarloTreeSearch;
+import ai.grader.BetterGrader;
+import ai.grader.BoardGrader;
+import ai.grader.SimplestGrader;
 import ai.grader.TestNNGrader;
 import othello.Othello;
+import othelloTrees.ArrayTree;
+import othelloTrees.HashTree;
 import progressbar.Progressbar;
+import progressbar.Timer;
 import szte.mi.Move;
 
-import java.util.Arrays;
 import java.util.Random;
-
-import static ai.grader.TestNNGrader.multiplyVectorsWithBias;
 
 public class PlayGround {
 
@@ -195,13 +199,77 @@ public class PlayGround {
 		}
 	}
 
+	public static void measureGraderTime() {
+		BoardGrader[] graders = new BoardGrader[]{new BetterGrader(), new SimplestGrader(), new TestNNGrader(120)};
+		Timer[] graderTimer = new Timer[graders.length];
+		for (int i = 0; i < graderTimer.length; i++) {
+			graderTimer[i] = new Timer();
+		}
+
+		Random random = new Random(42);
+		int testSize = 300_000;
+		HashTree.OthelloState[] toGrade = getRandomOthelloArray(testSize, random);
+
+		Progressbar progressbar = new Progressbar("Measuring Grader Performance", testSize);
+		for (HashTree.OthelloState othello : toGrade) {
+			ArrayTree.ArrayNode node = new ArrayTree.ArrayNode(othello.getBoard());
+			for (int i = 0; i < graders.length; i++) {
+				BoardGrader grader = graders[i];
+				Timer timer = graderTimer[i];
+				timer.startTimer();
+				grader.gradeBoard(node, othello.isPlayerOne());
+				timer.stopTimer();
+			}
+			progressbar.countUp();
+		}
+		System.out.println();
+		for (Timer timer : graderTimer) {
+			System.out.println(timer.getCurrentTimeInMilliSeconds());
+		}
+	}
+
+	private void timeGettingNextMoves(){
+		Random random = new Random(42);
+		int testSize = 500_000;
+		HashTree.OthelloState[] position = getRandomOthelloArray(testSize, random);
+		Timer timer=new Timer();
+		timer.startTimer();
+		for (HashTree.OthelloState othelloState : position) {
+			Othello.MoveAndResultingBoardList<ArrayTree.ArrayNode> nextMovesAndBoards = othelloState.getBoard().getPossibleMovesAndStates(ArrayTree.ArrayNode::getNodeFromBoard, othelloState.isPlayerOne());
+		}
+		timer.stopTimer();
+		System.out.println(timer.getCurrentTimeInMilliSeconds());
+	}
+
 	public static void main(String[] args) {
-		TestNNGrader test = new TestNNGrader(60);
-		// System.out.println(test.gradeBoard(new ArrayTree.ArrayNode(new Othello()),true));
-		int[] n = new int[]{1, 2};
-		int[] m = new int[]{2, 1, 3, 4,1,2};
-		int[] bias = new int[]{1, 2,3};
-		System.out.println(Arrays.toString(multiplyVectorsWithBias(n, m, bias)));
+		Random random = new Random(42);
+		int testSize = 500_000;
+		HashTree.OthelloState[] position = getRandomOthelloArray(testSize, random);
+		AaronFish ai=new AaronFish();
+		for (HashTree.OthelloState othelloState : position) {
+			a
+		}
+
+	}
+
+	static HashTree.OthelloState getRandomOthelloPosition(Random random) {
+		Othello game = new Othello();
+		boolean playerOne = true;
+		int moves = random.nextInt(55);
+		for (int i = 0; i < moves && !game.isOver(); i++) {
+			int move = MonteCarloTreeSearch.chooseRandomMove(game, playerOne, random);
+			game.makeMove(move, playerOne);
+			playerOne = !playerOne;
+		}
+		return new HashTree.OthelloState(game, playerOne);
+	}
+
+	static HashTree.OthelloState[] getRandomOthelloArray(int size, Random random) {
+		HashTree.OthelloState[] positions = new HashTree.OthelloState[size];
+		for (int i = 0; i < size; i++) {
+			positions[i] = getRandomOthelloPosition(random);
+		}
+		return positions;
 	}
 
 

@@ -44,7 +44,7 @@ public class ArrayTree implements OthelloTree {
 			this.board = board;
 		}
 
-		static ArrayNode getNodeFromBoard(Othello board) {
+		public static ArrayNode getNodeFromBoard(Othello board) {
 			return new ArrayNode(board);
 		}
 

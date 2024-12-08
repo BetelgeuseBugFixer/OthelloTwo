@@ -1,5 +1,5 @@
-import ai.grader.BetterGrader;
 import ai.genetic.AiAgent;
+import ai.grader.BetterGrader;
 import oldthello.Oldthello;
 import org.junit.jupiter.api.Assertions;
 import othello.Othello;
@@ -10,8 +10,10 @@ import java.util.HashSet;
 import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AllTest {
+
 	private static boolean compareNewWithOld(ArrayList<Integer> ref, Othello.MoveWithResult[] test) {
 		HashSet<Integer> refMoves = new HashSet<>(ref);
 		HashSet<Integer> testMoves = getHashsetFromMoves(test);
@@ -30,6 +32,26 @@ class AllTest {
 			result.add(move.move);
 		}
 		return result;
+	}
+
+	@org.junit.jupiter.api.Test
+	void checkOrderedFields() {
+		assertEquals(Othello.ORDERED_FIELDS.length, 60);
+		HashSet<Integer> fields = new HashSet<>();
+		for (int value : Othello.ORDERED_FIELDS) {
+			fields.add(value);
+		}
+		assertEquals(Othello.ORDERED_FIELDS.length,fields.size());
+		for (int i = 0; i < 64; i++) {
+			if (i == 27 || i == 28 || i == 35 || i == 36) {
+				continue;
+			}
+			boolean fieldIsInArray = fields.contains(i);
+			if (!fieldIsInArray) {
+				System.out.println(i + " is missing");
+			}
+			assertTrue(fieldIsInArray);
+		}
 	}
 
 	@org.junit.jupiter.api.Test
@@ -58,12 +80,12 @@ class AllTest {
 				refGame.move(nextMove);
 				testGame.makeMove(nextMove, player == 1);
 				player = player == 1 ? 2 : 1;
-				boolean gameOverRight = testGame.isOver() == (refGame.isOver()||refGame.allStones()==64);
+				boolean gameOverRight = testGame.isOver() == (refGame.isOver() || refGame.allStones() == 64);
 				if (!gameOverRight) {
 					System.out.println(refGame.isOver());
 					System.out.println(testGame.isOver());
 				}
-				assertEquals(testGame.isOver(),(refGame.isOver()||refGame.allStones()==64));
+				assertEquals(testGame.isOver(), (refGame.isOver() || refGame.allStones() == 64));
 				gameIsOver = refGame.isOver();
 			}
 		}
