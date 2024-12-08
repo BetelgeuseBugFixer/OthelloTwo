@@ -232,7 +232,7 @@ public class MirroredHashTree implements OthelloTree {
 		}
 	}
 
-	class MirrorNode extends OthelloNode {
+	public class MirrorNode extends OthelloNode {
 		private final Othello board;
 		int stonesSet;
 

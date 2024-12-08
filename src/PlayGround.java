@@ -227,28 +227,25 @@ public class PlayGround {
 			System.out.println(timer.getCurrentTimeInMilliSeconds());
 		}
 	}
-
-	private void timeGettingNextMoves(){
+	private void testNextMoveSpeed(){
 		Random random = new Random(42);
-		int testSize = 500_000;
+		int testSize = 200;
 		HashTree.OthelloState[] position = getRandomOthelloArray(testSize, random);
-		Timer timer=new Timer();
+		AaronFish ai = new AaronFish();
+		int depth = 7;
+		AaronFish.DepthGoalCalculator depthGoalCalculator = new AaronFish.ConstantDepth(6);
+		Timer timer = new Timer();
 		timer.startTimer();
 		for (HashTree.OthelloState othelloState : position) {
-			Othello.MoveAndResultingBoardList<ArrayTree.ArrayNode> nextMovesAndBoards = othelloState.getBoard().getPossibleMovesAndStates(ArrayTree.ArrayNode::getNodeFromBoard, othelloState.isPlayerOne());
+			ai.initWithRoot(othelloState.getBoard(), othelloState.isPlayerOne(), depthGoalCalculator);
+			ai.calculateNextMove(depth);
 		}
 		timer.stopTimer();
 		System.out.println(timer.getCurrentTimeInMilliSeconds());
 	}
 
 	public static void main(String[] args) {
-		Random random = new Random(42);
-		int testSize = 500_000;
-		HashTree.OthelloState[] position = getRandomOthelloArray(testSize, random);
-		AaronFish ai=new AaronFish();
-		for (HashTree.OthelloState othelloState : position) {
-			a
-		}
+
 
 	}
 
@@ -271,7 +268,6 @@ public class PlayGround {
 		}
 		return positions;
 	}
-
 
 	public static long rightShift(long x) {
 		return x << 1;
@@ -385,6 +381,19 @@ public class PlayGround {
          */
 
 		return orderedFields;
+	}
+
+	private void timeGettingNextMoves() {
+		Random random = new Random(42);
+		int testSize = 500_000;
+		HashTree.OthelloState[] position = getRandomOthelloArray(testSize, random);
+		Timer timer = new Timer();
+		timer.startTimer();
+		for (HashTree.OthelloState othelloState : position) {
+			Othello.MoveAndResultingBoardList<ArrayTree.ArrayNode> nextMovesAndBoards = othelloState.getBoard().getPossibleMovesAndStates(ArrayTree.ArrayNode::getNodeFromBoard, othelloState.isPlayerOne());
+		}
+		timer.stopTimer();
+		System.out.println(timer.getCurrentTimeInMilliSeconds());
 	}
 
 	public interface TestShifter {

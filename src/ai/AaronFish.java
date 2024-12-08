@@ -55,6 +55,15 @@ public class AaronFish implements szte.mi.Player {
 		inOpeningLibrary = true;
 	}
 
+	public void initWithRoot(Othello rootBoard, boolean playerOne, DepthGoalCalculator depthGoalCalculator) {
+		// NOTE: currentCall may never be init with 0
+		this.currentCallId = 1;
+		this.boardTree = new MirroredHashTree();
+		this.boardTree.setRoot(rootBoard);
+		this.playerOne = playerOne;
+		this.currentMove = -1;
+		this.setDepthGoalCalculator(depthGoalCalculator);
+	}
 	public void initWithRoot(OthelloNode root, boolean playerOne, DepthGoalCalculator depthGoalCalculator) {
 		// NOTE: currentCall may never be init with 0
 		this.currentCallId = 1;
