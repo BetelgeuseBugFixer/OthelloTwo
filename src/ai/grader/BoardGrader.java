@@ -1,4 +1,4 @@
-package ai;
+package ai.grader;
 
 import othello.Othello;
 import othelloTrees.OthelloTree;
