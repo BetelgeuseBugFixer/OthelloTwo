@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.function.Function;
 
 public class Othello {
+	public static final int[] ORDERED_FIELDS = new int[]{0, 7, 56, 63, 2, 3, 4, 5, 16, 23, 24, 31, 32, 39, 40, 47, 58, 59, 60, 61, 18, 19, 20, 21, 26, 29, 34, 37, 42, 43, 44, 45, 10, 11, 12, 13, 17, 22, 25, 30, 33, 38, 41, 46, 50, 51, 52, 53, 1, 6, 8, 15, 48, 55, 57, 62, 9, 14, 49, 54};
 	static final long leftBorderBitMask = 0b1111111011111110111111101111111011111110111111101111111011111110L;
 	static final long rightBorderBitMask = 0b111111101111111011111110111111101111111011111110111111101111111L;
 	public long whitePLayerDiscs;
@@ -139,7 +140,8 @@ public class Othello {
 		int index = 0;
 
 		// Iterate over every field
-		for (int i = 0; i < 64; i++) {
+		// for (int i = 0; i < 64; i++) {
+		for (int i : ORDERED_FIELDS) {
 			long discsToFlip = getDiscsToFlip(i, playerOne);
 			if (discsToFlip != 0) {
 				long newWhiteDiscs = whitePLayerDiscs ^ discsToFlip;
