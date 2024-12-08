@@ -1,4 +1,4 @@
-import ai.BetterGrader;
+import ai.grader.BetterGrader;
 import ai.genetic.AiAgent;
 import oldthello.Oldthello;
 import org.junit.jupiter.api.Assertions;
