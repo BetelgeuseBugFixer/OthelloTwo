@@ -1,7 +1,7 @@
 package gui;
 
 import ai.AaronFish;
-import ai.BetterGrader;
+import ai.grader.BetterGrader;
 import gui.oldthello.Oldthello;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
