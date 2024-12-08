@@ -1,7 +1,7 @@
 package ai.genetic;
 
 import ai.AaronFish;
-import ai.BetterGrader;
+import ai.grader.BetterGrader;
 import org.apache.commons.math3.distribution.NormalDistribution;
 
 import java.util.Random;
