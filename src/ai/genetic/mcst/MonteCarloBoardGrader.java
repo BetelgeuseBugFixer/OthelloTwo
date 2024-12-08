@@ -1,6 +1,6 @@
 package ai.genetic.mcst;
 
-import ai.BoardGrader;
+import ai.grader.BoardGrader;
 import othello.Othello;
 import othelloTrees.OthelloTree;
 
