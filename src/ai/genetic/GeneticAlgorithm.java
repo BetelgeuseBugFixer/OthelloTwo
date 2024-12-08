@@ -1,7 +1,7 @@
 package ai.genetic;
 
 import AIaaron.Aai01;
-import ai.BetterGrader;
+import ai.grader.BetterGrader;
 import ai.genetic.mcst.MCTWPlayer;
 import ai.genetic.server.ServerPlayer;
 import games.othello.Agents.Agent;
