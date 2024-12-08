@@ -1,4 +1,4 @@
-package ai;
+package ai.grader;
 
 import othello.Othello;
 import othelloTrees.OthelloTree;
@@ -26,19 +26,19 @@ public class BetterGrader implements BoardGrader {
 			BetterGrader::shiftDownLeft, BetterGrader::shiftDownRight};
 
 
-	//third run
-	public int[] third = {36, 417, -835, 2294, 1152, 756, 0, 164, 0, -722, 0, 303, -853, -4509, 0, -4264, 2198, 0, 0, -411, 1122, 318, -1164, 2396, 1032, 1392, -41, 1115, 0, -258, -257, 515, -1289, -5937, 350, 0, 2771, 0, 0, 0, 1165};	// second run that somehow did fantastic
+	// third run
+	public int[] third = {36, 417, -835, 2294, 1152, 756, 0, 164, 0, -722, 0, 303, -853, -4509, 0, -4264, 2198, 0, 0, -411, 1122, 318, -1164, 2396, 1032, 1392, -41, 1115, 0, -258, -257, 515, -1289, -5937, 350, 0, 2771, 0, 0, 0, 1165};    // second run that somehow did fantastic
 	public int[] second = {34, 76, -133, 192, 116, 98, 0, 294, -28, 50, 0, -8, -164, -896, -30, -439, 1124, 23, 0, 162, 0, 131, -106, 242, 120, 122, 0, 273, 36, 0, -66, -18, -130, -844, 11, -405, 1146, 0, 0, 114, 69};
 	// second run in between
-	//public int[] secondB = {20, 49, -102, 209, 123, 104, 0, 303, -35, 32, -46, -16, -155, -885, -40, -436, 1117, 45, 0, 155, 0, 81, -100, 222, 133, 78, 0, 289, 25, 44, -63, -29, -123, -867, -9, -377, 1135, 14, 0, 130, 77};
-	//first run
+	// public int[] secondB = {20, 49, -102, 209, 123, 104, 0, 303, -35, 32, -46, -16, -155, -885, -40, -436, 1117, 45, 0, 155, 0, 81, -100, 222, 133, 78, 0, 289, 25, 44, -63, -29, -123, -867, -9, -377, 1135, 14, 0, 130, 77};
+	// first run
 	public int[] first = {-130, -191, 22, -107, -20, 96, 30, -391, 169, 140, -43, 201, 35, -103, -74, -176, 156, -218, -79, 473, 268, 69, -210, 315, 189, 158, 126, 670, -220, 421, 126, 102, -117, -1422, 103, -701, 1680, -57, -19, -216, -29};
 	// handcrafted
 	public int[] handcrafted = {20, 10, -20, 30, 40, 30, 30, 20, -20, 10, 15, 10, -5, -50, 20, -10, 60, 1, 20, 70, -20, 10, -5, 30, 40, 30, 30, 20, -20, 10, 15, 10, -5, -50, 20, -10, 50, 2, 30, 90, -60};
-	//combination
+	// combination
 	public int[] combination = {34, 76, -133, 192, 116, 98, 40, 294, -28, 50, 0, -8, -164, -896, -30, -439, 1124, 23, 0, 162, 0, 0, 0, 2701, 2157, 1522, 202, 973, -271, -777, -507, 382, -1454, -6604, -998, 0, 0, 0, -150, -125, 1179};
 
-	public int[] weights=first;
+	public int[] weights = first;
 	int moveChange = 0;
 	int sPossibleMovesIndex = 1;
 	int sFrontierDiscsIndex = 2;
@@ -230,25 +230,35 @@ public class BetterGrader implements BoardGrader {
 		return (x << 7) & rightBorderBitMask;
 	}
 
+	protected static int getFrontiersDiscDifference(Othello board) {
+		long blackPlayerDiscs = board.blackPlayerDiscs;
+		long whitePlayerDiscs = board.whitePLayerDiscs;
+		long allDiscs = blackPlayerDiscs | whitePlayerDiscs;
+		long empty = ~allDiscs;
+		long frontierDiscs = allDiscs & (shiftDown(empty) | shiftUp(empty) | shiftLeft(empty) | shiftRight(empty) | shiftUpLeft(empty) | shiftUpRight(empty) | shiftDownLeft(empty) | shiftDownRight(empty));
+
+		return Long.bitCount(frontierDiscs & blackPlayerDiscs) - Long.bitCount(frontierDiscs & whitePlayerDiscs);
+	}
+
 	// to include in metric:
 	//-two unbalanced edges next to each other
 	//-corner capture
 	@Override
-	public int gradeBoard(OthelloTree.OthelloNode node, boolean playerOneMadeLastMove) {
+	public int gradeBoard(OthelloTree.OthelloNode node, boolean playerOne) {
 		Othello board = node.getBoard();
 		int discsSet = Long.bitCount(board.blackPlayerDiscs & board.whitePLayerDiscs);
-		long possibleMoves = board.getLegalMovesAsLong(!playerOneMadeLastMove);
+		long possibleMoves = board.getLegalMovesAsLong(playerOne);
 		boolean startWeights = discsSet < weights[moveChange];
 
 		int score = 0;
 
-		score += getPossibleMovesScore(possibleMoves, playerOneMadeLastMove, startWeights);
+		score += getPossibleMovesScore(possibleMoves, !playerOne, startWeights);
 		score += getFrontierDiscsScore(board, startWeights);
 		score += getCornerAndStableDiscs(board, startWeights);
-		score += getEdgeScores(board, playerOneMadeLastMove, startWeights);
+		score += getEdgeScores(board, !playerOne, startWeights);
 		score += getDiscDifferenceScore(board, startWeights);
 		score += getDiscPositionScore(board, startWeights);
-		score += getParityScore(board, playerOneMadeLastMove, startWeights, possibleMoves);
+		score += getParityScore(board, playerOne, startWeights, possibleMoves);
 
 		if (score == 0) {
 			return score + 1;
@@ -265,7 +275,6 @@ public class BetterGrader implements BoardGrader {
 			weights[i] = 1;
 		}
 	}
-
 
 	public int getParityScore(Othello board, boolean playerOneMadeLastMove, boolean startWeights, long possibleMoves) {
 		int parity = -1;
@@ -330,7 +339,6 @@ public class BetterGrader implements BoardGrader {
 		return parity * weights[eParityWeightIndex] + parityInDanger * weights[eParityInDangerIndex];
 
 	}
-
 
 	public long[] getUnevenRegions(long allDiscs) {
 		long alreadyCoveredRegions = allDiscs;
@@ -437,18 +445,11 @@ public class BetterGrader implements BoardGrader {
 	}
 
 	private int getFrontierDiscsScore(Othello board, boolean startWeights) {
-		long blackPlayerDiscs = board.blackPlayerDiscs;
-		long whitePlayerDiscs = board.whitePLayerDiscs;
-		long allDiscs = blackPlayerDiscs | whitePlayerDiscs;
-		long empty = ~allDiscs;
-		long frontierDiscs = allDiscs & (shiftDown(empty) | shiftUp(empty) | shiftLeft(empty) | shiftRight(empty) | shiftUpLeft(empty) | shiftUpRight(empty) | shiftDownLeft(empty) | shiftDownRight(empty));
-
-		int blackFrontierDiscs = Long.bitCount(frontierDiscs & blackPlayerDiscs);
-		int whiteFrontierDiscs = Long.bitCount(frontierDiscs & whitePlayerDiscs);
+		int difference = getFrontiersDiscDifference(board);
 		if (startWeights) {
-			return weights[sFrontierDiscsIndex] * (blackFrontierDiscs - whiteFrontierDiscs);
+			return weights[sFrontierDiscsIndex] * (difference);
 		}
-		return weights[eFrontierDiscsIndex] * (blackFrontierDiscs - whiteFrontierDiscs);
+		return weights[eFrontierDiscsIndex] * (difference);
 
 	}
 
