@@ -1,10 +1,9 @@
 package othelloTrees;
 
-import ai.BoardGrader;
+import ai.grader.BoardGrader;
 import othello.Othello;
 
 import java.util.Arrays;
-import java.util.Comparator;
 
 public interface OthelloTree {
 
@@ -12,9 +11,9 @@ public interface OthelloTree {
 
 	public void setRoot(OthelloNode node);
 
-	public void move(int move, boolean playerOne);
-
 	void setRoot(Othello openingBoard);
+
+	public void move(int move, boolean playerOne);
 
 	abstract class OthelloNode {
 		protected OthelloNode[] children;
@@ -72,7 +71,7 @@ public interface OthelloTree {
 		public boolean getIsTerminalNode(boolean playerOne) {
 			if (!this.checkedIfTerminal) {
 				checkedIfTerminal = true;
-				this.isTerminal=this.getBoard().isOver();
+				this.isTerminal = this.getBoard().isOver();
 			}
 			return isTerminal;
 		}
@@ -104,7 +103,6 @@ public interface OthelloTree {
 					this.score = grader.gradeBoard(this, playerOne);
 					this.isGraded = true;
 				}
-
 			}
 			return this.score;
 		}
@@ -145,7 +143,7 @@ public interface OthelloTree {
 			this.fullyCalculated = true;
 		}
 
-		public void setScore(int score, int currentCallId,boolean playerOne) {
+		public void setScore(int score, int currentCallId, boolean playerOne) {
 			this.lastCallId = currentCallId;
 			this.score = score;
 			sortChildren(playerOne);
