@@ -5,6 +5,8 @@ import othello.Othello;
 
 import java.util.Arrays;
 
+import static ai.AaronFish.*;
+
 public interface OthelloTree {
 
 	public OthelloNode getRoot();
@@ -89,19 +91,19 @@ public interface OthelloTree {
 
 		public int getScoreWithoutCalcCheck(BoardGrader grader, boolean playerOne) {
 			if (!this.isGraded) {
+				this.isGraded=true;
 				if (getIsTerminalNode(playerOne)) {
 					this.fullyCalculated = true;
 					int discDifference = this.getBoard().getDiscDifference();
 					if (discDifference > 0) {
-						this.score = Integer.MAX_VALUE;
+						this.score = WIN_SCORE;
 					} else if (discDifference < 0) {
-						this.score = Integer.MIN_VALUE;
+						this.score = LOOSE_SCORE;
 					} else {
-						this.score = 0;
+						this.score = DRAW_SCORE;
 					}
 				} else {
 					this.score = grader.gradeBoard(this, playerOne);
-					this.isGraded = true;
 				}
 			}
 			return this.score;

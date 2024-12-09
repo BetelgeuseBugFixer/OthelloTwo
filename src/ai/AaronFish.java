@@ -3,9 +3,8 @@ package ai;
 import ai.genetic.mcst.MonteCarloBoardGrader;
 import ai.grader.BetterGrader;
 import ai.grader.BoardGrader;
-import ai.grader.SimplestGrader;
-import ai.grader.TestNNGrader;
 import othello.Othello;
+import othelloTrees.ArrayTree;
 import othelloTrees.MirroredHashTree;
 import othelloTrees.OpeningLibraryWrapper;
 import othelloTrees.OthelloTree;
@@ -15,6 +14,9 @@ import szte.mi.Move;
 import java.util.Random;
 
 public class AaronFish implements szte.mi.Player {
+	public final static int WIN_SCORE = Integer.MAX_VALUE - 1;
+	public final static int LOOSE_SCORE = Integer.MIN_VALUE + 1;
+	public final static int DRAW_SCORE = Integer.MIN_VALUE + 2;
 	int currentCallId;
 	BoardGrader boardGrader;
 	boolean playerOne;
@@ -29,7 +31,7 @@ public class AaronFish implements szte.mi.Player {
 		this.depthGoalCalculator = new changingDepth();
 		this.boardGrader = new BetterGrader();
 		this.currentCallId = 0;
-		this.boardTree = new MirroredHashTree();
+		this.boardTree = new ArrayTree();
 		this.playedWithSameBoardTree = false;
 	}
 
@@ -64,6 +66,7 @@ public class AaronFish implements szte.mi.Player {
 		this.currentMove = -1;
 		this.setDepthGoalCalculator(depthGoalCalculator);
 	}
+
 	public void initWithRoot(OthelloNode root, boolean playerOne, DepthGoalCalculator depthGoalCalculator) {
 		// NOTE: currentCall may never be init with 0
 		this.currentCallId = 1;
@@ -142,7 +145,7 @@ public class AaronFish implements szte.mi.Player {
 				if (score > bestScore) {
 					bestScore = score;
 					bestMoveIndex = i;
-					if (bestScore == Integer.MAX_VALUE) {
+					if (bestScore == WIN_SCORE) {
 						break;
 					}
 				}
@@ -150,7 +153,7 @@ public class AaronFish implements szte.mi.Player {
 					alpha = bestScore;
 				}
 			}
-			if (bestScore == Integer.MIN_VALUE) {
+			if (bestScore == LOOSE_SCORE) {
 				bestMoveIndex = getMoveIndexWithHighestWinProbability();
 			}
 		} else {
@@ -161,7 +164,7 @@ public class AaronFish implements szte.mi.Player {
 				if (score < bestScore) {
 					bestScore = score;
 					bestMoveIndex = i;
-					if (bestScore == Integer.MIN_VALUE) {
+					if (bestScore == LOOSE_SCORE) {
 						break;
 					}
 				}
@@ -169,7 +172,7 @@ public class AaronFish implements szte.mi.Player {
 					beta = bestScore;
 				}
 			}
-			if (beta == Integer.MAX_VALUE) {
+			if (beta == WIN_SCORE) {
 				bestMoveIndex = getMoveIndexWithHighestWinProbability();
 			}
 		}
@@ -189,7 +192,7 @@ public class AaronFish implements szte.mi.Player {
 				if (score > alpha) {
 					alpha = score;
 					bestMove = root.getMoveAt(i);
-					if (score == Integer.MAX_VALUE) {
+					if (score == WIN_SCORE) {
 						break;
 					}
 				}
@@ -202,7 +205,7 @@ public class AaronFish implements szte.mi.Player {
 				if (score < beta) {
 					beta = score;
 					bestMove = root.getMoveAt(i);
-					if (score == Integer.MIN_VALUE) {
+					if (score == LOOSE_SCORE) {
 						break;
 					}
 				}
@@ -223,12 +226,16 @@ public class AaronFish implements szte.mi.Player {
 			if (score > bestScore) {
 				bestScore = score;
 				alpha = Math.max(bestScore, alpha);
-				if (beta <= alpha) {
+				if (bestScore==WIN_SCORE){
 					break;
+				}
+				if (beta <= alpha) {
+					//when pruning we don't set the score
+					return bestScore;
 				}
 			}
 		}
-		if (bestScore == Integer.MIN_VALUE || bestScore == Integer.MAX_VALUE || bestScore == 0) {
+		if (bestScore == WIN_SCORE || bestScore == LOOSE_SCORE || bestScore == DRAW_SCORE) {
 			node.setToFullyCalculated();
 		}
 		node.setScore(bestScore, currentCallId, true);
@@ -246,12 +253,15 @@ public class AaronFish implements szte.mi.Player {
 			if (score < bestScore) {
 				bestScore = score;
 				beta = Math.min(bestScore, beta);
-				if (beta <= alpha) {
+				if (bestScore==LOOSE_SCORE){
 					break;
+				}
+				if (beta <= alpha) {
+					return bestScore;
 				}
 			}
 		}
-		if (bestScore == Integer.MIN_VALUE || bestScore == Integer.MAX_VALUE || bestScore == 0) {
+		if (bestScore == WIN_SCORE || bestScore == LOOSE_SCORE || bestScore == DRAW_SCORE) {
 			node.setToFullyCalculated();
 		}
 		node.setScore(bestScore, currentCallId, false);
@@ -322,8 +332,9 @@ public class AaronFish implements szte.mi.Player {
 
 	public static class changingDepth implements DepthGoalCalculator {
 		public int getGoalDepth(long remainingTime, int remainingEmptySpaces) {
-			if (remainingEmptySpaces < 13) {
-				return 25;
+			if (remainingEmptySpaces < 15) {
+				System.out.println("victory");
+				return 35;
 			} else {
 				return 7;
 			}
