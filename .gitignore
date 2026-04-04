@@ -33,3 +33,4 @@ out
 .DS_Store
 /.idea/uiDesigner.xml
 /qodana.yaml
+/src/META-INF/

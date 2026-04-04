@@ -3,6 +3,7 @@ package ai;
 import ai.genetic.mcst.MonteCarloBoardGrader;
 import ai.grader.BetterGrader;
 import ai.grader.BoardGrader;
+import ai.grader.SimplestGrader;
 import othello.Othello;
 import othelloTrees.ArrayTree;
 import othelloTrees.MirroredHashTree;
@@ -156,6 +157,7 @@ public class AaronFish implements szte.mi.Player {
 			if (bestScore == LOOSE_SCORE) {
 				bestMoveIndex = getMoveIndexWithHighestWinProbability();
 			}
+			System.out.println(bestScore);
 		} else {
 			int bestScore = Integer.MAX_VALUE;
 			for (int i = 0; i < root.getNextNodes(false).length; i++) {
@@ -175,6 +177,7 @@ public class AaronFish implements szte.mi.Player {
 			if (beta == WIN_SCORE) {
 				bestMoveIndex = getMoveIndexWithHighestWinProbability();
 			}
+			System.out.println(bestScore);
 		}
 		return root.getMoveAt(bestMoveIndex);
 	}
@@ -332,11 +335,11 @@ public class AaronFish implements szte.mi.Player {
 
 	public static class changingDepth implements DepthGoalCalculator {
 		public int getGoalDepth(long remainingTime, int remainingEmptySpaces) {
-			if (remainingEmptySpaces < 15) {
+			if (remainingEmptySpaces < 19) {
 				System.out.println("victory");
 				return 35;
 			} else {
-				return 7;
+				return 8;
 			}
 		}
 	}
