@@ -5,10 +5,7 @@ import ai.grader.BetterGrader;
 import ai.grader.BoardGrader;
 import ai.grader.SimplestGrader;
 import othello.Othello;
-import othelloTrees.ArrayTree;
-import othelloTrees.MirroredHashTree;
-import othelloTrees.OpeningLibraryWrapper;
-import othelloTrees.OthelloTree;
+import othelloTrees.*;
 import othelloTrees.OthelloTree.OthelloNode;
 import szte.mi.Move;
 
@@ -32,7 +29,9 @@ public class AaronFish implements szte.mi.Player {
 		this.depthGoalCalculator = new changingDepth();
 		this.boardGrader = new BetterGrader();
 		this.currentCallId = 0;
-		this.boardTree = new ArrayTree();
+//		this.boardTree = new ArrayTree();
+		this.boardTree = new MirroredHashTree();
+//		this.boardTree = new HashTree();
 		this.playedWithSameBoardTree = false;
 	}
 
@@ -138,8 +137,9 @@ public class AaronFish implements szte.mi.Player {
 			return root.getMoveAt(0);
 		}
 		int bestMoveIndex = -1;
-		if (playerOne) {
-			int bestScore = Integer.MIN_VALUE;
+        int bestScore;
+        if (playerOne) {
+            bestScore = Integer.MIN_VALUE;
 			for (int i = 0; i < root.getNextNodes(true).length; i++) {
 				OthelloNode node = root.getChildAt(i);
 				int score = minValue(node, depth - 1, alpha, beta);
@@ -157,9 +157,8 @@ public class AaronFish implements szte.mi.Player {
 			if (bestScore == LOOSE_SCORE) {
 				bestMoveIndex = getMoveIndexWithHighestWinProbability();
 			}
-			System.out.println(bestScore);
-		} else {
-			int bestScore = Integer.MAX_VALUE;
+        } else {
+            bestScore = Integer.MAX_VALUE;
 			for (int i = 0; i < root.getNextNodes(false).length; i++) {
 				OthelloNode node = root.getChildAt(i);
 				int score = maxValue(node, depth - 1, alpha, beta);
@@ -177,9 +176,9 @@ public class AaronFish implements szte.mi.Player {
 			if (beta == WIN_SCORE) {
 				bestMoveIndex = getMoveIndexWithHighestWinProbability();
 			}
-			System.out.println(bestScore);
-		}
-		return root.getMoveAt(bestMoveIndex);
+        }
+        System.out.println(bestScore);
+        return root.getMoveAt(bestMoveIndex);
 	}
 
 	public int gradeNodeAndReturnBestMove(int depth) {
